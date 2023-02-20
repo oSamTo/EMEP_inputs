@@ -22,3 +22,7 @@ map_yr_ie <- 2019 # what year is the MapEire spatial distribution for the data: 
 
 #### PROCESSING ####
 EMEPinputUK(v_years, v_pollutants, time_scale = "year", map_yr, output_dir)
+
+
+
+downloadGriddedEMEPemissions(pollutant = "sox", report_year = 2022, emis_year = 2020)

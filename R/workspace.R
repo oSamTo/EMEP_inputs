@@ -35,6 +35,9 @@ r_dom_terr      <<- rast("data/spatial/terrestrial_mask.tif")
 # lookup file for sector mapping
 dt_sec <<- fread("data/lookups/EMEP_sectors.csv")[!is.na(EMEP_sec)]
 
+# lookup file for pollutant names
+dt_poll <<- fread("data/lookups/pollutants.csv")
+
 # EMEP input missing value
 EMEP_fillval <<- 9.96920996838687e+36
 

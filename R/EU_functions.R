@@ -4,45 +4,96 @@
 #########################################################
 
 ######################################################################################################
+#### function to fetch gridded emissions for a given year from NAEI website. 
+griddedNAEIemissions <- function(pollutant = c("cd","co","hg","nh3","nmvoc","nox","pb","pm25","pm10","pmco","sox"), emis_year){
+  
+  pollutant <- match.arg(pollutant)
+  
+  if(!is.numeric(emis_year))   stop ("Year vector is not numeric")
+  
+  suppressWarnings(dir.create(paste0("./data/gridded/UK/",pollutant), recursive = T))
+  
+  #####
+  
+  print(paste0(Sys.time(),": GRIDDED ",pollutant," emissions from NAEI for ",emis_year))
+  
+  # create URL
+  naei_num <- dt_poll[ceh_poll == pollutant, naei_poll]
+  
+  poll_url <- paste0("https://naei.beis.gov.uk/mapping/mapping_",emis_year,"/",naei_num,".zip")
+  
+  # create a name for your download
+  poll_file_name <- paste0(pollutant,"_maps_",emis_year,".zip")
+  
+  # download to local
+  download.file(url = poll_url,
+                destfile = paste0("./data/gridded/UK/",pollutant,"/",poll_file_name),
+                quiet = T)
+  
+  # unzip download to local
+  unzip(paste0("./data/gridded/UK/",pollutant,"/",poll_file_name), overwrite = T,  exdir = paste0("./data/gridded/UK/",pollutant,"/",pollutant,"_maps_",emis_year))
+  
+  # list the files and turn to tif and write to 
+  
+  poll_ascs <- list.files(paste0(dir_local,"/",poll,"_maps_",year), pattern=".asc$", full.names=T)
+  
+  for(f in poll_ascs){
+    
+    r <- raster(f)
+    
+    suppressWarnings(writeRaster(r, paste0("./",poll,"/maps/",year,"/",names(r),".tif"), overwrite=T))
+    
+  }
+  
+  
+  j <- list.files(".", pattern=".aux.xml$", full.names = T, recursive = T)
+  length(j)
+  do.call(file.remove, list(j))
+  
+  # delete the zip file
+  file.remove(paste0("./data/gridded/EMEP/",pollutant,"/",grid_file_name))
+  
+  
+}
+
+
+######################################################################################################
 #### function to fetch gridded emissions for a given year from EMEP website. 
 
-downloadGriddedEMEPemissions <- function(pollutant = c("cd","co","hg","nh3","nmvoc","nox","pb","pm2.5","pm10","pmco","sox"), report_year, emis_year){
+griddedEMEPemissions <- function(pollutant = c("cd","co","hg","nh3","nmvoc","nox","pb","pm25","pm10","pmco","sox"), report_year, emis_year){
   
   pollutant <- match.arg(pollutant)
   
   if(!is.numeric(report_year)) stop ("Year vector is not numeric")
   if(!is.numeric(emis_year))   stop ("Year vector is not numeric")
   
-  suppressWarnings(dir.create(paste0("./data/gridded/EMEP/",pollutant)))
+  suppressWarnings(dir.create(paste0("./data/gridded/EMEP/",pollutant), recursive = T))
   
   #####
   
-  dt_pollutants <- data.table( ceh = c("cd","co","cu","hg","nh3","ni","nmvoc","nox","pb","pm2.5","pm10","pmco","sox","zn"),
-                               emep = c("Cd","CO","Cu","Hg","NH3","Ni","NMVOC","NOx","Pb","PM2_5","PM10","PMcoarse","SOx","Zn"))
-  
- 
-  emep_poll <- dt_pollutants[ceh==pollutant, emep]
+  emep_poll <- dt_poll[ceh_poll == pollutant, emep_poll]
     
   print(paste0(Sys.time(),": GRIDDED ",emep_poll," emissions from EMEP for ",emis_year," (reported in year ",report_year,")"))
-    
+  
+  # define the URL
   emep_url <- paste0("https://webdab01.umweltbundesamt.at/download/gridding",report_year,"/",emis_year,"/",emep_poll,"_",report_year,"_GRID_",emis_year,".zip")
-    
+  
+  # ZIP file name
   grid_file_name <- paste0("emep_",pollutant,"_gridded_",report_year,"_",emis_year,".zip")
     
- # download to local
+ # download to folder
   download.file(url = emep_url,
                   destfile = paste0("./data/gridded/EMEP/",pollutant,"/",grid_file_name),
                   quiet = T)
-    
+  
+  # Unzip all the files
   unzip(paste0("./data/gridded/EMEP/",pollutant,"/",grid_file_name), overwrite = T,  exdir = paste0("./data/gridded/EMEP/",pollutant,"/",emep_poll,"_",report_year,"_GRID_",emis_year))
  
+  # delete the zip file
+  file.remove(paste0("./data/gridded/EMEP/",pollutant,"/",grid_file_name))
   
 } # function
 
-
-downloadGriddedEMEPemissions(pollutants = c("co","nh3","nmvoc","nox","pm2.5","pm10","pmco","sox"), report_year = 2022, emis_year = 2020)
-
-# 
 
 
   ################################################################################################
