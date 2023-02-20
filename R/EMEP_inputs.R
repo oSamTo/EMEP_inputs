@@ -1,5 +1,5 @@
 source("R/workspace.R")
-source("R/emissions_functions.R")
+
 
 ###########################################################
 ####                                                   ####

@@ -5,6 +5,10 @@ if(length(new.packages)) install.packages(new.packages)
 lapply(list.of.packages, require, character.only = TRUE)
 ##############################################################################################################
 options(datatable.showProgress = FALSE)
+
+source("R/UK_functions.R")
+source("R/EU_functions.R")
+
 ###########################################################
 #### SETTING UP WORKSPACE FOR MAKING EMPE MODEL INPUTS ####
 ###########################################################
