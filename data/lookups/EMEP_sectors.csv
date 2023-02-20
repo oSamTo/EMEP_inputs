@@ -1,0 +1,23 @@
+GNFR,GNFRlong,SNAP,sec,s1,s2,EMEP_sec,name
+A ,A_PublicPower,1,sec01,1,1,1,PublicPower
+B ,B_Industry,3,sec02,3,3,2,Industry
+C ,C_OtherStatComb,2,sec03,2,2,3,OtherStationaryComb
+D ,D_Fugitive,5,sec04,5,5,4,Fugitive
+E ,E_Solvents,6,sec05,6,2,5,Solvents
+F ,F_RoadTransport,7,sec06,7,2,6,RoadTransport
+G ,G_Shipping,8,sec07,8,8,7,Shipping
+H ,H_Aviation,8,sec08,8,7,8,Aviation
+I ,I_Offroad,8,sec09,8,2,9,Offroad
+J ,J_Waste,9,sec10,9,6,10,Waste
+K ,K_AgriLivestock,10,sec11,10,2,11,AgriLivestock
+L ,L_AgriOther,10,sec12,10,2,12,AgriOther
+M ,M_Other,,sec13,5,5,13,Other
+O,O_AviCruise,,,,,,AviationCruise
+P,P_IntShipping,8,,,,,InternationalShipping
+Q,Q_LULUCF,11,,,,,LULUCF
+A1 ,,1,sec14,1,1,1,PublicPower_Point
+A2 ,,1,sec15,1,3,1,PublicPower_Area
+F1 ,,7,sec16,7,2,16,RoadTransportExhaustGasoline
+F2 ,,7,sec17,7,2,17,RoadTransportExhaustDiesel
+F3 ,,7,sec18,7,2,18,RoadTransportExhaustLPGgas
+F4 ,,7,sec19,7,2,19,RoadTransportNonExhaustOther
