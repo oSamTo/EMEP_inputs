@@ -1,16 +1,50 @@
 
+#########################################################
+#### FUNCTIONS FOR CREATION OF EMEP - EU INPUT FILES ####
+#########################################################
+
+######################################################################################################
+#### function to fetch gridded emissions for a given year from EMEP website. 
+
+downloadGriddedEMEPemissions <- function(pollutant = c("cd","co","hg","nh3","nmvoc","nox","pb","pm2.5","pm10","pmco","sox"), report_year, emis_year){
   
+  pollutant <- match.arg(pollutant)
   
-  require(ncdf4)
-  require(sf)
-  require(raster)
-  require(fasterize)
-  require(data.table)
-  require(stringr)
-  require(lubridate)
-  # Create mask
-  nc_dir<-"N:/EMEP/EU_inputs/NetCDF_input/"
+  if(!is.numeric(report_year)) stop ("Year vector is not numeric")
+  if(!is.numeric(emis_year))   stop ("Year vector is not numeric")
   
+  suppressWarnings(dir.create(paste0("./data/gridded/EMEP/",pollutant)))
+  
+  #####
+  
+  dt_pollutants <- data.table( ceh = c("cd","co","cu","hg","nh3","ni","nmvoc","nox","pb","pm2.5","pm10","pmco","sox","zn"),
+                               emep = c("Cd","CO","Cu","Hg","NH3","Ni","NMVOC","NOx","Pb","PM2_5","PM10","PMcoarse","SOx","Zn"))
+  
+ 
+  emep_poll <- dt_pollutants[ceh==pollutant, emep]
+    
+  print(paste0(Sys.time(),": GRIDDED ",emep_poll," emissions from EMEP for ",emis_year," (reported in year ",report_year,")"))
+    
+  emep_url <- paste0("https://webdab01.umweltbundesamt.at/download/gridding",report_year,"/",emis_year,"/",emep_poll,"_",report_year,"_GRID_",emis_year,".zip")
+    
+  grid_file_name <- paste0("emep_",pollutant,"_gridded_",report_year,"_",emis_year,".zip")
+    
+ # download to local
+  download.file(url = emep_url,
+                  destfile = paste0("./data/gridded/EMEP/",pollutant,"/",grid_file_name),
+                  quiet = T)
+    
+  unzip(paste0("./data/gridded/EMEP/",pollutant,"/",grid_file_name), overwrite = T,  exdir = paste0("./data/gridded/EMEP/",pollutant,"/",emep_poll,"_",report_year,"_GRID_",emis_year))
+ 
+  
+} # function
+
+
+downloadGriddedEMEPemissions(pollutants = c("co","nh3","nmvoc","nox","pm2.5","pm10","pmco","sox"), report_year = 2022, emis_year = 2020)
+
+# 
+
+
   ################################################################################################
   ################################################################################################
   CREATE.NETCDF<-function(nc_ref_srce,fn,nc_var_names,yr,iso){

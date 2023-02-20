@@ -1,6 +1,5 @@
 source("R/workspace.R")
 
-
 ###########################################################
 ####                                                   ####
 ####    THIS MASTER SCRIPT WILL TAKE NAEI EMISSIONS    ####
@@ -16,9 +15,10 @@ output_dir <- "C:/FastProcessingSam/EMEP_new_grid/grid_sep22/trial_input"
 v_years <- 2019
 v_pollutants <- c("nox") 
 # "nox","nh3","sox","pm2.5","pmco","co","nmvoc", "cd", "cu", "ni", "pb", "zn"
-map_yr <- 2019 # what year is the NAEI spatial distribution for the data: 2018/2019/2020
+map_yr_uk <- 2020 # what year is the NAEI spatial distribution for the data: 2018/2019/2020
+map_yr_ie <- 2019 # what year is the MapEire spatial distribution for the data: 2016/2019
 
-# Oct '22: there is no choice for sector classification anymore.
+
 
 #### PROCESSING ####
-creatEMEPinput(v_years, v_pollutants, time_scale = "month", map_yr, output_dir)
+EMEPinputUK(v_years, v_pollutants, time_scale = "year", map_yr, output_dir)
