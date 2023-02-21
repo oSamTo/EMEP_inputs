@@ -42,7 +42,7 @@ EMEPinputUK <- function(v_years, v_pollutants, time_scale = c("year","month"), m
                                             Metal: cd, cu, hg, ni, pb, zn")
       ######################################################################################
       
-      print(paste0(Sys.time(),": Creating EMEP input netCDF for ",species," in ",y,"..."))
+      print(paste0(Sys.time(),": Creating EMEP-UK/EIRE input netCDF for ",species," in ",y,"..."))
       
       # set up blank stacks ready for data of different regions
       l_uk_temp  <- list()
@@ -106,7 +106,7 @@ EMEPinputUK <- function(v_years, v_pollutants, time_scale = c("year","month"), m
       
       print(paste0(Sys.time(),":               Creating and populating netcdf..."))
       
-      createNETCDF(l_uk_temp, l_ie_temp, l_sea_temp, y, species, map_yr, output_dir, time_scale, dt_emis_summary)
+      createNETCDFuk(l_uk_temp, l_ie_temp, l_sea_temp, y, species, map_yr, output_dir, time_scale, dt_emis_summary)
       
     } # pollutant loop
     
@@ -247,7 +247,7 @@ summariseEmissions <- function(y, species, i, sc_pad, l_uk, s_uk, l_ie, s_ie, se
 
 ######################################################################################################
 #### function to create a netCDF and input the data
-createNETCDF <- function(l_uk_temp, l_ie_temp, l_sea_temp, y, species, map_yr, output_dir, time_scale, dt_emis_summary){
+createNETCDFuk <- function(l_uk_temp, l_ie_temp, l_sea_temp, y, species, map_yr, output_dir, time_scale, dt_emis_summary){
   
   if(species == "pm2.5"){
     nc_filename <- paste0(output_dir,"/pm25_UKEIRE_",y,"emis_",map_yr,"map_0.01.nc")
