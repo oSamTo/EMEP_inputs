@@ -1,10 +1,7 @@
 ##############################################################################################################
-list.of.packages <- c("sf","terra","stringr","dplyr","ggplot2","data.table","stats","readxl","ncdf4","lubridate")
+packs <- c("sf","terra","stringr","dplyr","ggplot2","data.table","stats","readxl","ncdf4","lubridate")
 
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-
-if(length(new.packages)) install.packages(new.packages)
-lapply(list.of.packages, require, character.only = TRUE)
+lapply(packs, require, character.only = TRUE)
 ##############################################################################################################
 options(datatable.showProgress = FALSE)
 
@@ -33,7 +30,7 @@ r_dom_terr_10km <<- crop(extend(disagg(rast("data/spatial/Emissions_mask_10km.ti
 r_dom_terr      <<- rast("data/spatial/terrestrial_mask.tif")
 
 # lookup file for sector mapping
-dt_sec <<- fread("data/lookups/EMEP_sectors.csv")[!is.na(EMEP_sec)]
+dt_sec <<- fread("data/lookups/EMEP_sectors.csv")[!is.na(sec)]
 
 # lookup file for pollutant names
 dt_poll <<- fread("data/lookups/pollutants.csv")
@@ -44,9 +41,8 @@ dt_iso <<- fread("data/lookups/EMEP_territories.csv")
 # EMEP input missing value
 EMEP_fillval <<- 9.96920996838687e+36
 
-# EMEP yday numbers as taken from an EMEP input file - fixed (?)
+# EMEP yday numbers, to represent month central days, as taken from an EMEP input file - fixed (?)
 v_yday <<- c(14,45,73,104,134,165,195,226,257,287,318,348)
-
 
 ######################################################################################################
 #### function to fetch gridded emissions for a given year from NAEI website. 

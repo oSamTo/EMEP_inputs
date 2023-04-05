@@ -3,22 +3,26 @@
 #########################################################
 
 ######################################################################################################
-#### function to take NAEI emissions, make ready to EMEP format and create netCDFs
+#### function to take NAEI emissions, make ready to EMEP format and create netCDFs for UK & Eire
 
-EMEPinputUK <- function(v_years, v_pollutants, time_scale = c("year","month"), map_yr, output_dir){
+EMEPinputUK <- function(v_years, v_pollutants, time_scale = c("year","month"), naei_inv, map_yr_uk, map_yr_ie, output_dir){
   
   time_scale <- match.arg(time_scale)
   
   # v_years  = vector, *numeric*, year to process.
   if(!is.numeric(v_years)) stop ("Year vector is not numeric")
   
+  # naei_inv  = *numeric*, year of inventory release data.
+  if(!is.numeric(naei_inv)) stop ("Inventory release year is not numeric")
+  
   # map_yr = *numeric*, year of spatial dist. from NAEI. 
-  if(map_yr < 2018) stop ("Spatial distribution must be 2018 or later")
+  if(map_yr_uk < 2018) stop ("UK spatial distribution must be 2018 or later")
+  if(!(map_yr_ie %in% c(2016,2019))) stop ("Eire spatial distribution must be 2016 or 2019")
   
   # For the years & pollutants, take the regional emissions in Lat Long and;
   #   i) convert point emissions (.csv) into a raster
   #  ii) combine the points with the diffuse (.tif) data as required for the model
-  # iii) MASK THE DATA to fit inside the EU emissions data
+  # iii) MASK THE DATA to fit *inside* the EU emissions data
   #  iv) For SNAP 1: ONLY point sources go into A_PublicPower as this is treated with 200m injection. All other into B_Industry.
   #   v) split into monthly emissions, if needed
   #  vi) create netCDF
@@ -45,56 +49,76 @@ EMEPinputUK <- function(v_years, v_pollutants, time_scale = c("year","month"), m
       print(paste0(Sys.time(),": Creating EMEP-UK/EIRE input netCDF for ",species," in ",y,"..."))
       
       # set up blank stacks ready for data of different regions
-      l_uk_temp  <- list()
-      l_ie_temp  <- list()
-      l_sea_temp <- list()
+      l_uk_allSec  <- list()
+      l_ie_allSec  <- list()
+      l_sea_allSec <- list()
       
       # sector totals list
-      l_sec_tots <- list()
+      l_sum_allSec <- list()
       
-      # sector names to loop through
-      v_sectors <- dt_sec[,name]
+      # sector names to loop through - this is netcdf sector names (sec01 etc.)
+      v_sectors <- dt_sec[,unique(sec)]
       
-      print(paste0(Sys.time(),":               Collecting and creating all emissions input data..."))
+      print(paste0(Sys.time(),":      Collecting and creating all emissions input data..."))
       
       for(i in v_sectors){
         
-        sc <- dt_sec[name == i, EMEP_sec]
-        sc_pad <- str_pad(sc, 2, "0", side = "left")
+        if(i == "") next # not interested in currently blank EMEP-named sectors
+        
+        print(paste0(Sys.time(),":         ",i))
+        
+        #########################################################
+        #### OBTAIN 12 MONTHS OF DATA FOR EACH NETCDF SECTOR ####
+        
+        ## At this point, we are using GNFR maps for UK and Eire
+            # these have already been generated: 
+                # for the UK, they are derived from SNAP maps. 
+                # for EIRE, they are GNFR maps from the MapEire project. 
+        ## There is one GNFR per EMEP sector name
+        
+        #sc <- dt_sec[name == i, EMEP_sec]
+        #sc_pad <- str_pad(sc, 2, "0", side = "left")
         
         ####################################
         #### LISTS OF EMISSION SURFACES ####
         
-        l_uk <- sectorEmissions(emis_loc, species, y, i, res_crs, map_yr, country = "uk")
-        l_ie <- sectorEmissions(emis_loc, species, y, i, res_crs, map_yr, country = "eire")
-        
-        # Create a combined buffer strip zone - "SEA"
-        r_SEA <- app(c(l_uk[["sea"]], l_ie[["sea"]]), sum, na.rm = T)
+        l_uk <- sectorEmissions(emis_loc, species, y, i, res_crs, map_yr = map_yr_uk, naei_inv, country = "uk")
+        l_ie <- sectorEmissions(emis_loc, species, y, i, res_crs, map_yr = map_yr_ie, naei_inv, country = "eire")
         
         ########################
         #### TEMPORAL SPLIT ####
         # if the time_scale is year, the data stays as 1 annual total.
-        # if the time_scale is month, the data needs to be split into 12 layers using profiles from DUKEMs
+        # if the time_scale is month, the data needs to be split into 12 layers
+            # this is either the default (up to 2019) femis files
+            # or the newly generated stuff that has come out of DUKEMs
+        # the sea layer needs to be split based on the country it came from (i.e. UK or Eire)
         
-        s_uk_temp   <- splitAnnual(species = species, time_scale = "month", r_annual = l_uk[["terrestrial"]],                                          i = i, sc = sc, sc_pad = sc_pad, country = "uk")
-        s_ie_temp   <- splitAnnual(species = species, time_scale = "month", r_annual = l_ie[["terrestrial"]],                                          i = i, sc = sc, sc_pad = sc_pad, country = "ie")
-        s_SEA_temp  <- splitAnnual(species = species, time_scale = "month", r_annual = r_SEA,                                                          i = i, sc = sc, sc_pad = sc_pad, country = "sea")
+        l_uk_prof   <- splitAnnual(species = species, time_scale, l_annual = l_uk, i = i, country = "uk")
+        l_ie_prof   <- splitAnnual(species = species, time_scale, l_annual = l_ie, i = i, country = "ie")
+        
+        # create three stacks for UK, Eire and the SEA buffer (annual or monthly)
+        s_uk  <- l_uk_prof[["terrestrial"]]
+        s_ie  <- l_ie_prof[["terrestrial"]]
+        s_sea <- tapp(c(l_uk_prof[["sea"]], l_ie_prof[["sea"]]), index = 1:12, sum, na.rm=T)
+        # need an if clause for s_sea in-case it's annual
         
         ###################
         #### COLLATING ####
         # add temporal raster stacks to lists
         
-        l_uk_temp[[paste0("uk_", sc_pad, "_", i,"_",time_scale)]]   <- s_uk_temp
-        l_ie_temp[[paste0("ie_", sc_pad, "_", i,"_",time_scale)]]   <- s_ie_temp
-        l_sea_temp[[paste0("sea_", sc_pad, "_", i,"_",time_scale)]] <- s_SEA_temp
+        l_uk_allSec[[paste0("uk_", species, "_", i,"_",time_scale)]]   <- s_uk
+        l_ie_allSec[[paste0("ie_", species, "_", i,"_",time_scale)]]   <- s_ie
+        l_sea_allSec[[paste0("sea_", species, "_", i,"_",time_scale)]] <- s_sea
         
         ####################
         #### STATISTICS ####
         
-        dt_totals <- summariseEmissions(y, species, i, sc_pad, l_uk = l_uk, s_uk = s_uk_temp,
-                                        l_ie = l_ie, s_ie = s_ie_temp, sea = s_SEA_temp)
+        dt_totals <- summariseEmissions(y, species, i,
+                                        l_uk = l_uk, s_uk = s_uk,
+                                        l_ie = l_ie, s_ie = s_ie,
+                                        sea = s_sea)
         
-        l_sec_tots[[paste0("totals_", sc_pad, "_", i,"_",time_scale)]] <- dt_totals
+        l_sum_allSec[[paste0("totals_", species, "_", i,"_", time_scale)]] <- dt_totals
         
          
       } # sector loop
@@ -102,11 +126,12 @@ EMEPinputUK <- function(v_years, v_pollutants, time_scale = c("year","month"), m
       ############################################################
       #### CREATE AND POPULATE NETCDF ON POLLUTANT/YEAR BASIS ####
       
-      dt_emis_summary <- rbindlist(l_sec_tots, use.names=T)[order(Region, GNFR)]
+      dt_emis_summary <- rbindlist(l_sum_allSec, use.names=T)[order(Region, GNFR)]
       
       print(paste0(Sys.time(),":               Creating and populating netcdf..."))
       
-      createNETCDFuk(l_uk_temp, l_ie_temp, l_sea_temp, y, species, map_yr, output_dir, time_scale, dt_emis_summary)
+      createNETCDFuk(y, naei_inv, species, map_yr_uk, map_yr_ie, output_dir, time_scale,
+                     l_uk_allSec, l_ie_allSec, l_sea_allSec, dt_emis_summary)
       
     } # pollutant loop
     
@@ -120,7 +145,7 @@ EMEPinputUK <- function(v_years, v_pollutants, time_scale = c("year","month"), m
 
 ######################################################################################################
 #### function to collect sector data for diffuse and points, based on country and sector
-sectorEmissions <- function(emis_loc, species, y, i, res_crs, map_yr, country = c("uk", "eire")){
+sectorEmissions <- function(emis_loc, species, y, i, res_crs, map_yr, naei_inv, country = c("uk", "eire")){
   
   country <- match.arg(country)
   
@@ -131,16 +156,31 @@ sectorEmissions <- function(emis_loc, species, y, i, res_crs, map_yr, country = 
   if(map_yr < 2018) stop ("Spatial distribution must be 2018 or later")
   
   # set the diffuse filename
-  GNFRfile <- paste0(emis_loc,"/Emissions_grids_plain/LL/",species,"/diffuse/",y,"/rasters_GNFR/",species,"_diff_",y,"_",country,"_GNFR_",dt_sec[name == i, GNFRlong],"_t_",res_crs,"_",map_yr,"NAEImap.tif")
+  # map acronym
+  ma <- ifelse(country == "uk", "NAEI", "ME")
   
-  # some GNFR sectors blank. Not mapped to EMEP. Check for existence and skip
-  if(file.exists(GNFRfile)){
+  f_diff <- paste0(emis_loc,"/Emissions_grids_plain/LL/",species,"/diffuse/",y,"/rasters_GNFR/",species,"_diff_",y,"_release",naei_inv,"_",country,"_GNFR_",dt_sec[sec == i, GNFRlong],"_t_",res_crs,"_",map_yr,ma,"map.tif")
+  
+  # set the points filename
+  f_pt <- paste0(emis_loc,"/Emissions_grids_plain/LL/",species,"/point/",y,"/",species,"_pt_",y,"_",country,"_SNAPGNFR_t_LL.csv")
+  
+  ### read in the data; if diff/pts are empty or don't exist, set as blank domain
+  ### read diffuse data ###
+  if(file.exists(f_diff)){
     
-    ## diffuse data ##
-    r_diff <- crop(extend(rast(paste0(emis_loc,"/Emissions_grids_plain/LL/",species,"/diffuse/",y,"/rasters_GNFR/",species,"_diff_",y,"_",country,"_GNFR_",dt_sec[name == i, GNFRlong],"_t_",res_crs,"_",map_yr,"NAEImap.tif")), r_dom_0.1), r_dom_0.1)
+    r_diff <- crop(extend(rast(f_diff), r_dom_0.1), r_dom_0.1)
+  
+  }else{
     
-    ## point data ## (should be fine if GNFR name is blank)
-    dt_pts <- fread(paste0(emis_loc,"/Emissions_grids_plain/LL/",species,"/point/",y,"/",species,"_pt_",y,"_",country,"_GNFR_t_LL.csv"))[GNFR == dt_sec[name == i, GNFRlong] & AREA == toupper(country)]
+    r_diff <- r_dom_0.1
+    
+  } # end of read diffuse
+  
+  ### read point data ###
+  if(file.exists(f_pt)){
+    
+    # get the table of points first and assess if any entries at all
+    dt_pts <- fread(f_pt)[GNFR == dt_sec[sec == i, GNFRlong] & AREA == toupper(country)]
     
     # if there are no points, use a blank raster, otherwise rasterize
     if(nrow(dt_pts) == 0){
@@ -149,29 +189,29 @@ sectorEmissions <- function(emis_loc, species, y, i, res_crs, map_yr, country = 
       
     }else{
       
-      v_pt <- vect(dt_pts, geom=c("Lon", "Lat"), crs = "EPSG:4326")
-      r_pt <- terra::rasterize(v_pt, r_dom_0.1, field = "Emission", fun = sum)
+      v_pt <- vect(dt_pts, geom=c("Easting", "Northing"), crs = "EPSG:4326")
+      r_pt <- terra::rasterize(v_pt, r_dom_0.1, field = "pt_emis_t", fun = sum)
       
-    } # end of ifelse for points
-    
-    # stack and sum to one surface
-    s <- c(r_diff, r_pt) ; names(s) <- c("diffuse","point")
-    r <- app(s, sum, na.rm = T) ; names(r) <- "total"
+    } # end of read points
     
   }else{
     
-    r <- r_dom_0.1 ; names(r) <- "total"
+    r_pt <- r_dom_0.1
+    
+  }
   
-  } # sector exclusion
+  ## combine the surfaces, whether they have data in or not. 
+  s <- c(r_diff, r_pt) ; names(s) <- c("diffuse","point")
+  r <- app(s, sum, na.rm = T) ; names(r) <- "total"
   
   # EMEP needs zero value, not NA, in emissions
   r[is.na(r)] <- 0
   
   # Mask to the EMEP input restrictions
-  r_t   <- mask(r,     r_dom_terr)
-  r_t10 <- mask(r,     r_dom_terr_10km)
-  r_ow  <- mask(r,     r_dom_terr_10km, inverse=T)
-  r_sea <- mask(r_t10, r_dom_terr, inverse=T)
+  r_t   <- mask(r,     r_dom_terr)                 # emissions on UK land territory
+  r_t10 <- mask(r,     r_dom_terr_10km)            # emissions on UK land territory + 10km sea buffer
+  r_ow  <- mask(r,     r_dom_terr_10km, inverse=T) # emissions outwith UK land + 10km buffer
+  r_sea <- mask(r_t10, r_dom_terr, inverse=T)      # emissions only in the 10km sea buffer
   
   l <- list(r, r_t, r_t10, r_ow, r_sea)
   names(l) <- c("total", "terrestrial","terrestrial_10km","outwith_10km","sea")
@@ -182,57 +222,92 @@ sectorEmissions <- function(emis_loc, species, y, i, res_crs, map_yr, country = 
 
 ######################################################################################################
 #### function to split annual emissions out into months (or keep as annual)
-splitAnnual <- function(species, time_scale = c("year","month"), r_annual, i, sc, sc_pad, country = c("uk","ie","sea")){
+splitAnnual <- function(species, time_scale = c("year","month"), l_annual, i, country = c("uk","ie","sea")){
   
   country    <- match.arg(country)
   time_scale <- match.arg(time_scale)
+  
   if(time_scale == "year"){ i_time <- 1 }else{ i_time <- 1:12 }
   
   if(time_scale == "year"){
     
-    s <- r_annual
-    names(s) < paste0(species, "_", country, "_", sc_pad)
+    l_s <- c(l_annual[["terrestrial"]], l_annual[["sea"]])
+    names(l_s) <- paste0(species, "_", country,"_",c("terrestrial","sea"), "_", i)
     
   }else{
     
-    # read in the monthly splits and format from DUKEMs
-    dt_gam <- suppressMessages(fread(paste0("https://github.com/oSamTo/DUKEMs_TP/raw/main/output/coeffs_sector/GNFR/",species,"/GAM_month_GNFR_",species,"_allYr_LIST.csv"), verbose = F, showProgress = F))
-    # set name of C_ to match the EMEP code
-    dt_gam[sector == "C_OtherStationaryComb", sector := "C_OtherStatComb"]
+    ## ARGUMENTS NEED TO BE BUILT IN TO TAKE DUKEMS STUFF
     
-    # subset the GAM data to the right GNFR sector needed
-    dt_profs <- dt_gam[sector == dt_sec[name == i, GNFRlong ]]
+    country_id <- ifelse(country == "uk", 27, 14) # to extract correct femis factors
+    snap_id <- dt_sec[sec == i, as.numeric(SNAP)]
     
-    if(nrow(dt_profs) > 0){
-      v_coeffs <- dt_profs[, coeff] 
+    # read in femis file for legacy temporal splits (subset to Eire or UK - SEA needs to match parent country)
+    dt_femis <- fread(paste0("data/femis/MonthlyFac.",species))  ##!! need one for every pollutant? !!##
+    names(dt_femis) <- c("ISO","SNAP",month.abb[1:12])
+    dt_femis_m <- melt(dt_femis, id.vars = c("ISO","SNAP"), variable.name = "MON", value.name = "FAC")
+    
+    # extract required femis data - Use 1s if the SNAP sector in dt_dec is "NA"
+    if(is.na(snap_id)){
+      v_femis <- rep(1,12)
     }else{
-      v_coeffs <- rep(1,12)
+      v_femis <- dt_femis_m[ISO == country_id & SNAP == snap_id][["FAC"]] # vector of monthly splits 
     }
     
     # make a standard 1 month raster. Annual/12.
-    r_month <- r_annual/12
-    s_month <- rep(r_month, 12)
+    
+    l_s_month <- lapply(l_annual[c("terrestrial","sea")], function(x) rep(x/12, 12))
     
     # adjust with temporal profile
-    s <- s_month * v_coeffs
-    names(s) <- paste0(species, "_", country, "_", sc_pad,"_",i,"_",i_time)
+    
+    l_s <- lapply(l_s_month, function(x) x * v_femis)
+    
+    names(l_s[["terrestrial"]]) <- paste0(species, "_", country,"_","terrestrial", "_", i,"_",str_pad(i_time, 2, "0", side = "left"))
+    names(l_s[["sea"]]) <- paste0(species, "_", country,"_","sea", "_", i,"_",str_pad(i_time, 2, "0", side = "left"))
+    
+    # some tiny change in overall totals when splitting - possibly decimal place/rounding etc
+    
+    # DUKEMS related:
+    
+    # read in the monthly splits and format from DUKEMs
+    #dt_gam <- suppressMessages(fread(paste0("https://github.com/oSamTo/DUKEMs_TP/raw/main/output/coeffs_sector/GNFR/",species,"/GAM_month_GNFR_",species,"_allYr_LIST.csv"), verbose = F, showProgress = F))
+    # set name of C_ to match the EMEP code
+    #dt_gam[sector == "C_OtherStationaryComb", sector := "C_OtherStatComb"]
+    
+    # subset the GAM data to the right GNFR sector needed
+    #dt_profs <- dt_gam[sector == dt_sec[name == i, GNFRlong ]]
+    
+    #if(nrow(dt_profs) > 0){
+    #  v_coeffs <- dt_profs[, coeff] 
+    #}else{
+    #  v_coeffs <- rep(1,12)
+    #}
+    
+    # make a standard 1 month raster. Annual/12.
+    #r_month <- r_annual/12
+    #s_month <- rep(r_month, 12)
+    
+    # adjust with temporal profile
+    #s <- s_month * v_coeffs
+    #names(s) <- paste0(species, "_", country, "_", sc_pad,"_",i,"_",i_time)
   }
   
-  return(s) # return the split (or annual) emissions
+  return(l_s) # return the monthly/annual emissions
   
 } # end function
 
 ######################################################################################################
 #### function to summarise input emissions
-summariseEmissions <- function(y, species, i, sc_pad, l_uk, s_uk, l_ie, s_ie, sea){
+summariseEmissions <- function(y, species, i, l_uk, s_uk, l_ie, s_ie, sea){
   
   # summarise the emissions totals
   dt <- data.table(Year = y,
                    Pollutant = species,
                    Region = c("uk","ie","sea"),
-                   GNFR = dt_sec[name == i, GNFRlong],
-                   EMEP_Sector = sc_pad,
-                   long_name = i,
+                   GNFR = dt_sec[sec == i, GNFRlong],
+                   SNAP = dt_sec[sec == i, SNAP],
+                   EMEP_Sector = dt_sec[sec == i, EMEP_sec],
+                   sec_long = i,
+                   long_name = dt_sec[sec == i, name],
                    Incoming_annual_kt      = unlist(c(global(l_uk[["total"]], sum, na.rm=T)/1000, global(l_ie[["total"]], sum, na.rm=T)/1000, 0)), 
                    Terrestrial_annual_kt   = unlist(c(global(l_uk[["terrestrial"]], sum, na.rm=T)/1000, global(l_ie[["terrestrial"]], sum, na.rm=T)/1000, 0)), 
                    #Terrestrial_split_kt    = unlist(c(sum(global(s_uk, sum, na.rm=T))/1000, sum(global(s_ie, sum, na.rm=T))/1000)),
@@ -247,16 +322,19 @@ summariseEmissions <- function(y, species, i, sc_pad, l_uk, s_uk, l_ie, s_ie, se
 
 ######################################################################################################
 #### function to create a netCDF and input the data
-createNETCDFuk <- function(l_uk_temp, l_ie_temp, l_sea_temp, y, species, map_yr, output_dir, time_scale, dt_emis_summary){
+createNETCDFuk <- function(y, naei_inv, species, map_yr_uk, map_yr_ie, output_dir, time_scale, l_uk_allSec, l_ie_allSec, l_sea_allSec, dt_emis_summary){
   
+  # create output directory
+  dir.create(file.path(output_dir), showWarnings = FALSE, recursive = T)   
+  
+  # create netcdf name
   if(species == "pm2.5"){
-    nc_filename <- paste0(output_dir,"/pm25_UKEIRE_",y,"emis_",map_yr,"map_0.01.nc")
+    nc_filename <- paste0(output_dir,"/pm25_UKEIRE_",y,"emis_",map_yr_uk,"map_",naei_inv,"inv_0.01.nc")
   }else{
-    nc_filename <- paste0(output_dir,"/", species,"_UKEIRE_",y,"emis_",map_yr,"map_0.01.nc")
+    nc_filename <- paste0(output_dir,"/", species,"_UKEIRE_",y,"emis_",map_yr_uk,"map_",naei_inv,"inv_0.01.nc")
   }
   
   # if the file already exists, just delete and rewrite
-  
   if(file.exists(nc_filename)){
     
     print(paste0("NetCDF already exists for ",species, " in ", y,"; DELETING & REPLACING..."))
@@ -267,6 +345,7 @@ createNETCDFuk <- function(l_uk_temp, l_ie_temp, l_sea_temp, y, species, map_yr,
   # netCDF variables are done on sector name and attributes determine sector, country etc
   # in this file, UK (27), EIRE (14) and SEA (171) remain separate
   # there are 12 month layers, or just one annual layer (dependent on time_scale)
+  # the names, e.g. sec01, are taken from the lookup table 'dt_sec'
   
   # Set up the dimensions: latlong, time, sectors
   
@@ -275,15 +354,16 @@ createNETCDFuk <- function(l_uk_temp, l_ie_temp, l_sea_temp, y, species, map_yr,
   v_lat <- as.array(seq(ymin(r_dom_0.1) + 0.01/2, ymax(r_dom_0.1) - 0.01/2, 0.01))
   n_lat <- length(v_lat)
   #timevals <- as.numeric(difftime(paste0(y,"-01-01"), dmy("01-01-1850")))
-  v_time <- c(14, 45, 73, 104, 134, 165, 195, 226, 257, 287, 318, 348)
+  v_time <- v_yday
   n_time <- length(v_time)
+  
+  ## !! need some code above to incorporate possibility of annual data for v_time !! ##
   
   # create dimensions
   dimlon <- ncdim_def(name = "lon", longname= "longitude", units = "degrees_east", vals = v_lon)
   dimlat <- ncdim_def(name = "lat", longname= "latitude", units = "degrees_north", vals = v_lat)
   #dimtime <- ncdim_def(name = "time", units = "days since 1850-01-01 00:00", longname = "days", vals = timevals)
   dimtime <- ncdim_def(name = "time", units = "tonnes month-1", vals = v_time)
-  
   
   # Create names and variables for UK, Eire and SEA SEPARATELY
   ## Ireland: ISO:  IE: country 14
@@ -319,13 +399,14 @@ createNETCDFuk <- function(l_uk_temp, l_ie_temp, l_sea_temp, y, species, map_yr,
     sec_name  <- v_sectors[v]
     sec_desc  <- substr(sec_name, str_locate_all(sec_name,"_")[[1]][2,2] + 1, nchar(sec_name))
     sec_EMEP  <- dt_sec[name == sec_desc, str_pad(EMEP_sec, 2, "0", side = "left")]
+    sec_long  <- dt_sec[name == sec_desc, sec]
     sec_GNFR  <- dt_sec[name == sec_desc, GNFRlong]
     
     ISO <- tolower(str_split(sec_name, "_")[[1]][2])
     ISO_num  <- v_country[v]
     
-    l_insert <- get(paste0("l_",ISO,"_temp"))
-    s_insert <- l_insert[[paste0(ISO,"_",sec_EMEP, "_", sec_desc,"_",time_scale)]]
+    l_insert <- get(paste0("l_",ISO,"_allSec"))
+    s_insert <- l_insert[[paste0(ISO,"_",species, "_", sec_long,"_",time_scale)]]
     
     # extract the year and pollutant and put in
     a <- array(s_insert, dim = c(n_lon, n_lat, n_time))
@@ -341,8 +422,8 @@ createNETCDFuk <- function(l_uk_temp, l_ie_temp, l_sea_temp, y, species, map_yr,
     ncatt_put(ncnew, varid = sec_name, attname = "country"    , attval = ISO_num , prec="int")
     
     # summary of data going into netcdf
-    dt <- data.table(Pollutant = species, Year = y, Region = ISO, long_name = sec_desc, EMEP_Sector = sec_EMEP, GNFR = sec_GNFR, Month = 1:12, emis_kt = round(global(s_insert, sum, na.rm=T)[,1]/1000, 3))
-    dtw <- dcast(dt, Pollutant+Year+Region+long_name+EMEP_Sector+GNFR ~ Month, value.var = "emis_kt")
+    dt <- data.table(Pollutant = species, Year = y, Region = ISO, long_name = sec_desc, EMEP_Sector = sec_EMEP, GNFR = sec_GNFR, time_res = time_scale, time_unit = 1:n_time, emis_kt = round(global(s_insert, sum, na.rm=T)[,1]/1000, 3))
+    dtw <- dcast(dt, Pollutant+Year+Region+long_name+EMEP_Sector+GNFR ~ time_res+time_unit, value.var = "emis_kt")
     dtw[, tot_kt := rowSums(.SD, na.rm=T), .SDcols = as.character(1:12)]
     
     l[[v_sectors[v]]] <- dtw
@@ -377,6 +458,10 @@ createNETCDFuk <- function(l_uk_temp, l_ie_temp, l_sea_temp, y, species, map_yr,
   ncatt_put(ncnew, 0, "periodicity", ifelse(time_scale=="month","monthly","annual"), prec="char")
   ncatt_put(ncnew, 0, "NCO","netCDF Operators version 4.9.8 (Homepage = http://nco.sf.net, Code = http://github.com/nco/nco)", prec = "char")
   
+  ncatt_put(ncnew, 0, "emissions_year",y, prec="int")
+  ncatt_put(ncnew, 0, "inventory_year",naei_inv, prec="int")
+  ncatt_put(ncnew, 0, "UK_map_year",map_yr_uk, prec="int")
+  ncatt_put(ncnew, 0, "EIRE_map_year",map_yr_ie, prec="int")
   
   nc_close(ncnew)
   

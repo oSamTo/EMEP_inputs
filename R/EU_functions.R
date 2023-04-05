@@ -5,6 +5,11 @@
 
 
 
+
+
+
+
+
 ######################################################################################################
 #### function to fetch gridded emissions for a given year from EMEP website. 
 
@@ -44,29 +49,30 @@ griddedEMEPemissions <- function(pollutant = c("cd","co","hg","nh3","nmvoc","nox
 
 
 ######################################################################################################
-#### function to 
+#### function to take EMEP emissions, make ready to EMEP format and create netCDFs for EU
 
-
-EMEPinputEU <- function(v_emis_year, v_pollutants, report_year, output_dir){
-  
-  # create a blank netcdf
-  # process the data
-  # input the data into the ncdf
+EMEPinputEU <- function(v_years, v_pollutants, time_scale = "month", emep_inv = 2020, map_yr = 2020, output_dir){
   
   # v_years  = vector, *numeric*, year to process.
   if(!is.numeric(v_years)) stop ("Year vector is not numeric")
   
   # emissions year = *numeric*
-  if(!is.numeric(report_year)) stop ("Reporting year is not numeric")
-  if(!is.numeric(emis_year)) stop ("Emissions year is not numeric")
+  if(!is.numeric(emep_inv)) stop ("Reporting year is not numeric")
   
-  ## method outline here
+  # For the years & pollutants, take the EU emissions in csv format and;
+  #   i) convert every country/sector into a raster
+  #  ii) MASK THE DATA to fit *around* the UK emissions data
+  # iii) split into monthly emissions, if needed
+  #  iv) create netCDF
   
+  emis_loc <- "C:/FastProcessingSam/EMEP_new_grid/EMEP_gridded"
   res_crs <- "0.1_LL"
   
   ## loop through years and pollutants listed and make a netCDF input file for each.
+  ## This is to be made with a monthly time attribute
+      # for the month, incorporate the EDGAR temporal data 
   
-  for(y in v_emis_year){
+  for(y in v_years){
     
     for(species in v_pollutants){
       
@@ -78,8 +84,127 @@ EMEPinputEU <- function(v_emis_year, v_pollutants, report_year, output_dir){
       
       print(paste0(Sys.time(),": Creating blank EMEP-UK/EIRE input netCDF for ",species," in ",y,"..."))
       
+      # we are using the EMEP csv emissions NOT the netcdf emissions
+          # https://www.ceip.at/the-emep-grid/gridded-emissions/nox
+      # this is because we need a variable *per country* per sector - the netcdf does not have country IDs
+      
+      # set up blank stack ready for data of different countries
+      l_eu_allSec  <- list()
+      
+      # sector totals list
+      l_sum_allSec <- list()
+      
+      # sector names to loop through - this is netcdf sector names (sec01 etc.)
+      v_sectors <- dt_sec[,unique(sec)]
+      
+      print(paste0(Sys.time(),":      Collecting and creating all emissions input data..."))
+      
+      for(i in v_sectors){
+        
+        if(i == "") next # not interested in currently blank EMEP-named sectors
+        if(dt_sec[sec == i, GNFRlong == ""]) next # not interested in blank named GNFR sectors either
+        # this isnt the same as UK, which uses blank placeholders, but there are many countries so ignore
+        
+        print(paste0(Sys.time(),":         ",i))
+        
+        #######################################################
+        #### OBTAIN 12 MONTHS OF DATA FOR EACH GNFR SECTOR ####
+        
+        ## There is one GNFR per EMEP sector name
+        # read in the GNFR csv for EMEP
+        # create a raster for every country and every sector
+        # fill in missing countries/sectors with blanks
+        # there are no EMEP csv files for Intl Ships, Avi Cruise or LULUCF
+        
+        ####################################
+        #### LISTS OF EMISSION SURFACES ####
+        
+        l_eu <- EMEPsectorEmissions(emis_loc, species, y, i, res_crs, map_yr, emep_inv)
+        
+        
+        ########################
+        #### TEMPORAL SPLIT ####
+        # if the time_scale is year, the data stays as 1 annual total.
+        # if the time_scale is month, the data needs to be split into 12 layers
+        # this is either the default (up to 2019) femis files
+        # or the newly generated stuff that has come out of DUKEMs
+        # the sea layer needs to be split based on the country it came from (i.e. UK or Eire)
+        
+        l_uk_prof   <- splitAnnual(species = species, time_scale, l_annual = l_uk, i = i, country = "uk")
+        l_ie_prof   <- splitAnnual(species = species, time_scale, l_annual = l_ie, i = i, country = "ie")
+        
+        # create three stacks for UK, Eire and the SEA buffer (annual or monthly)
+        s_uk  <- l_uk_prof[["terrestrial"]]
+        s_ie  <- l_ie_prof[["terrestrial"]]
+        s_sea <- tapp(c(l_uk_prof[["sea"]], l_ie_prof[["sea"]]), index = 1:12, sum, na.rm=T)
+        # need an if clause for s_sea in-case it's annual
+        
+        ###################
+        #### COLLATING ####
+        # add temporal raster stacks to lists
+        
+        l_uk_allSec[[paste0("uk_", species, "_", i,"_",time_scale)]]   <- s_uk
+        l_ie_allSec[[paste0("ie_", species, "_", i,"_",time_scale)]]   <- s_ie
+        l_sea_allSec[[paste0("sea_", species, "_", i,"_",time_scale)]] <- s_sea
+        
+        ####################
+        #### STATISTICS ####
+        
+        dt_totals <- summariseEmissions(y, species, i,
+                                        l_uk = l_uk, s_uk = s_uk,
+                                        l_ie = l_ie, s_ie = s_ie,
+                                        sea = s_sea)
+        
+        l_sum_allSec[[paste0("totals_", species, "_", i,"_", time_scale)]] <- dt_totals
+        
+        
+      } # sector loop
+      
+      ############################################################
+      #### CREATE AND POPULATE NETCDF ON POLLUTANT/YEAR BASIS ####
+      
+      dt_emis_summary <- rbindlist(l_sum_allSec, use.names=T)[order(Region, GNFR)]
+      
+      print(paste0(Sys.time(),":               Creating and populating netcdf..."))
+      
+      createNETCDFuk(y, naei_inv, species, map_yr_uk, map_yr_ie, output_dir, time_scale,
+                     l_uk_allSec, l_ie_allSec, l_sea_allSec, dt_emis_summary)
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      # units = Tg yr-1 = Mt yr-1 = 1,000 kt yr-1
+      nc_file <- "C:/FastProcessingSam/EMEP_new_grid/EMEP_gridded/NOx_2022_GRID_1990_to_2020.nc"
+      nc <- nc_open(nc_file)
+      nc
+      nc_close(nc)
+      
+      s <- rast(nc_file, subds = "roadtransport")
+      
+      r <- s[[31]]
+      r <- r * 1000000
+      
+      
+      global(r, sum, na.rm=T)
+      
+      
+      dt_road <- fread("C:/FastProcessingSam/EMEP_new_grid/EMEP_gridded/NOx_2022_GRID_2020/NOx_F_RoadTransport_2022_GRID_2020.txt")
+      
+      sum(dt_road$EMISSION, na.rm=T)
+      
+      
+      plot(s[[31]])
       
       dt_iso
+      
+      
+      
+      
       
       
       
@@ -89,8 +214,132 @@ EMEPinputEU <- function(v_emis_year, v_pollutants, report_year, output_dir){
   } # year
   
   
+} # end of function
+  
+
+######################################################################################################
+#### function to collect EMEP sector data, per country, for diffuse emissions
+EMEPsectorEmissions <- function(emis_loc, species, y, i, res_crs, map_yr, emep_inv){
+  
+  # v_years  = vector, *numeric*, year to process.
+  if(!is.numeric(y)) stop ("Year vector is not numeric")
+  
+  # set the diffuse filename
+  if(i == "sec03"){
+    f_diff <- paste0(emis_loc,"/",dt_poll[ceh_poll == species, emep_poll],"_2022_GRID_",y,"/",dt_poll[ceh_poll == species, emep_poll],"_C_OtherStationaryComb_2022_GRID_",y,".txt")
+  }else{
+    f_diff <- paste0(emis_loc,"/",dt_poll[ceh_poll == species, emep_poll],"_2022_GRID_",y,"/",dt_poll[ceh_poll == species, emep_poll],"_",dt_sec[sec == i, GNFRlong],"_2022_GRID_",y,".txt")
+  }
+  
+  ### for every country present in the data; 
+    # read in it's subset
+    # rasterise and add to list
   
   
+  sf_emep <- st_read("C:/FastProcessingSam/EMEP_new_grid/EMEP_gridded/EMEP_grid_01deg_shp/EMEP_GRID_FULL.shp")
+  
+  unique(sf_emep$ISO)[!(unique(sf_emep$ISO) %in% unique(dt_iso$EMEP_iso))]
+  unique(dt_iso$EMEP_iso)[!(unique(dt_iso$EMEP_iso) %in% unique(sf_emep$ISO))]
+  
+  dt_emis <- fread(f_diff)
+  setnames(dt_emis, c("# Format: ISO2"),c("ISO"))
+  unique(dt_emis$ISO) %in% unique(dt_iso$EMEP_iso)
+  unique(dt_emis$ISO) %in% unique(sf_emep$ISO)
+  
+  
+  for(i in v_sectors){
+    
+    if(i == "") next # not interested in currently blank EMEP-named sectors
+    if(dt_sec[sec == i, GNFRlong == ""]) next # not interested in blank named GNFR sectors either
+    
+    # set the diffuse filename
+    if(i == "sec03"){
+      f_diff <- paste0(emis_loc,"/",dt_poll[ceh_poll == species, emep_poll],"_2022_GRID_",y,"/",dt_poll[ceh_poll == species, emep_poll],"_C_OtherStationaryComb_2022_GRID_",y,".txt")
+    }else{
+      f_diff <- paste0(emis_loc,"/",dt_poll[ceh_poll == species, emep_poll],"_2022_GRID_",y,"/",dt_poll[ceh_poll == species, emep_poll],"_",dt_sec[sec == i, GNFRlong],"_2022_GRID_",y,".txt")
+    }
+    
+    dt_emis <- fread(f_diff)
+    setnames(dt_emis, c("# Format: ISO2"),c("ISO"))
+    
+    print(paste0(length(unique(dt_emis$ISO)), " unique ISOs in ",dt_sec[sec == i, GNFRlong]))
+    
+    
+  }
+  
+  ## ALL ISOs in csv are in the iso lookup table
+  ## but not all ISOs in csv are in the shapefile
+  
+  ### in csv, not in shapefile
+  # AST - Asian areas in the extended EMEP domain (ASM+ASE+ARO+ARE+CAS) [these 5 at the end all exist]
+  # KZT - Kazakhstan [however there is KZ & KZE in shapefile]
+  # RUE - Russian Federation in the extended EMEP domain (RU+RFE+RUX) [these 3 at the end all exist]
+  # UZ - Uzbekistan [however there is UZO & UZE in shapefile]
+  
+  dt_emis[ISO == "RUE"]
+  
+  if(file.exists(f_diff)){
+    
+    r_diff <- crop(extend(rast(f_diff), r_dom_0.1), r_dom_0.1)
+    
+  }else{
+    
+    r_diff <- r_dom_0.1
+    
+  } # end of read diffuse
+  
+  ### read point data ###
+  if(file.exists(f_pt)){
+    
+    # get the table of points first and assess if any entries at all
+    dt_pts <- fread(f_pt)[GNFR == dt_sec[sec == i, GNFRlong] & AREA == toupper(country)]
+    
+    # if there are no points, use a blank raster, otherwise rasterize
+    if(nrow(dt_pts) == 0){
+      
+      r_pt <- r_dom_0.1
+      
+    }else{
+      
+      v_pt <- vect(dt_pts, geom=c("Easting", "Northing"), crs = "EPSG:4326")
+      r_pt <- terra::rasterize(v_pt, r_dom_0.1, field = "pt_emis_t", fun = sum)
+      
+    } # end of read points
+    
+  }else{
+    
+    r_pt <- r_dom_0.1
+    
+  }
+  
+  ## combine the surfaces, whether they have data in or not. 
+  s <- c(r_diff, r_pt) ; names(s) <- c("diffuse","point")
+  r <- app(s, sum, na.rm = T) ; names(r) <- "total"
+  
+  # EMEP needs zero value, not NA, in emissions
+  r[is.na(r)] <- 0
+  
+  # Mask to the EMEP input restrictions
+  r_t   <- mask(r,     r_dom_terr)                 # emissions on UK land territory
+  r_t10 <- mask(r,     r_dom_terr_10km)            # emissions on UK land territory + 10km sea buffer
+  r_ow  <- mask(r,     r_dom_terr_10km, inverse=T) # emissions outwith UK land + 10km buffer
+  r_sea <- mask(r_t10, r_dom_terr, inverse=T)      # emissions only in the 10km sea buffer
+  
+  l <- list(r, r_t, r_t10, r_ow, r_sea)
+  names(l) <- c("total", "terrestrial","terrestrial_10km","outwith_10km","sea")
+  
+  return(l)
+  
+} # end of function
+
+######################################################################################################
+
+
+
+
+
+
+
   
   
   pollutant <- "nox"
