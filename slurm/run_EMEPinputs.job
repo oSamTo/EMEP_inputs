@@ -1,0 +1,8 @@
+#!/bin/bash
+#SBATCH -p short-serial
+#SBATCH --job-name=run_EMEPinputs
+#SBATCH -o slurm/emep_input_%j.out
+#SBATCH -e slurm/emep_input_%j.err
+#SBATCH --mem=60G
+#SBATCH -t 22:59:00
+R CMD BATCH --no-restore --no-save EMEP_inputs.R slurm/console_EMEPinputs.Rout

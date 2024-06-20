@@ -1,61 +1,99 @@
 EMEP_iso,EMEP_code,Name
 AL,1,Albania
-AM,56,Armenia
-AST,96,Asian areas in the extended EMEP domain (ASM+ASE+ARO+ARE+CAS)
 AT,2,Austria
-ATL,32,Remaining North-East Atlantic Ocean
-AZ,69,Azerbaijan
-BA,50,Bosnia and Herzegovina
-BAS,30,Baltic Sea
 BE,3,Belgium
 BG,4,Bulgaria
-BLS,34,Black Sea
-BY,39,Belarus
-CAS,80,Caspian Sea
-CH,24,Switzerland
-CY,55,Cyprus
-CZ,46,Czech Republic
-DE,60,Germany
+FCS,5,Former Czechoslovakia
 DK,6,Denmark
-EE,43,Estonia
-ES,22,Spain
 FI,7,Finland
 FR,8,France
-GB,27,United Kingdom
-GE,54,Georgia
+GDR,9,Former East Germany
+FRG,10,Former Fed. Rep. of Germany
 GR,11,Greece
-HR,49,Croatia
 HU,12,Hungary
-IE,14,Ireland
 IS,13,Iceland
+IE,14,Ireland
 IT,15,Italy
-KG,68,Kyrgyzstan
-KZT,92,Kazakhstan
-LI,59,Liechtenstein
-LT,45,Lithuania
 LU,16,Luxembourg
-LV,44,Latvia
-MC,62,Monaco
-MD,41,Republic of Moldova
-ME,73,Montenegro
-MED,33,Mediterranean Sea
-MK,52,The former Yugoslav Republic of Macedonia
-MT,57,Malta
 NL,17,Netherlands
 NO,18,Norway
-NOA,63,North Africa
-NOS,31,North Sea
 PL,19,Poland
 PT,20,Portugal
 RO,21,Romania
-RS,72,Serbia
-RU,61,Russian Federation in the former official EMEP domain
-RUE,93,Russian Federation in the extended EMEP domain (RU+RFE+RUX)
+ES,22,Spain
 SE,23,Sweden
-SI,48,Slovenia
-SK,47,Slovakia
-TJ,81,Tajikistan
-TM,95,Turkmenistan
+CH,24,Switzerland
 TR,25,Turkey
+SU,26,Former USSR
+GB,27,United Kingdom
+VUL,28,Volcanoes
+REM,29,Remaining Land Areas
+BAS,30,Baltic Sea
+NOS,31,North Sea
+ATL,32,Remaining North-East Atlantic Ocean
+MED,33,Mediterranean Sea
+BLS,34,Black Sea
+NAT,35,Natural marine sources
+RUO,36,Kola/Karelia
+RUP,37,St. Petersburg/Novgorod-Pskov
+RUA,38,Kaliningrad
+BY,39,Belarus
 UA,40,Ukraine
-UZ,94,Uzbekistan
+MD,41,Republic of Moldova
+RUR,42,Rest of Russia
+EE,43,Estonia
+LV,44,Latvia
+LT,45,Lithuania
+CZ,46,Czech Republic
+SK,47,Slovakia
+SI,48,Slovenia
+HR,49,Croatia
+BA,50,Bosnia and Herzegovina
+CS,51,Serbia and Montenegro
+MK,52,The former Yugoslav Republic of Macedonia
+KZ,53,Kazakhstan
+GE,54,Georgia
+CY,55,Cyprus
+AM,56,Armenia
+MT,57,Malta
+ASI,58,Other Asian Areas
+LI,59,Liechtenstein
+DE,60,Germany
+RU,61,Russian Federation in the former official EMEP domain
+MC,62,Monaco
+NOA,63,North Africa
+EU,64,European Community
+US,65,USA
+CA,66,Canada
+NA,67,Not defined
+KG,68,Kyrgyzstan
+AZ,69,Azerbaijan
+ATX,70,Atlantic outside EMEP
+RUX,71,Russian Fed. Outside EMEP
+RS,72,Serbia
+ME,73,Montenegro
+RFE,74,Rest of extended Russian Federation (in the extended EMEP domain)
+KZE,75,Rest of Kazakhstan (in the extended EMEP domain)
+UZ,76,Uzbekistan (in the original EMEP domain)
+TM,77,Turkmenistan (in the original EMEP domain)
+UZE,78,Rest of  Uzbekistan (in the extended EMEP domain)
+TME,79,Rest of Turkmenistan (in the extended EMEP domain) 
+CAS,80,Caspian Sea
+TJ,81,Tajikistan
+ARL,82,Aral Lake (in the original EMEP domain)
+ARE,83,Rest of Aral Lake (in the extended EMEP domain)
+ASM,84,Modified remaining Asian areas (in the original EMEP domain)
+ASE,85,Remaining extended Asian areas (in the extended EMEP domain)
+AOE,86,Arctic Ocean (in the extended EMEP domain)
+RFX,87,Extended EMEP-external part of Russian Federation
+ASX,88,Extended EMEP-external part of Asia
+PAX,89,Extended EMEP-external part of Pacific Ocean
+AOX,90,Extended EMEP-external part of Arctic Ocean
+NAX,91,EMEP-external part of North Africa
+KZT,92,Kazakhstan (all)
+RUE,93,Russian Federation in the extended EMEP domain (RU+RFE+RUX)
+UZT,94,Uzbekistan
+TMT,95,Turkmenistan
+AST,96,Asian areas in the extended EMEP domain (ASM+ASE+ARO+ARE+CAS)
+SEA,171,Ships by coast
+GL,601,Greenland
