@@ -383,14 +383,14 @@ splitEUannual <- function(species, time_dim = c("year","month"), eu_tp_scheme, l
     ## Option to change this to use EDGAR
 	     # we could use the EDGAR generated regional profiles. 
     	
-	if(eu_tp_scheme == "pre_TEMREG"){
+	if(eu_tp_scheme %in% c("EMEP4UKv4.45", "EMEP4UKv5.0")){
 	
-	# IF the eu_tp_scheme = "pre_TEMREG", use the previous EMEP defaults
+	# If the tp_scheme = version of EMEP4UK (e.g. 'EMEP4UKv4.45'); use EMEP defaults of that version
 	# read in timing file for legacy temporal splits (subset to Eire or UK - SEA needs to match parent country)
 	if(species == "nmvoc"){
-	    dt_timing <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/model_inputs/EMEP4UK/pre_TEMREG/MonthlyFacs.voc"))
+	    dt_timing <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/model_inputs/EMEP4UK/",tp_scheme,"/MonthlyFacs.voc"))
 	}else{
-	    dt_timing <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/model_inputs/EMEP4UK/pre_TEMREG/MonthlyFacs.",species))
+	    dt_timing <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/model_inputs/EMEP4UK/",tp_scheme,"/MonthlyFacs.",species))
 	}
 	   
     names(dt_timing) <- c("ISO","SNAP",month.abb[1:12])
