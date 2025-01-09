@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH -p high-mem
 #SBATCH --job-name=run_emep_array
+#SBATCH --array=1-7
 #SBATCH -o slurm/emep_arr_%a.out
 #SBATCH -e slurm/emep_arr_%a.err
 #SBATCH --mem=120G

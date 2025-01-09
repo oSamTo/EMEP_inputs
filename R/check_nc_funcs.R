@@ -10,13 +10,13 @@ evaluateNC <- function(species, v_years, naei_inv, map_yr_uk, map_yr_ie, emep_in
 					   plot_EIRE = FALSE, summarise_EU = FALSE, plot_EU = FALSE){
 
   if(summarise_UK == TRUE)   evaluateUKnc(species, v_years, naei_inv, map_yr_uk, tp_scheme, dt_sec)
-  if(plot_UK == TRUE)        plotUKnc(species, naei_inv, map_yr_uk)
+  if(plot_UK == TRUE)        plotUKnc(species, naei_inv, map_yr_uk, tp_scheme)
   
   #if(summarise_EIRE == TRUE) evaluateEIREnc(species, v_years, naei_inv, map_yr_uk, tp_scheme, dt_sec)
-  if(plot_EIRE == TRUE)      plotEIREnc(species, emep_inv)
+  if(plot_EIRE == TRUE)      plotEIREnc(species, emep_inv, tp_scheme)
   
   if(summarise_EU == TRUE)   evaluateEUnc(species, v_years, emep_inv, tp_scheme, dt_sec)
-  if(plot_EU == TRUE)        plotEUnc(species, emep_inv)
+  if(plot_EU == TRUE)        plotEUnc(species, emep_inv, tp_scheme)
   
   print("Processing Complete.")
   
@@ -27,6 +27,9 @@ evaluateNC <- function(species, v_years, naei_inv, map_yr_uk, map_yr_ie, emep_in
 #### a vector of species can be put into lapply while the vector of years is looped over
 
 evaluateUKnc <- function(species, v_years, naei_inv, map_yr_uk, tp_scheme, dt_sec){
+   
+  folname <- paste0("outputs/EMEP4UK/inv",naei_inv,"/plots/UK/",tp_scheme)
+  suppressWarnings(dir.create(folname, recursive = T))
   
   print(paste0(Sys.time(),": Summarising ",species," data in the UK..."))
 
@@ -72,14 +75,17 @@ evaluateUKnc <- function(species, v_years, naei_inv, map_yr_uk, tp_scheme, dt_se
    
    #return(dt_all)
    
-   fwrite(dt_all, paste0("outputs/EMEP4UK/inv2023/plots/UK/",species,"_UKEIRE_nc_data.csv"))
+   fwrite(dt_all, paste0(folname, "/",species,"_UKEIRE_nc_data.csv"))
    
 }
 
 #####################################################################################################
 #### function to plot the UK summary data
 
-plotUKnc <- function(species, naei_inv, map_yr_uk){
+plotUKnc <- function(species, naei_inv, map_yr_uk, tp_scheme){
+
+  folname <- paste0("outputs/EMEP4UK/inv",naei_inv,"/plots/UK/",tp_scheme)
+  suppressWarnings(dir.create(folname, recursive = T))
 
   print(paste0(Sys.time(),": Plotting ",species," data in the UK..."))
 
@@ -90,7 +96,7 @@ plotUKnc <- function(species, naei_inv, map_yr_uk){
   ###########################
   
   # format the NC summary data
-  dt <- fread(paste0("outputs/EMEP4UK/inv2023/plots/UK/",species,"_UKEIRE_nc_data.csv"))
+  dt <- fread(paste0(folname,"/",species,"_UKEIRE_nc_data.csv"))
   dt <- dt[Area=="UK"]
   dt <- dt[Pollutant == species]
   dt <- dt_lu[dt, on = "GNFR"]
@@ -105,7 +111,7 @@ plotUKnc <- function(species, naei_inv, map_yr_uk){
   
   # bring in the data that is outwith the UK area (SEA and also to domain edge, lost to masking)
   v_years <- dt[,unique(Year)]
-  v_nc_info <- paste0("outputs/EMEP4UK/inv",naei_inv,"/emis",v_years,"/UKEIRE/TPgenYr_AGGNA/",species,"_UKEIRE_",v_years,"emis_",map_yr_uk,"map_",naei_inv,"inv_SUMMARY.csv")
+  v_nc_info <- paste0("outputs/EMEP4UK/inv",naei_inv,"/emis",v_years,"/UKEIRE/TP",tp_scheme,"_AGGNA/",species,"_UKEIRE_",v_years,"emis_",map_yr_uk,"map_",naei_inv,"inv_SUMMARY.csv")
   l_nc_info <- lapply(v_nc_info, fread)
   dt_nc_info <- rbindlist(l_nc_info, use.names=T)
   setnames(dt_nc_info, "Region", "Area")
@@ -354,7 +360,7 @@ plotUKnc <- function(species, naei_inv, map_yr_uk){
      subtitle = 'UK = terrestrial emissions ; SEA = UK + 10km sea buffer ; ALL = all emissions, including those excluded to outer domain') & theme(plot.title = element_text(size = 24),
                         plot.subtitle = element_text(size = 18))
   
-  ggsave(paste0("outputs/EMEP4UK/inv",naei_inv,"/plots/UK/",species, "_UK_NAEI_totals_vs_nc_SNAP.png"), p1, width = 16, height = 19)
+  ggsave(paste0(folname,"/",species, "_UK_NAEI_totals_vs_nc_SNAP.png"), p1, width = 16, height = 19)
   #ggsave(paste0("outputs/EMEP4UK/inv",naei_inv,"/plots/",species, "_UK_NAEI_totals_vs_nc_SNAP.png"), gSNAP, width = 13, height = 10)
   
   
@@ -386,7 +392,10 @@ plotUKnc <- function(species, naei_inv, map_yr_uk){
 #### the EIRE data should already be summarised via the UK function - just read data
 
 
-plotEIREnc <- function(species, emep_inv){
+plotEIREnc <- function(species, emep_inv, tp_scheme){
+
+  folname <- paste0("outputs/EMEP4UK/inv",emep_inv,"/plots/EIRE/", tp_scheme)
+  suppressWarnings(dir.create(folname, recursive = T))
 
   print(paste0(Sys.time(),": Plotting ",species," data in EIRE..."))
 
@@ -551,7 +560,7 @@ plotEIREnc <- function(species, emep_inv){
      subtitle = 'UK = terrestrial emissions ; SEA = UK + 10km sea buffer ; ALL = all emissions, including those excluded to outer domain') & theme(plot.title = element_text(size = 24),
                         plot.subtitle = element_text(size = 18))
   
-  ggsave(paste0("outputs/EMEP4UK/inv",emep_inv,"/plots/EIRE/",species, "_EIRE_EMEP_totals_vs_nc_GNFR.png"), p1, width = 16, height = 19)
+  ggsave(paste0(folname,"/",species, "_EIRE_EMEP_totals_vs_nc_GNFR.png"), p1, width = 16, height = 19)
   #ggsave(paste0("outputs/EMEP4UK/inv",naei_inv,"/plots/",species, "_UK_NAEI_totals_vs_nc_SNAP.png"), gSNAP, width = 13, height = 10)
   
   
@@ -585,8 +594,13 @@ plotEIREnc <- function(species, emep_inv){
 #### this is done with the EMEP ISO map, as the input files are summed to one EU area 
 
 evaluateEUnc <- function(species, v_years, emep_inv, tp_scheme, dt_sec){
-
-  print(paste0(Sys.time(),": Summarising ",species," data in the UK..."))
+  
+  if(tp_scheme %in% c("genYr","ukem_genYr")) next
+  
+  folname <- paste0("outputs/EMEP4UK/inv",emep_inv,"/plots/EU/",tp_scheme)
+  suppressWarnings(dir.create(folname, recursive = T))
+  
+  print(paste0(Sys.time(),": Summarising ",species," data in the EU..."))
   
   ## as the emissions are in one EU variable, use an EMEP domain raster to summarise inputs. 
   r_EU <- rast("data/spatial/iso_map.tif")
@@ -643,15 +657,20 @@ evaluateEUnc <- function(species, v_years, emep_inv, tp_scheme, dt_sec){
    
    #return(dt_all)
    
-   fwrite(dt_all, paste0("outputs/EMEP4UK/inv2023/plots/EU/",species,"_EU_nc_data.csv"))
+   fwrite(dt_all, paste0("outputs/EMEP4UK/inv",emep_inv,"/plots/EU/",tp_scheme,"/",species,"_EU_nc_data.csv"))
    
 }
 
 #####################################################################################################
 #### function to plot the EU summary data
 
-plotEUnc <- function(species, emep_inv){
-
+plotEUnc <- function(species, emep_inv, tp_scheme){
+  
+  if(tp_scheme %in% c("genYr","ukem_genYr")) next
+  
+  folname <- paste0("outputs/EMEP4UK/inv",emep_inv,"/plots/EU/",tp_scheme)
+  suppressWarnings(dir.create(folname, recursive = T))
+  
   print(paste0(Sys.time(),": Plotting ",species," data in the EU..."))
 
   # format the NC summary data
@@ -685,6 +704,6 @@ plotEUnc <- function(species, emep_inv){
     facet_grid(EMEP_iso~GNFR, scales = "free_y")+
     geom_vline(xintercept = 1990, linetype = "dashed")
 
-  ggsave(paste0("outputs/EMEP4UK/inv2023/plots/EU/",species,"_EU_totals_vs_nc_GNFR.png"), g_iso, width = 16, height = 45)
+  ggsave(paste0(folname,"/",species,"_EU_totals_vs_nc_GNFR.png"), g_iso, width = 16, height = 45)
     
 }

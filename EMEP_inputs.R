@@ -13,18 +13,18 @@ source("R/workspace.R")
 #species <- "sox"
 
 i_a <- as.numeric(commandArgs(trailingOnly = TRUE)[1]) # array number
-
-v_years <- c(2021) # what emissions years to process
+# i_a <- 1
+v_years <- c(2021:2022) # what emissions years to process
 v_pollutants <- c("nox","nh3","sox","pm25","pmco","co","nmvoc") # "nox","nh3","sox","pm25","pmco","co","nmvoc", "cd", "cu", "ni", "pb", "zn" - CEH names, not EMEP model
 species <- v_pollutants[i_a]
 
-time_dim <- "month"
-tp_scheme <- "EMEP4UKv5.0" # EMEP4UKv4.45 / EMEP4UKv5.0, genYr, 2017:2021
+time_dim <- "month" # annual, month, yday
+tp_scheme <- "test" # EMEP4UKv4.45 / EMEP4UKv5.0, genYr, 2017:2021, ukem_genYr, ukem_2017:2023 
 eu_tp_scheme <- "EMEP4UKv5.0" # EMEP4UKv4.45 / EMEP4UKv5.0 / EDGAR (no EDGAR at the mo)
 
 # UK & Eire emission years
-naei_inv = 2023
-map_yr_uk = 2021
+naei_inv = 2024
+map_yr_uk = 2022
 map_yr_ie = 2019
 
 # EMEP EU emission years
@@ -41,6 +41,7 @@ output_dir <- paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4
 dt_alt_emis <- data.table(poll = c("nh3"), 
                           loc = c("/gws/nopw/j04/ceh_generic/inventory_processor/data"))
 
+# alt_emis = dt_alt_emis
 
 #### PROCESSING ####
 # map_yr_uk = what year is the NAEI spatial distribution for the data: 2018/2019/2020
@@ -52,5 +53,5 @@ EMEPinputUK(v_years, species, uk_agg_schema = uk_agg_schema, time_dim = time_dim
             naei_inv = naei_inv, map_yr_uk = map_yr_uk, map_yr_ie = map_yr_ie, output_dir)
 
 # EU ##
-EMEPinputEU(v_years, species, eu_agg_schema = eu_agg_schema, time_dim = time_dim,
-            eu_tp_scheme, emep_inv = emep_inv, output_dir)
+#EMEPinputEU(v_years, species, eu_agg_schema = eu_agg_schema, time_dim = time_dim,
+#            eu_tp_scheme, emep_inv = emep_inv, output_dir)

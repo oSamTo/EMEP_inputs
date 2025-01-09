@@ -12,6 +12,8 @@ source("R/EU_functions.R")
 #### SETTING UP WORKSPACE FOR MAKING EMPE MODEL INPUTS ####
 ###########################################################
 
+run_clock <<- format(now(), "%Y_%m_%d_%H%M%S") # this is for archiving, time of run
+
 # new extended domain to include both UK & Eire
 r_dom_1km <<- rast(xmin = -230000, xmax = 750000, ymin = -50000, ymax = 1300000, 
                   res = 1000, crs = "epsg:27700", vals = NA)
@@ -42,5 +44,6 @@ dt_iso <<- fread("data/lookups/EMEP_territories.csv")
 EMEP_fillval <<- 9.96920996838687e+36
 
 # EMEP yday numbers, to represent month central days, as taken from an EMEP input file - fixed (?)
-v_yday <<- c(14,45,73,104,134,165,195,226,257,287,318,348)
+v_mday <<- c(14,45,73,104,134,165,195,226,257,287,318,348)
+v_yday <<- 1:365
 
