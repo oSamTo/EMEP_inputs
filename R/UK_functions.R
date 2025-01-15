@@ -63,13 +63,14 @@ vectorPolls <- function(dt_PID, class = c("ceh","emep","mapeire","naei")){
 
 ######################################################################################################
 #### function to take NAEI emissions, make ready to EMEP format and create netCDFs for UK & Eire
-EMEPinputUK <- function(v_years, species, uk_agg_schema, time_dim = c("annual","month","yday"), tp_scheme, 
-                        alt_emis, naei_inv, map_yr_uk, map_yr_ie, output_dir){
-  
+EMEP_input_UK <- function(y, species, time_dim = c("annual","month","yday"), 
+			              naei_inv, map_yr_uk, map_yr_ie, folname, tp_scheme,
+                          uk_agg_schema, dt_alt_emis){
+    
   time_dim <- match.arg(time_dim)
   
   # v_years  = vector, *numeric*, year to process.
-  if(!is.numeric(v_years)) stop ("Year vector is not numeric")
+  if(!is.numeric(y)) stop ("Year vector is not numeric")
   
   # naei_inv  = *numeric*, year of inventory release data.
   if(!is.numeric(naei_inv)) stop ("Inventory release year is not numeric")
@@ -86,7 +87,7 @@ EMEPinputUK <- function(v_years, species, uk_agg_schema, time_dim = c("annual","
   #   v) split into monthly emissions, if needed
   #  vi) create netCDF
     	
-	res_crs <- "0.01_LL"
+  res_crs <- "0.01_LL"
  
   ## loop through years and pollutants listed and make a netCDF input file for each.
   ## years before 1970 (1980 for NH3) will always use the SPEED time series - /gws/nopw/j04/ceh_generic/samtom/SPEED
@@ -94,23 +95,20 @@ EMEPinputUK <- function(v_years, species, uk_agg_schema, time_dim = c("annual","
   
   ## Data to be made with a monthly time attribute
       # for the month, incorporate the new DUKEMs temporal data 
-  
-  for(y in v_years){  
-      
+        
       ######################################################################################
-      if(!(species %in% c("ch4","co2","n2o","bap","bz","hcl","nox","sox","nh3", "co", "nmvoc","cd","cu","pb","hg","ni","zn", "pm0_1","pm1","pm25","pm10","pmco")) ) stop ("Species must be in: 
+      if(!(species %in% c("ch4","co2","n2o","bap","bz","hcl","nox","sox","nh3", "co", "voc","cd","cu","pb","hg","ni","zn", "pm0_1","pm1","pm25","pm10","pmco")) ) stop ("Species must be in: 
                                             AP:    bap, bz, co, hcl, nh3, nox, sox, voc
                                             PM:    pm0_1, pm1, pm2_5, pm10, pmco
                                             GHG:   ch4, co2, n2o
                                             Metal: cd, cu, hg, ni, pb, zn")
       ######################################################################################
       
-      print(paste0(Sys.time(),": Creating EMEP4UK UK/EIRE input netCDF for ",dt_poll[ceh_poll == species, emep_model]," in ",y,"..."))
-           
+      print(paste0(Sys.time(),": Creating EMEP4UK UK/EIRE input (",time_dim,") netCDF for ",dt_poll[ceh_poll == species, emep_model]," in ",y,"..."))           
 	  
 	  # set emissions location. 
 	  # use the default emissions location for all processed emissions from inventory, if not set in the alternative table
-	  # THIS ISN'T REALLY IN USE AT THE MOMENT
+	  # THIS ISN'T REALLY IN USE AT THE MOMENT, but the basis is as follow;
 	  if(species %in% dt_alt_emis[,poll]){
 	  
 	    emis_loc <- dt_alt_emis[poll == species, loc]
@@ -123,6 +121,8 @@ EMEPinputUK <- function(v_years, species, uk_agg_schema, time_dim = c("annual","
 	  
 	  }
 	
+	  # create folder, move old netCDF files. 
+	  archive_data(species, folname)	
 	  
 	  # set up blank stacks ready for data of different regions
       l_uk_allSec  <- list()
@@ -138,25 +138,13 @@ EMEPinputUK <- function(v_years, species, uk_agg_schema, time_dim = c("annual","
       # sector names to loop through - this is netcdf sector names (sec01 etc.)
       v_sectors <- dt_sec[,unique(sec)]
       
-      print(paste0(Sys.time(),":      Collecting and creating all emissions input data from ",loc_text," location..."))
+      print(paste0(Sys.time(),":      Collecting all emissions input data from ",loc_text," location..."))
       
       for(i in v_sectors){
         
         if(i == "") next # not interested in currently blank EMEP-named sectors
         
-        print(paste0(Sys.time(),":         ",i))
-        
-        #########################################################
-        #### OBTAIN 12 MONTHS OF DATA FOR EACH NETCDF SECTOR ####
-        
-        ## At this point, we are using GNFR maps for UK and Eire
-            # these have already been generated: 
-                # for the UK, they are derived from SNAP maps. 
-                # for EIRE, they are GNFR maps from the MapEire project. 
-        ## There is one GNFR per EMEP sector name
-        
-        #sc <- dt_sec[name == i, EMEP_sec]
-        #sc_pad <- str_pad(sc, 2, "0", side = "left")
+       # print(paste0(Sys.time(),":         ",i))
         
         ####################################
         #### LISTS OF EMISSION SURFACES ####
@@ -168,10 +156,11 @@ EMEPinputUK <- function(v_years, species, uk_agg_schema, time_dim = c("annual","
         
         ########################
         #### TEMPORAL SPLIT ####
-        # if the time_dim is year, the data stays as 1 annual total.
-        # if the time_dim is month, the data needs to be split into 12 layers
-            # this is either the temporal profiles from inside EMEP4UK
-            # or the newly generated stuff that has come out of DUKEMs
+        # if the time_dim is 'annual', the data stays as 1 annual total.
+        # if the time_dim is 'month',  the data needs to be split into 12 layers.
+		# if the time_dim is 'yday',   the data needs to be split into 365 layers.
+            # this is either the temporal profiles from inside EMEP4UKv4.45 / v5.0
+            # or newly generated data (e.g. ukem_pro)
         # the sea & outwith layers need to be split based on the country it came from (i.e. UK or Eire)
         
         l_uk_prof   <- splitUKIEannual(species = species, time_dim, tp_scheme, l_annual = l_uk, i = i, country = "uk")
@@ -179,16 +168,16 @@ EMEPinputUK <- function(v_years, species, uk_agg_schema, time_dim = c("annual","
         
         ###########################
 		#### AREA BASED STACKS ####
-		# create stacks for UK, Eire, SEA buffer and outwith UK domain (annual or monthly), separate & total
+		# create stacks for UK, Eire, SEA buffer and outwith UK domain (annual or monthly); separate & total
         
-		l_s_uk  <- stack_data(l_uk_prof, l_ie_prof, mask = "uk")
-		l_s_ie  <- stack_data(l_uk_prof, l_ie_prof, mask = "ie")
-		l_s_sea <- stack_data(l_uk_prof, l_ie_prof, mask = "sea")
-		l_s_ow  <- stack_data(l_uk_prof, l_ie_prof, mask = "ow")
+		l_s_uk  <- stack_data(l_uk_prof, l_ie_prof, i, mask = "uk")
+		l_s_ie  <- stack_data(l_uk_prof, l_ie_prof, i, mask = "ie")
+		l_s_sea <- stack_data(l_uk_prof, l_ie_prof, i, mask = "sea")
+		l_s_ow  <- stack_data(l_uk_prof, l_ie_prof, i, mask = "ow")
 				        	
         ###################
         #### COLLATING ####
-        # add temporal raster stacks to lists that will go into NetCDF (so just certain ones)
+        # add temporal raster stacks to lists that will go into NetCDF
         
         l_uk_allSec[[paste0("uk_", dt_poll[ceh_poll == species, emep_model], "_", i,"_",time_dim)]]   <- l_s_uk
         l_ie_allSec[[paste0("ie_", dt_poll[ceh_poll == species, emep_model], "_", i,"_",time_dim)]]   <- l_s_ie
@@ -197,10 +186,10 @@ EMEPinputUK <- function(v_years, species, uk_agg_schema, time_dim = c("annual","
         
         ####################
         #### STATISTICS ####        
-		# annual inventory summary for UK & IE
+		# inventory summary for UK & IE
 		dt_inv_summary <- rbindlist(list(l_uk$ann_summary, l_ie$ann_summary), use.names = T)
 		
-		# make annual summaries for all masked areas
+		# make summaries for all masked areas
 		l_maskgroup_summary <- summarise_UKIE_emissions(y, naei_inv, species, i, time_dim,
                                                         l_uk_inv = l_uk, l_ie_inv = l_ie, 
 														l_s_uk = l_s_uk, l_s_ie = l_s_ie,
@@ -227,16 +216,14 @@ EMEPinputUK <- function(v_years, species, uk_agg_schema, time_dim = c("annual","
       #### CREATE AND POPULATE NETCDF ON POLLUTANT/YEAR BASIS ####
       
       print(paste0(Sys.time(),":      Creating and populating netcdf..."))
-      
-	  target_folname <- archive_data(y, tp_scheme, uk_agg_schema, output_dir)
-	  
+      	    
       dt_ncinput_summary <- createNETCDFuk(y, naei_inv, species, map_yr_uk, map_yr_ie, 
-	                                       time_dim, folname = target_folname, tp_scheme, uk_agg_schema,
+	                                       time_dim, folname, tp_scheme, uk_agg_schema,
                                            l_uk_allSec, l_ie_allSec, l_sea_allSec)
       	  
 	  ####################################
       #### COLLATE/WRITE SUMMARY DATA ####	  
-	  print(paste0(Sys.time(),": Summarising netCDF files for ",dt_poll[ceh_poll == species, emep_model]," in ",y,"..."))
+	  print(paste0(Sys.time(),":      Summarising netCDF files for ",dt_poll[ceh_poll == species, emep_model]," in ",y,"..."))
 	  
 	  dt_inv_summary  <- rbindlist(l_inv_summary, use.names=T)
 	  dt_mask_summary <- rbindlist(l_mask_summary, use.names=T)
@@ -244,37 +231,15 @@ EMEPinputUK <- function(v_years, species, uk_agg_schema, time_dim = c("annual","
 	  # dt_ncinput_summary # as above
 	  
 	  # another nc summary from file, post writing. Double checker. 
-	  dt_ncoutput_summary <- summarise_nc_file(species, y, folname = target_folname, 
-	                                           map_yr_uk, naei_inv, time_dim)	  	    
-	  
-	  write_summaries(naei_inv, species, map_yr_uk, folname = target_folname,
+	  dt_ncoutput_summary <- summarise_nc_file(species, y, folname, 
+	                                           map_yr_uk, naei_inv, time_dim)
+	  	  
+	  write_summaries(y, naei_inv, species, map_yr_uk, folname,
 					  dt_inv = dt_inv_summary, dt_mask = dt_mask_summary, dt_group = dt_group_summary,
 					  dt_ncinp = dt_ncinput_summary, dt_ncout = dt_ncoutput_summary)
-  
-	  ###################
-      #### PLOT DATA ####	  
-	  # make some year-specific plots
-	  print(paste0(Sys.time(),": Plotting emissions data for ",dt_poll[ceh_poll == species, emep_model]," in ",y,"..."))
-	  
-	  #   plotYearUK(species, output_dir, y, tp_scheme, uk_agg_schema, naei_inv, map_yr_uk)
-	  
-	  
-	  
-	  ##################
-      #### QAQC DOC ####	  
-	  
-
-
-	  ###########################
-	  #### METADATA - DELETE ####
-	  
-	  # write some metadata - ON HOLD - this can go in QAQC
-	  #print(paste0(Sys.time(),": Writing metadata for ",species," in ",y,"..."))
-      #writeMetadataUK(y, species, naei_inv, map_yr_uk, map_yr_ie, output_dir, time_dim, tp_scheme, uk_agg_schema, alt_emis)
-		
+  		
 	  print(paste0(Sys.time(),": DONE..."))
 	
-  } # year loop
   
 } # end of function
         
@@ -316,18 +281,22 @@ UKIEsectorEmissions <- function(emis_loc, species, y, i, time_dim, res_crs, map_
   if(country == "uk"){
     
 	# diffuse filename (current year)
-	f_diff <- paste0(emis_loc,"/NAEI/inv",naei_inv,"/maps/NAEI_",species,"_DIFFUSE_inv",naei_inv,"_emis_",naei_inv-2,"/GNFR/NAEI_",
-	                 species,"_DIFFUSE_inv",naei_inv,"_emis_",naei_inv-2,"_GNFR_",dt_sec[sec == i, GNFRlong],"_t_LL.tif")
+	f_diff <- paste0(emis_loc,"/NAEI/inv",naei_inv,"/maps/NAEI_",dt_poll[ceh_poll == species, invProc],
+					 "_DIFFUSE_inv",naei_inv,"_emis_",naei_inv-2,"/GNFR/NAEI_", 
+					 dt_poll[ceh_poll == species, invProc],"_DIFFUSE_inv",naei_inv,"_emis_",naei_inv-2,
+					 "_GNFR_",dt_sec[sec == i, GNFRlong],"_t_LL.tif")
   
     # set the points filename - the NAEI data from 1990 to current year
-    f_pt <- c(paste0(emis_loc,"/NAEI/inv",naei_inv,"/points/NAEI_AllPoll_POINTS_inv",naei_inv,"_emis_1990_",naei_inv-2,"_GNFR_t_LL.csv"),
-	          paste0(emis_loc,"/../../samtom/SPEED/power_station_emissions_ALL_1950-2000_GNFR_t_LL.csv"))
+    f_pt <- c(paste0(emis_loc,"/NAEI/inv",naei_inv,"/points/NAEI_AllPoll_POINTS_inv",naei_inv,
+	          "_emis_1990_",naei_inv-2,"_GNFR_t_LL.csv"),
+			  paste0(emis_loc,"/../../samtom/SPEED/power_station_emissions_ALL_1950-2000_GNFR_t_LL.csv"))
       
   }else{
   
     # diffuse filename - Eire inventory is currently set to 2021 with 2019 maps
-	f_diff <- paste0(emis_loc,"/MapEire/inv2021/maps/tif/MapEire_",species,"_DIFFUSE_inv2021_emis_2019/GNFR/MapEire_",
-	                 species,"_DIFFUSE_inv2021_emis_2019_GNFR_",dt_sec[sec == i, GNFRlong],"_t_LL.tif")
+	f_diff <- paste0(emis_loc,"/MapEire/inv2021/maps/tif/MapEire_",dt_poll[ceh_poll == species, invProc],
+	                 "_DIFFUSE_inv2021_emis_2019/GNFR/MapEire_", dt_poll[ceh_poll == species, invProc],
+					 "_DIFFUSE_inv2021_emis_2019_GNFR_",dt_sec[sec == i, GNFRlong],"_t_LL.tif")
   
     # set the points filename
     f_pt <- "no_file"
@@ -361,7 +330,7 @@ UKIEsectorEmissions <- function(emis_loc, species, y, i, time_dim, res_crs, map_
 		
 	dt_pts <- rbindlist(l_pts, use.names = T)
 	
-    dt_pts <- dt_pts[GNFR == dt_sec[sec == i, GNFRlong] & AREA == toupper(country) & Pollutant == species]
+    dt_pts <- dt_pts[GNFR == dt_sec[sec == i, GNFRlong] & AREA == toupper(country) & Pollutant == dt_poll[ceh_poll == species, invProc]]
 	
 	if(i == "sec01"){
 	  
@@ -438,13 +407,13 @@ UKIEsectorEmissions <- function(emis_loc, species, y, i, time_dim, res_crs, map_
 			# set secs 14 to 19 as NA, as they are not used yet, and causes double counting in summary
 				
 	if(i == "sec02"){
-	  scaling_value <- dt_alpha[Pollutant == species & Year == y & AREA == toupper(country) & SNAP %in% c(3:4), sum(tot_emis_t, na.rm=T)]
+	  scaling_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] & Year == y & AREA == toupper(country) & SNAP %in% c(3:4), sum(tot_emis_t, na.rm=T)]
 	}else if(i %in% c("sec07","sec08","sec12")){
 	  scaling_value <- NA
 	}else if(i %in% c("sec14","sec15","sec16","sec17","sec18","sec19")){
 	  scaling_value <- NA
 	}else{
-	  scaling_value <- dt_alpha[Pollutant == species & Year == y & AREA == toupper(country) & SNAP == dt_sec[sec == i, SNAP], tot_emis_t]
+	  scaling_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] & Year == y & AREA == toupper(country) & SNAP == dt_sec[sec == i, SNAP], tot_emis_t]
 	}
 	
 	if(length(scaling_value) == 0) scaling_value <- 0
@@ -469,12 +438,12 @@ UKIEsectorEmissions <- function(emis_loc, species, y, i, time_dim, res_crs, map_
 	 f_alpha <- paste0(emis_loc,"/EMEP/inv",naei_inv,"/alpha/EMEP_AllPoll_TOTALS_inv",naei_inv,"_emis_1970-",naei_inv-2,"_GNFR_alpha.csv")
      dt_alpha <- fread(f_alpha)
 	 
-	 scaling_value <- dt_alpha[Pollutant == species & Year == y  & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong], tot_emis_t]
+	 scaling_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] & Year == y  & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong], tot_emis_t]
    
    }else{
      
 	 # if before 1990, find the 1990 EMEP value and scale by EMEP scalar, apply to 2019 map
-     dt_ceds_alpha <- fread(paste0(emis_loc,"/../../samtom/SPEED/CEDS_for_EMEP/",species,"_CEDS_1950_1990_ISO_GNFR_kt.csv"))
+     dt_ceds_alpha <- fread(paste0(emis_loc,"/../../samtom/SPEED/CEDS_for_EMEP/",dt_poll[ceh_poll == species, SPEED],"_CEDS_1950_1990_ISO_GNFR_kt.csv"))
 	 dt_emep_alpha <- fread(paste0(emis_loc,"/EMEP/inv",naei_inv,"/alpha/EMEP_AllPoll_TOTALS_inv",naei_inv,"_emis_1970-",naei_inv-2,"_GNFR_alpha.csv"))
 	 
 	 if(i == "sec08"){	 
@@ -483,7 +452,7 @@ UKIEsectorEmissions <- function(emis_loc, species, y, i, time_dim, res_crs, map_
        emep_alpha <- dt_ceds_alpha[Year == y & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong], alpha]
 	 }
 	 
-	   emep90_t  <- dt_emep_alpha[Pollutant == species & Year == 1990 & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong], tot_emis_t]
+	   emep90_t  <- dt_emep_alpha[Pollutant == dt_poll[ceh_poll == species, SPEED] & Year == 1990 & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong], tot_emis_t]
 	   scaling_value <- (emep_alpha * emep90_t)	 
 	 
    }
@@ -527,8 +496,9 @@ UKIEsectorEmissions <- function(emis_loc, species, y, i, time_dim, res_crs, map_
   ### RETURN DATA ###
   
   # also make a scaling/inventory data table - no summary of masked etc. only inventory
-  dt_inv <- data.table(Area = country, 
-					   Pollutant = ifelse(species=="nmvoc","voc",species), 
+  dt_inv <- data.table(Area = country,
+                       mask = "all",  
+					   Pollutant = species, 
 					   data_source = "inventory",
 					   emis_y = y, 
 					   inv_y = naei_inv, 
@@ -561,13 +531,21 @@ splitUKIEannual <- function(species, time_dim = c("annual","month","yday"), tp_s
   if(time_dim == "annual"){ i_time <- 1 }else if(time_dim == "month"){ i_time <- 1:12 }else{ i_time <- 1:365 }
   
   if(time_dim == "annual"){
-    
-    l_s <- c(l_annual[["terrestrial"]], l_annual[["sea"]])
-    names(l_s) <- c("terrestrial","sea")
-    
-	names(l_s[["terrestrial"]]) <- paste0(dt_poll[ceh_poll == species, emep_model], "_", country,"_","terrestrial", "_", i,"_",str_pad(i_time, 2, "0", side = "left"))
+         
+	l_s <- l_annual[c("terrestrial","sea","outwith_10km")]
+	    
+	# error if any negative values remain
+	if(any(global(l_s[["terrestrial"]], min, na.rm=T) < 0)) stop("there are negative emissions values (land)")
+	if(any(global(l_s[["sea"]], min, na.rm=T) < 0)) stop("there are negative emissions values (sea)")
+	if(any(global(l_s[["outwith_10km"]], min, na.rm=T) < 0)) stop("there are negative emissions values (outwith_10km)")
+	
+	names(l_s)[3] <- "outwith"
+	
+    names(l_s[["terrestrial"]]) <- paste0(dt_poll[ceh_poll == species, emep_model], "_", country,"_","terrestrial", "_", i,"_",str_pad(i_time, 2, "0", side = "left"))
     names(l_s[["sea"]]) <- paste0(dt_poll[ceh_poll == species, emep_model], "_", country,"_","sea", "_", i,"_",str_pad(i_time, 2, "0", side = "left"))
-        
+    names(l_s[["outwith"]]) <- paste0(dt_poll[ceh_poll == species, emep_model], "_", country,"_","outwith", "_", i,"_",str_pad(i_time, 2, "0", side = "left"))
+		
+		
   }else if(time_dim == "month"){
     
     ## Use the nominated temporal schema to split the data to monthly layers
@@ -589,12 +567,8 @@ splitUKIEannual <- function(species, time_dim = c("annual","month","yday"), tp_s
       snap_id <- dt_sec[sec == i, as.numeric(SNAP)] # set the SNAP to read from the temporal file. 
     
       # read in temporal file for legacy temporal splits (subset to Eire or UK - SEA needs to match parent country)
-      if(species == "nmvoc"){
-	    dt_tempro <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/model_inputs/EMEP4UK/",tp_scheme,"/MonthlyFacs.voc"))
-	  }else{
-	    dt_tempro <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/model_inputs/EMEP4UK/",tp_scheme,"/MonthlyFacs.",species))
-	  }
-	  	  
+      dt_tempro <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/model_inputs/EMEP4UK/",tp_scheme,"/MonthlyFacs.",dt_poll[ceh_poll == species, emep_model]))
+	  	  	  
 	  names(dt_tempro) <- c("ISO","SNAP",month.abb[1:12])
       dt_tempro_m <- melt(dt_tempro, id.vars = c("ISO","SNAP"), variable.name = "MON", value.name = "FAC")
     
@@ -610,7 +584,8 @@ splitUKIEannual <- function(species, time_dim = c("annual","month","yday"), tp_s
 	
 		
 	}else if(grepl("ukem_", tp_scheme)){
-	# IF the tp_scheme is generated by ukem_pro, use the SNAP csv output;
+	# IF the tp_scheme is generated by ukem_pro, use the SNAP gam output;
+	# Use yday gams as they take into account joining up the year start/end. Subset by v_mday
 	# HAS to be SNAP output for the UK, as the data correspond to UK NAEI SNAP emissions
 	# EIRE can stay as GNFR timing
 	# GAMs can produce -ve values in profiles which will cause -ve emissions
@@ -628,22 +603,37 @@ splitUKIEannual <- function(species, time_dim = c("annual","month","yday"), tp_s
 	  }else{
 	  
 	    # choose SNAP for UK and GNFR for Eire
+		# use yday GAMs and subset
 		if(country == "uk"){
-		
-		  dt_tempro <- fread(paste0("/gws/nopw/j04/ukem/test/sam/ukem_pro/output/coeff_sector/SNAP/",species,
-		                            "/",strsplit(tp_scheme,"_")[[1]][2], "/SNAP_",dt_sec[sec == i, str_pad(SNAP, 2, "0", side = "left")],
-							        "_month_",species,"_",strsplit(tp_scheme,"_")[[1]][2],".csv"))
-	  
+		  
+		  # gam
+		  m_gam <- readRDS(paste0("/gws/nopw/j04/ukem/test/sam/ukem_pro/output/GAM_sector/SNAP/",
+								  dt_poll[ceh_poll == species, ukem_pro],"/",strsplit(tp_scheme,"_")[[1]][2],"/SNAP_",
+								  dt_sec[sec == i, str_pad(SNAP, 2, "0", side = "left")],
+								  "_yday_",dt_poll[ceh_poll == species, ukem_pro],"_",strsplit(tp_scheme,"_")[[1]][2],".rds"))
+				  		  
+		  # set up blank table, extract gam yday values 
+		  dt_tempro <- data.table(time = v_mday, N = 0)
+		  dt_tempro[, "N" := mgcv::predict.gam(m_gam, newdata = list(time = time)), by = seq_len(nrow(dt_tempro))]
+		  
+          # create vector		  
 	      v_tempro <- dt_tempro[,N] # vector of monthly splits 
 		  v_tempro[v_tempro < 0] <- 0.02 # rare occasion factor goes below 0, set to 0.02 (i.e. some emissions, but tiny)
 	      v_tempro <- v_tempro/mean(v_tempro)# not always adding to 12 in the tempro file, adjust slightly
 		
 		}else{
-          		
-		  dt_tempro <- fread(paste0("/gws/nopw/j04/ukem/test/sam/ukem_pro/output/coeff_sector/GNFR19/",species,
-		                            "/",strsplit(tp_scheme,"_")[[1]][2],"/GNFR19_",dt_sec[sec == i, GNFRlong],
-									"_month_",species,"_",strsplit(tp_scheme,"_")[[1]][2],".csv"))
-	  
+          
+		  # gam
+		  m_gam <- readRDS(paste0("/gws/nopw/j04/ukem/test/sam/ukem_pro/output/GAM_sector/GNFR19/",
+								  dt_poll[ceh_poll == species, ukem_pro],"/",strsplit(tp_scheme,"_")[[1]][2],"/GNFR19_",
+								  dt_sec[sec == i, GNFRlong],"_yday_",dt_poll[ceh_poll == species, ukem_pro],"_",
+								  strsplit(tp_scheme,"_")[[1]][2],".rds"))
+								  
+		  # set up blank table, extract gam yday values 
+		  dt_tempro <- data.table(time = v_mday, N = 0)
+		  dt_tempro[, "N" := mgcv::predict.gam(m_gam, newdata = list(time = time)), by = seq_len(nrow(dt_tempro))]
+		  
+          # create vector	
 	      v_tempro <- dt_tempro[,N] # vector of monthly splits 
 		  v_tempro[v_tempro < 0] <- 0.02 # rare occasion factor goes below 0, set to 0.02 (i.e. some emissions, but tiny)
 	      v_tempro <- v_tempro/mean(v_tempro)# not always adding to 12 in the tempro file, adjust slightly
@@ -678,8 +668,8 @@ splitUKIEannual <- function(species, time_dim = c("annual","month","yday"), tp_s
 	    # choose SNAP for UK and GNFR for Eire
 		if(country == "uk"){
 		
-		  dt_tempro <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/coeff_sector/SNAP/",species,"/",tp_scheme,
-							   "/SNAP_",dt_sec[sec == i, str_pad(SNAP, 2, "0", side = "left")],"_month_",species,"_",tp_scheme,".csv"))
+		  dt_tempro <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/coeff_sector/SNAP/",dt_poll[ceh_poll == species, TEMREG],"/",tp_scheme,
+							   "/SNAP_",dt_sec[sec == i, str_pad(SNAP, 2, "0", side = "left")],"_month_",dt_poll[ceh_poll == species, TEMREG],"_",tp_scheme,".csv"))
 	  
 	      v_tempro <- dt_tempro[,N] # vector of monthly splits 
 		  v_tempro[v_tempro < 0] <- 0.02 # rare occasion factor goes below 0, set to 0.02 (i.e. some emissions, but tiny)
@@ -687,8 +677,8 @@ splitUKIEannual <- function(species, time_dim = c("annual","month","yday"), tp_s
 		
 		}else{
           		
-		  dt_tempro <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/coeff_sector/GNFR/",species,"/",tp_scheme,
-							   "/GNFR_",dt_sec[sec == i, GNFRlong],"_month_",species,"_",tp_scheme,".csv"))
+		  dt_tempro <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/coeff_sector/GNFR/",dt_poll[ceh_poll == species, TEMREG],"/",tp_scheme,
+							   "/GNFR_",dt_sec[sec == i, GNFRlong],"_month_",dt_poll[ceh_poll == species, TEMREG],"_",tp_scheme,".csv"))
 	  
 	      v_tempro <- dt_tempro[,N] # vector of monthly splits 
 		  v_tempro[v_tempro < 0] <- 0.02 # rare occasion factor goes below 0, set to 0.02 (i.e. some emissions, but tiny)
@@ -728,7 +718,7 @@ splitUKIEannual <- function(species, time_dim = c("annual","month","yday"), tp_s
 
 ######################################################################################################
 #### function to create stacks of emissions for different mask areas
-stack_data <- function(l_uk_prof, l_ie_prof, mask = c("uk","ie","sea","ow")){
+stack_data <- function(l_uk_prof, l_ie_prof, i, mask = c("uk","ie","sea","ow")){
 
   s_blank <- l_uk_prof[[1]] %>% setValues(.,0)
 
@@ -740,7 +730,8 @@ stack_data <- function(l_uk_prof, l_ie_prof, mask = c("uk","ie","sea","ow")){
   
     l_prof <- get(paste0("l_",mask,"_prof"))
 	
-	s_all <- tapp(c(l_prof[["terrestrial"]], l_prof[["sea"]], l_prof[["outwith"]]), v_in, sum, na.rm=T)
+	s_all <- suppressWarnings(tapp(c(l_prof[["terrestrial"]], l_prof[["sea"]], l_prof[["outwith"]]), 
+							  v_in, sum, na.rm=T))
 	names(s_all) <- paste0(dt_poll[ceh_poll == species, emep_model],"_",mask,"_all_",i,"_",str_pad(v_in, 2, "0", side = "left"))
 	s_ter <- l_prof[["terrestrial"]]
     s_sea <- l_prof[["sea"]]
@@ -752,7 +743,7 @@ stack_data <- function(l_uk_prof, l_ie_prof, mask = c("uk","ie","sea","ow")){
     names(s_all) <- paste0(dt_poll[ceh_poll == species, emep_model],"_",mask,"_all_",i,"_",str_pad(v_in, 2, "0", side = "left"))	
 	s_ter <- s_blank
     names(s_ter) <- paste0(dt_poll[ceh_poll == species, emep_model],"_",mask,"_terrestrial_",i,"_",str_pad(v_in, 2, "0", side = "left"))	
-    s_sea <- tapp(c(l_uk_prof[["sea"]], l_ie_prof[["sea"]]), v_in, sum, na.rm=T)
+    s_sea <- suppressWarnings(tapp(c(l_uk_prof[["sea"]], l_ie_prof[["sea"]]), v_in, sum, na.rm=T))
     names(s_sea) <- paste0(dt_poll[ceh_poll == species, emep_model],"_",mask,"_sea_",i,"_",str_pad(v_in, 2, "0", side = "left"))	
     s_ow <- s_blank
 	names(s_ow) <- paste0(dt_poll[ceh_poll == species, emep_model],"_",mask,"_outwith_",i,"_",str_pad(v_in, 2, "0", side = "left"))	
@@ -765,7 +756,7 @@ stack_data <- function(l_uk_prof, l_ie_prof, mask = c("uk","ie","sea","ow")){
     names(s_ter) <- paste0(dt_poll[ceh_poll == species, emep_model],"_",mask,"_terrestrial_",i,"_",str_pad(v_in, 2, "0", side = "left"))	
     s_sea <- s_blank
     names(s_sea) <- paste0(dt_poll[ceh_poll == species, emep_model],"_",mask,"_sea_",i,"_",str_pad(v_in, 2, "0", side = "left"))	
-    s_ow <- tapp(c(l_uk_prof[["outwith"]], l_ie_prof[["outwith"]]), v_in, sum, na.rm=T)
+    s_ow <- suppressWarnings(tapp(c(l_uk_prof[["outwith"]], l_ie_prof[["outwith"]]), v_in, sum, na.rm=T))
 	names(s_ow) <- paste0(dt_poll[ceh_poll == species, emep_model],"_",mask,"_outwith_",i,"_",str_pad(v_in, 2, "0", side = "left"))
   
   }
@@ -790,7 +781,7 @@ summarise_UKIE_emissions <- function(y, naei_inv, species, i, time_dim,
   # basic info
   dt_mask <- data.table(Area = c("uk","uk","uk","ie","ie","ie"), 
                    mask = c("terrestrial","sea","outwith","terrestrial","sea","outwith"),
-                   Pollutant = ifelse(species=="nmvoc","voc",species),
+                   Pollutant = species,
 				   data_source = "masked",
 	       	       emis_y = y, 
 				   inv_y = naei_inv, 
@@ -822,7 +813,7 @@ summarise_UKIE_emissions <- function(y, naei_inv, species, i, time_dim,
   ## GROUPED SUMMARIES for IE, UK, SEA, OW
   # basic info
   dt_group <- data.table(Area = c("uk","ie","sea","ow"),                   
-                         Pollutant = ifelse(species=="nmvoc","voc",species),
+                         Pollutant = species,
 				         data_source = "grouped",
 	       	             emis_y = y, 
 				         inv_y = naei_inv, 
@@ -855,38 +846,71 @@ summarise_UKIE_emissions <- function(y, naei_inv, species, i, time_dim,
 
 ######################################################################################################
 #### function to create directory and archive anything that exists in the target directory. 
-archive_data <- function(y, tp_scheme, uk_agg_schema, output_dir){
+archive_data <- function(species, folname){
 
-  print(paste0("Creating new directory and archiving previously run data..."))
-
-  folname <- paste0(output_dir,"/emis",y,"/UKEIRE/TP",tp_scheme,"_AGG",uk_agg_schema)
+  print(paste0(Sys.time(),":      Creating new directory and archiving previously run data..."))
+  
   dir.create(file.path(folname), showWarnings = FALSE, recursive = T)  
   
   # collect all files and folders named 'plots','tables' and 'qaqc' to move to archive folder.
-  v_files <- list.files(folname, full.name = FALSE, recursive = FALSE, include.dirs = FALSE, pattern = ".nc$")
-  v_fols  <- c("plots","tables","qaqc")
+  v_files <- list.files(folname, full.name = FALSE, recursive = FALSE, include.dirs = FALSE, 
+					    pattern = paste0("^",species,".*\\.nc$"))
+  
+  v_plots <- list.files(file.path(folname,"plots"), full.name = FALSE, recursive = FALSE, include.dirs = FALSE, 
+					    pattern = paste0("^",species,".*\\.png$"))
+						
+  v_tables <- list.files(file.path(folname,"tables"), full.name = FALSE, recursive = FALSE, include.dirs = FALSE, 
+					    pattern = paste0("^",species,".*\\.csv$"))
+						
+  v_qaqc <- list.files(file.path(folname,"qaqc"), full.name = FALSE, recursive = FALSE, include.dirs = FALSE, 
+					    pattern = paste0("^",species,".*\\.html$"))
+  
+ 
   
   if(length(v_files) > 0){
   
     archive_folname <- paste0(folname,"/",run_clock)
     dir.create(file.path(archive_folname), showWarnings = FALSE, recursive = TRUE)
 	
-	sapply(v_files, function(x) file.rename(from = file.path(folname, x), to = file.path(folname, run_clock, x)))
+	sapply(v_files, function(x) file.rename(from = file.path(folname, x), to = file.path(archive_folname, x)))
 	  
   }
   
-  if(sum(dir.exists(paste0(folname,"/",v_fols))) > 0){
+  if(length(v_plots) > 0){
   
-    archive_folname <- paste0(folname,"/",run_clock)
+    archive_folname <- paste0(folname,"/",run_clock,"/plots")
     dir.create(file.path(archive_folname), showWarnings = FALSE, recursive = TRUE)
-		
-	sapply(which(dir.exists(paste0(folname,"/",v_fols))), function(x) file.rename(from = file.path(folname, v_fols[x]), to = file.path(folname, run_clock, v_fols[x])))
+	
+	sapply(v_plots, function(x) file.rename(from = file.path(folname, x), to = file.path(archive_folname, x)))
 	  
   }
   
+  if(length(v_tables) > 0){
   
-  return(folname)
+    archive_folname <- paste0(folname,"/",run_clock,"/tables")
+    dir.create(file.path(archive_folname), showWarnings = FALSE, recursive = TRUE)
+	
+	sapply(v_tables, function(x) file.rename(from = file.path(folname, x), to = file.path(archive_folname, x)))
+	  
+  }
   
+  if(length(v_qaqc) > 0){
+  
+    archive_folname <- paste0(folname,"/",run_clock,"/qaqc")
+    dir.create(file.path(archive_folname), showWarnings = FALSE, recursive = TRUE)
+	
+	sapply(v_qaqc, function(x) file.rename(from = file.path(folname, x), to = file.path(archive_folname, x)))
+	  
+  }
+ # if(sum(dir.exists(paste0(folname,"/",v_fols))) > 0){
+ # 
+ #   archive_folname <- paste0(folname,"/",run_clock)
+ #   dir.create(file.path(archive_folname), showWarnings = FALSE, recursive = TRUE)
+ #	
+ #	sapply(which(dir.exists(paste0(folname,"/",v_fols))), function(x) file.rename(from = file.path(folname, v_fols[x]), to = file.path(folname, run_clock, v_fols[x])))
+ #	  
+ # }
+   
   
 }
 
@@ -957,17 +981,18 @@ createNETCDFuk <- function(y, naei_inv, species, map_yr_uk, map_yr_ie, time_dim,
   ncnew <- nc_create(nc_filename, l_variables, force_v4=T)
   
   # now extract the data from the raster Stack and insert
-  print(paste0(Sys.time(),":      Inserting data..."))
+  print(paste0(Sys.time(),":            Inserting data..."))
   
   l <- list()
   
   for(v in 1:length(v_sectors)){
     
-    sect_name  <- v_sectors[v]
-    sect_desc  <- substr(sect_name, str_locate_all(sect_name,"_")[[1]][2,2] + 1, nchar(sect_name))
-    sect_EMEP  <- dt_sec[name == sect_desc, str_pad(EMEP_sec, 2, "0", side = "left")]
-    sect_long  <- dt_sec[name == sect_desc, sec]
-    sect_GNFR  <- dt_sec[name == sect_desc, GNFRlong]
+    sect_name <- v_sectors[v]
+    sect_desc <- substr(sect_name, str_locate_all(sect_name,"_")[[1]][2,2] + 1, nchar(sect_name))
+    sect_EMEP <- dt_sec[name == sect_desc, str_pad(EMEP_sec, 2, "0", side = "left")]
+    sect_long <- dt_sec[name == sect_desc, sec]
+    sect_GNFR <- dt_sec[name == sect_desc, GNFRlong]
+	sect_SNAP <- dt_sec[name == sect_desc, SNAP]
     # if(sect_desc == "OtherStationaryComb") sect_GNFR <- ""
 	
     ISO <- tolower(str_split(sect_name, "_")[[1]][2])
@@ -995,19 +1020,19 @@ createNETCDFuk <- function(y, naei_inv, species, map_yr_uk, map_yr_ie, time_dim,
     ncatt_put(ncnew, varid = sect_name, attname = "long_name"  , attval = sect_desc, prec="char")
     ncatt_put(ncnew, varid = sect_name, attname = "description", attval = sect_desc, prec="char")
     ncatt_put(ncnew, varid = sect_name, attname = "sector"     , attval = as.integer(sect_EMEP),   prec="short")
-    ncatt_put(ncnew, varid = sect_name, attname = "species"    , attval = ifelse(species=="nmvoc","voc",species) , prec="char")
+    ncatt_put(ncnew, varid = sect_name, attname = "species"    , attval = species , prec="char")
     ncatt_put(ncnew, varid = sect_name, attname = "country"    , attval = ISO_num , prec="int")
     
     # summary of data going into netcdf
 	# basic table
     dt <- data.table(Area = ISO, 
-	                 Pollutant = ifelse(species=="nmvoc","voc",species),
+	                 Pollutant = species,
 					 data_source = "NetCDF_input",
 					 emis_y = y, 
 					 inv_y = naei_inv, 
 					 sec_EMEP = sect_long,
 				     sec_GNFR = sect_GNFR, 
-				     sec_SNAP = dt_sec[EMEP_sec == as.numeric(sect_EMEP), SNAP],
+				     sec_SNAP = sect_SNAP,
 				     sec_long = sect_desc,
 					 sec_ncdf = sect_name,
 					 time_res = time_dim)
@@ -1075,7 +1100,7 @@ createNETCDFuk <- function(y, naei_inv, species, map_yr_uk, map_yr_ie, time_dim,
 
 ######################################################################################################
 #### function to write out the summary tables into a new folder
-write_summaries <- function(naei_inv, species, map_yr_uk, folname,
+write_summaries <- function(y, naei_inv, species, map_yr_uk, folname,
                             dt_inv, dt_mask, dt_group, dt_ncinp, dt_ncout){
     
   dir.create(file.path(folname, "tables"), showWarnings = FALSE, recursive = T)  
@@ -1106,15 +1131,15 @@ summarise_nc_file <- function(species, y, folname, map_yr_uk,
   # gather sector info direct from input file. Yet another safety check. 
   v_sectors <- dt_sec[,unique(sec)]
   
-  l <- list()
-  
+  l <- list()  
+      
   for(i in v_sectors){
   
     if(i == "") next # not interested in currently blank EMEP-named sectors
     if(dt_sec[sec == i, GNFRlong]  == "" ) next
-    print(paste0(Sys.time(),":         ",i))
+    #print(paste0(Sys.time(),":         ",i))
 	
-	nc_sec <- dt_sec[sec == i, name]
+	nc_sec <- dt_sec[sec == i, name]	
 	
 	# cycle through uk, ie and sea, summarising emissions
 	for(area in c("uk", "ie", "sea")){
@@ -1124,7 +1149,7 @@ summarise_nc_file <- function(species, y, folname, map_yr_uk,
 	        
       # annual total rasters
       r <- app(s,  sum, na.rm=T)
-	  
+	  	  
 	  # summarise all 
 	  dt_time <- data.table(Area = area, 
 	                        Pollutant = dt_poll[ceh_poll == species, emep_model],
@@ -1148,7 +1173,7 @@ summarise_nc_file <- function(species, y, folname, map_yr_uk,
 							sec_GNFR = dt_sec[sec == i, GNFRlong], 
 							sec_SNAP = dt_sec[sec == i, SNAP], 
 							sec_long = dt_sec[sec == i, name],
-							time_res = "annual",							   
+							time_res = "annual_summary",							   
 							t = 1,
 							emis_t_ncfile = global(r, sum, na.rm=T)[,1])
 	
@@ -1157,170 +1182,13 @@ summarise_nc_file <- function(species, y, folname, map_yr_uk,
 	  l[[paste0(area,"_",i)]] <- dt  
 	
 	} # area
-  
+	  
   } # sector
-  
+   
   dt_ncfile_summary <- rbindlist(l, use.names = T)
   
   return(dt_ncfile_summary)
 
 }
-
-######################################################################################################
-#### function to plot annual 
-plotYearUK <- function(species, output_dir, y, tp_scheme, uk_agg_schema, naei_inv, map_yr_uk){
-  
-  dir.create(file.path(folname, "plots"), showWarnings = FALSE, recursive = T)  
-  
-  fname_route <- paste0(dt_poll[ceh_poll == species, emep_model],"_UKEIRE_",y,"emis_",map_yr_uk,"map_",naei_inv,"inv")
-  
-  # read written summaries  
-  dt_inv   <- paste0(folname, "/", fname_route, "_INVENTORY.csv"))
-  dt_mask  <- paste0(folname, "/", fname_route, "_MASKED.csv"))
-  dt_group <- paste0(folname, "/", fname_route, "_PROCESSED.csv"))
-  dt_ncinp <- paste0(folname, "/", fname_route, "_NETCDFINP.csv"))
-  dt_ncout <- paste0(folname, "/", fname_route, "_NETCDFOUT.csv"))
-  
-  
-  dt_inv_total <- dt_inv[, lapply(.SD, sum, na.rm=T), by = .(Area, Pollutant, data_source, emis_y, inv_y), .SDcols = c("emis_t_inv_spatial","emis_t_inv_table","emis_t_spatial_scaled")]
-  
-  dt_mask_total <- dt_mask[, lapply(.SD, sum, na.rm=T), by = .(Area, mask, Pollutant, data_source, emis_y, inv_y), .SDcols = c("emis_t_tot_masked","tsum")]
-  
-  dt_group_total <- dt_group[, lapply(.SD, sum, na.rm=T), by = .(Area, Pollutant, data_source, emis_y, inv_y), .SDcols = c("emis_t_tot_grouped","tsum")]
-  
-  dt_ncinp_total <- dt_ncinp[, lapply(.SD, sum, na.rm=T), by = .(Area, Pollutant, data_source, emis_y, inv_y), .SDcols = c("emis_t_tot_ncinput","emis_t_tot_array","emis_t_tot_ncfile","tsum")]
-  
-  dt_ncout_total <- dt_ncout[time_res == "annual", lapply(.SD, sum, na.rm=T), by = .(Area, Pollutant, data_source, emis_y, inv_y), .SDcols = c("emis_t_ncfile")]
-
-	
-  dt_inv  <- copy(dt_inv_summary)
-  dt_mask <- copy(dt_mask_summary)
-  dt_ncinp <- copy(dt_ncinput_summary)
-  dt_ncout <- copy(dt_ncoutput_summary)
-  
-  
-  # plot up the data in several ways
-  # annual data has month = 0
-  
-  # plot of monthly 
-  dt_mon <- dt_ncdf[month != 0]
-  
-  g_mon <- ggplot(dt_mon, aes(x = month, y = nc_emis_t/1000, group = Sector, colour = Sector))+
-    geom_line()+
-    scale_x_continuous(breaks = 1:12)+
-    guides(color = "none")+
-    labs(y = bquote(kt~month^-1))+
-    facet_wrap(~ISO, ncol=1, scales = "free_y")+
-    theme_bw()+
-    theme(strip.text = element_text(size = 20),
-          #legend.title = element_blank(), 
-          legend.position = "none",
-          #legend.text = element_text(size = 16),
-          axis.text.x = element_text(angle = 45, hjust = 1, size = 16),
-          axis.title.x = element_blank(),
-          axis.text.y = element_text(size = 14))
-		
-  # plot of annual
-  dt_ann <- dt_ncdf[month == 0]
-   
-  g_ann <- ggplot(dt_ann, aes(x = Sector, y = nc_emis_t/1000, fill = Sector))+
-    geom_bar(stat="identity")+
-	#scale_x_continuous(breaks = 1:12)+
-    labs(y = bquote(kt~month^-1))+
-    facet_wrap(~ISO, ncol=1, scales = "free_y")+
-    theme_bw()+
-    theme(strip.text = element_text(size = 20),
-          axis.text.x = element_text(angle = 45, hjust = 1, size = 16),
-          axis.title.x = element_blank(),
-          axis.text.y = element_text(size = 14),
-          legend.title = element_blank(),
-          legend.text = element_text(size = 16))
-
-  # combine and write
-  p <- g_mon + g_ann + 
-             plot_layout(widths = c(2, 1), guides = "collect") & 
-			 theme(legend.position = 'bottom')
-
-  fname <- paste0(folname,"/plots/",dt_poll[ceh_poll == species, emep_model],"_UKEIRE_",y,"emis_",map_yr_uk,"map_",naei_inv,"inv.png")
-
-  ggsave(fname, p, width = 14, height = 10)
- 
-}
-
-
-create_qaqc <- function(){
-
-  dir.create(file.path(folname, "qaqc"), showWarnings = FALSE, recursive = T)  
-
-
-
-}
-
-
-
-
-
-######################################################################################################
-#### function to write out some metadata for the run
-
-writeMetadataUK <- function(y, species, naei_inv, map_yr_uk, map_yr_ie, output_dir, time_dim, tp_scheme, uk_agg_schema, alt_emis){
-
-  # create some metadata for the run
-  fileName <- paste0(output_dir,"/emis",y,"/UKEIRE/TP",tp_scheme,"_AGG",uk_agg_schema,"/Metadata_UKEIRE_",format(now(), "%Y%m%d_%H%M%S"),".txt")
-  
-  suppressMessages(file.create(fileName))
-  
-  file_conn <- file(fileName)  
-
-  # temporal profile text
-  if(tp_scheme == "pre_TEMREG"){
-    tp_scheme_text <- paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/model_inputs/EMEP4UK/",tp_scheme)
-  }else{
-    tp_scheme_text <- paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/coeff_sector/GNFR/",species,"/",tp_scheme)
-  }
-      
-  # alternative emissions source text
-  if("nh3" %in% alt_emis[,poll]){nh3_loc_text <- alt_emis[poll == "nh3", loc]}else{nh3_loc_text  <- "/gws/nopw/j04/ceh_generic/inventory_processor/data"}
-  if("nox" %in% alt_emis[,poll]){nox_loc_text <- alt_emis[poll == "nox", loc]}else{nox_loc_text  <- "/gws/nopw/j04/ceh_generic/inventory_processor/data"}
-  if("sox" %in% alt_emis[,poll]){sox_loc_text <- alt_emis[poll == "sox", loc]}else{sox_loc_text  <- "/gws/nopw/j04/ceh_generic/inventory_processor/data"}
-
-
-
-  writeLines(c(paste0("File creation timestamp: ", Sys.time()),
-               paste0("Folder name: ", output_dir),
-               paste0("Pollutants generated: ", species),
-			   paste0("Year of emissions generated: ", y),
-			   paste0("NAEI inventory used: ", naei_inv),
-			   paste0("NAEI UK map year used: ", map_yr_uk),
-			   paste0("MapEire Eire map year used: ", map_yr_ie),
-			   paste0("Aggregation schema: ", uk_agg_schema),
-			   paste0("Periodicity of netcdf data: ", time_dim),
-			   paste0("Schema for temporal profiles: ", tp_scheme_text),
-			   paste0("UK temporal profiles: SNAP onto GNFR"),
-			   paste0(""),
-			   if("nh3" %in% alt_emis[,poll])paste0("Location of NH3 emissions: ", alt_emis[poll == "nh3", loc]),
-			   if("nox" %in% alt_emis[,poll])paste0("Location of NOx emissions: ", alt_emis[poll == "nox", loc]),
-			   if("sox" %in% alt_emis[,poll])paste0("Location of SOx emissions: ", alt_emis[poll == "sox", loc]),
-			   "Location of NAEI/EIRE emissions: /gws/nopw/j04/ceh_generic/inventory_processor/data"), file_conn)
-			   
-  close(file_conn)
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
 
 

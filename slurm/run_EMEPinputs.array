@@ -1,10 +1,9 @@
 #!/bin/bash
 #SBATCH -p high-mem
 #SBATCH --job-name=run_emep_array
-#SBATCH --array=1-7
-#SBATCH -o slurm/emep_arr_%a.out
-#SBATCH -e slurm/emep_arr_%a.err
+#SBATCH -o slurm/output/emep_arr_%a.out
+#SBATCH -e slurm/output/emep_arr_%a.err
 #SBATCH --mem=120G
 #SBATCH -t 22:59:00
 
-R CMD BATCH --no-restore --no-save "--args ${SLURM_ARRAY_TASK_ID}" EMEP_inputs.R "slurm/console${SLURM_ARRAY_TASK_ID}_EMEP_array.Rout"
+R CMD BATCH --no-restore --no-save "--args ${SLURM_ARRAY_TASK_ID}" run.R "slurm/output/console${SLURM_ARRAY_TASK_ID}_EMEP_array.Rout"

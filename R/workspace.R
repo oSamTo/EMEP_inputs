@@ -1,18 +1,21 @@
 ##############################################################################################################
-packs <- c("sf","terra","stringr","dplyr","ggplot2","data.table","stats","readxl","ncdf4","lubridate","patchwork")
+packs <- c("sf","terra","stringr","dplyr","ggplot2","data.table",
+		   "stats","readxl","ncdf4","lubridate","patchwork","tidyterra")
 
 lapply(packs, require, character.only = TRUE)
+
 ##############################################################################################################
 options(datatable.showProgress = FALSE)
 
 source("R/UK_functions.R")
 source("R/EU_functions.R")
+source("R/QAQC_functions.R")
 
 ###########################################################
-#### SETTING UP WORKSPACE FOR MAKING EMPE MODEL INPUTS ####
+#### SETTING UP WORKSPACE FOR MAKING EMEP MODEL INPUTS ####
 ###########################################################
 
-run_clock <<- format(now(), "%Y_%m_%d_%H%M%S") # this is for archiving, time of run
+run_clock <<- format(now(), "%Y_%m_%d") # this is for archiving, time of run
 
 # new extended domain to include both UK & Eire
 r_dom_1km <<- rast(xmin = -230000, xmax = 750000, ymin = -50000, ymax = 1300000, 
@@ -22,10 +25,27 @@ r_dom_1km <<- rast(xmin = -230000, xmax = 750000, ymin = -50000, ymax = 1300000,
 r_dom_0.1 <<- rast(xmin = -13.8, xmax = 4.6, ymin = 49, ymax = 61.5, 
                   res = 0.01, crs = "epsg:4326", vals = NA)
 
+# plot domain for UK, slightly larger. 
+r_dom_ukplot <<- rast(xmin = -13.8, xmax = 5.4, ymin = 48.1, ymax = 62, 
+                  res = 0.01, crs = "epsg:4326", vals = NA)
+
 # EU domain
 r_dom_EU <<- rast(xmin = -30, xmax = 90, ymin = 30, ymax = 82, 
                    res = 0.1, crs = "epsg:4326", vals = NA)
 
+# shape for plotting. 
+# disable some spherical geometry in sf() that causes plot issues
+suppressWarnings(sf::sf_use_s2(FALSE))
+  
+sf_world <<- st_read("data/spatial/world/TM_WORLD_BORDERS-0.3.shp")
+st_crs(sf_world) <- "epsg:4326"
+sf_world <- st_make_valid(sf_world)
+sf_uk <<- st_crop(sf_world, ext(r_dom_ukplot) )
+sf_eu <<- st_crop(sf_world, ext(r_dom_EU) )
+
+# reinstate spherical geometry in sf()
+suppressWarnings(sf::sf_use_s2(TRUE))
+  
 # the emissions need to be masked to terrestrial cells (plus some coastal cells) - Massimo wants EMEP emissions data on the sea
 # the mask is in 0.1 degree, disaggregate to 0.01 so masking can be done
 r_dom_terr_10km <<- crop(extend(disagg(rast("data/spatial/Emissions_mask_10km.tif"), fact=10), r_dom_0.1), r_dom_0.1)
