@@ -1,0 +1,11 @@
+########################
+## EMEP temporal note ##
+########################
+
+Timings for EMEPv5.0 take from: 
+
+/home/emep4uk/EMEP4/input/Common_5.0
+
+monthly data look updated. 
+
+Hourly and Daily facs look like duplicates of EMEPv4.34 (time stamp also from 2014)

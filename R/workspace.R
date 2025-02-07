@@ -1,14 +1,22 @@
+
+######################################################
+####                                              ####
+####    FILE TO SET PACKAGES, SOURCE FUNCTIONS,   ####
+####  SET GLOBAL OBJECTS NEEDED THROUGHOUT - ETC. ####
+####                                              ####
+######################################################
+
 ##############################################################################################################
-packs <- c("sf","terra","stringr","dplyr","ggplot2","data.table",
-		   "stats","readxl","ncdf4","lubridate","patchwork","tidyterra")
+packs <- c("sf", "terra", "stringr", "dplyr", "ggplot2", "data.table", "purrr", "cowplot",
+		   "abind", "stats", "readxl", "ncdf4", "lubridate", "patchwork", "tidyterra")
 
 lapply(packs, require, character.only = TRUE)
 
 ##############################################################################################################
 options(datatable.showProgress = FALSE)
 
-source("R/UK_functions.R")
-source("R/EU_functions.R")
+source(paste0("R/UK_",emep_version,"_functions.R"))
+source(paste0("R/EU_",emep_version,"_functions.R"))
 source("R/QAQC_functions.R")
 
 ###########################################################
@@ -22,7 +30,7 @@ r_dom_1km <<- rast(xmin = -230000, xmax = 750000, ymin = -50000, ymax = 1300000,
                   res = 1000, crs = "epsg:27700", vals = NA)
 
 # This is the lat long equivalent raster of the UK domain at 1km in BNG
-r_dom_0.1 <<- rast(xmin = -13.8, xmax = 4.6, ymin = 49, ymax = 61.5, 
+r_dom_UKIE <<- rast(xmin = -13.8, xmax = 4.6, ymin = 49, ymax = 61.5, 
                   res = 0.01, crs = "epsg:4326", vals = NA)
 
 # plot domain for UK, slightly larger. 
@@ -46,9 +54,11 @@ sf_eu <<- st_crop(sf_world, ext(r_dom_EU) )
 # reinstate spherical geometry in sf()
 suppressWarnings(sf::sf_use_s2(TRUE))
   
-# the emissions need to be masked to terrestrial cells (plus some coastal cells) - Massimo wants EMEP emissions data on the sea
+# the emissions need to be masked to terrestrial cells (plus some coastal cells)
+# Massimo wants EMEP emissions data on the sea
 # the mask is in 0.1 degree, disaggregate to 0.01 so masking can be done
-r_dom_terr_10km <<- crop(extend(disagg(rast("data/spatial/Emissions_mask_10km.tif"), fact=10), r_dom_0.1), r_dom_0.1)
+# UK data does not have IOM, but EMEP only has shipping - use the mask with no IOM. 
+r_dom_terr_10km <<- crop(extend(disagg(rast("data/spatial/Emissions_mask_10km_noIOM.tif"), fact=10), r_dom_UKIE), r_dom_UKIE)
 r_dom_terr      <<- rast("data/spatial/terrestrial_mask.tif")
 
 # lookup file for sector mapping
@@ -57,8 +67,8 @@ dt_sec <<- fread("data/lookups/EMEP_sectors.csv")[!is.na(sec)]
 # lookup file for pollutant names
 dt_poll <<- fread("data/lookups/pollutant_names.csv")
 
-# lookup file for EMEP country names
-dt_iso <<- fread("data/lookups/EMEP_territories.csv")
+# lookup file for EMEP country names - taken from EMEPv5.0 file
+dt_iso <<- readRDS("data/lookups/dt_iso.rds") ; dt_iso <<- dt_iso[!is.na(ISO_char)]
 
 # EMEP input missing value
 EMEP_fillval <<- 9.96920996838687e+36
@@ -67,3 +77,33 @@ EMEP_fillval <<- 9.96920996838687e+36
 v_mday <<- c(14,45,73,104,134,165,195,226,257,287,318,348)
 v_yday <<- 1:365
 
+######################################################################################################
+#### function to reurn molecualr weight of the species being processed
+get_mol_weight <- function(species){
+  
+  if(species == ""){
+    
+    c(,,"sox","pm25","pmco","co","voc")
+  }else if(species == "nox"){
+    mw <- 46  
+  }else if(species == "nh3"){
+    mw <- 17  
+  }else if(species == "sox"){
+    mw <- 64  
+  }else if(species == "pm25"){
+    mw <- NA  
+  }else if(species == "pmco"){
+    mw <- NA  
+  }else if(species == "co"){
+    mw <- 28  
+  }else if(species == "voc"){
+    mw <- NA  
+  }else if(species == "pm10"){
+    mw <- NA  
+  }else if(species == "cu"){ # metals etc....
+    mw <- NA  
+  } 
+  
+  return(mw)
+  
+}

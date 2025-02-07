@@ -7,8 +7,8 @@
 ######################################################################################################
 #### function to take EMEP emissions, make ready to EMEP format and create netCDFs for EU
 
-EMEPinputEU <- function(v_years, species, eu_agg_schema, time_dim = "month", 
-                        eu_tp_scheme, emep_inv, output_dir){
+EMEPinputEU <- function(y, species, time_dim = c("annual","month","yday"), 
+                        emep_inv, folname, tp_scheme, eu_agg_schema){
   
   # v_years  = vector, *numeric*, year to process.
   if(!is.numeric(v_years)) stop ("Year vector is not numeric")
@@ -26,20 +26,14 @@ EMEPinputEU <- function(v_years, species, eu_agg_schema, time_dim = "month",
   r_uk_EU_ext <- aggregate(extend(r_dom_terr_10km, ext(r_dom_EU)), fact = 10) # converts UK territory+10km mask to EU size
   
   res_crs <- "0.1_LL"
-  
-  ## loop through years and pollutants listed and make a netCDF input file for each.
-  ## This is to be made with a monthly time attribute
-      # for the month, incorporate the EDGAR temporal data 
-  
-  for(y in v_years){
-          
+            
       ######################################################################################
-      if(!(species %in% c("nox","sox","nh3", "co", "nmvoc","pm25","pm10","pmco")) ) stop ("Species must be in: 
-                                            AP:    co, nh3, nox, sox, nmvoc
+      if(!(species %in% c("nox","sox","nh3", "co", "voc","pm25","pm10","pmco")) ) stop ("Species must be in: 
+                                            AP:    co, nh3, nox, sox, voc
                                             PM:    pm25, pm10, pmco")
       ######################################################################################
       
-      print(paste0(Sys.time(),": Creating EMEP4UK EU input netCDF for ",species," in ",y,"..."))
+      print(paste0(Sys.time(),": Creating EMEP4UK EU input (",time_dim,") netCDF for ",species," in ",y,"..."))
       
       # we are using the EMEP csv emissions NOT the netcdf emissions
           # https://www.ceip.at/the-emep-grid/gridded-emissions/nox
@@ -82,13 +76,13 @@ EMEPinputEU <- function(v_years, species, eu_agg_schema, time_dim = "month",
         ###################################
         #### LIST OF EMISSION SURFACES ####
         # evaluate the emissions input file only. 
-		l_EMEP_file <- summariseEMEPfile(emis_loc, species, y, i, emep_inv)
+		l_EMEP_file <- summariseEMEPfile(emis_loc, species, y, i, emep_inv, r_uk_EU_ext)
 		
 		l_EMEP_tots[[paste0("EMEP_totals_", species, "_", i)]] <- l_EMEP_file[[2]]
 		
 		# bring in all emissions into stacks
-        l_eu <- EMEPsectorEmissions(fname = l_EMEP_file[[1]], i, y, r_uk_EU_ext)
-                
+        l_eu <- EMEPsectorEmissions(fname = l_EMEP_file[[1]], i, y, species, r_uk_EU_ext)
+    		
         ########################
         #### TEMPORAL SPLIT ####
         # if the time_dim is year, the data stays as 1 annual total.
@@ -109,7 +103,7 @@ EMEPinputEU <- function(v_years, species, eu_agg_schema, time_dim = "month",
         ####################
         #### STATISTICS ####
         # summarising the processed emissions files
-        dt_totals <- summariseEUemissions(y, species, i, l_s = l_eu_prof)
+        dt_totals <- summariseEUemissions(y, species, i, l_s = l_eu_prof, time_dim)
         
         l_sum_allSec[[paste0("eu_totals_", species, "_", i,"_", time_dim)]] <- dt_totals
         
@@ -119,15 +113,23 @@ EMEPinputEU <- function(v_years, species, eu_agg_schema, time_dim = "month",
 	  ###########################################################
 	  #### summary files - emissions and processed emissions ####
 	  
-	  dt_in_file <- rbindlist(l_EMEP_tots, use.names=T)[order(ISO, GNFR)]
+	  dt_emep_emis <- rbindlist(l_EMEP_tots, use.names=T)[order(ISO, GNFR)]
 	  
-	  lapply(l_EMEP_tots, names)
+	  dt_proc_emis <- rbindlist(l_sum_allSec, use.names=T)[order(ISO, GNFR)]
 	  
-	  dt_emis_summary <- rbindlist(l_sum_allSec, use.names=T)[order(ISO, GNFR)]
+	  #######################################################
+      #### AGGREGATE/RESHAPE BY SECTOR/ISO (IF REQUIRED) ####
 	  
-	  ####################################################
-      #### AGGREGATION BY SECTOR OR ISO (IF REQUIRED) ####
-	  	  
+	  # The netcdf needs to have every sector at annual/month, per ISO/EU
+	  # tp_schema already taken care of above. Incoming data is;
+		# All_EU ---> 13 x sector stacks pollutant-1 a-1 ---> 60 ISO stacks sector-1 ---> month/annual stacks ISO-1
+		# this structure means the large emissions files are read in once, not every time per ISO
+	  # However the data need to be `pollutant_iso`, with the sector dimension as a stack. Reshape here.
+	  
+	  # if agg_schema is; 
+		# oneEU: one EU territory file for month/annual data (i.e. no ISO). 
+		# ISO = separate ISO inputs for month/annual data.
+
 	  print(paste0(Sys.time(),":               Aggregating by sector and/or ISO code..."))
 	  l_eu_agg <- aggregateEU(y, species, eu_agg_schema, time_dim, l_eu_allSec)
 	  	  
@@ -136,6 +138,11 @@ EMEPinputEU <- function(v_years, species, eu_agg_schema, time_dim = "month",
             
       print(paste0(Sys.time(),":               Creating and populating netcdf..."))
       
+	  # 17/01/25: have 2 different functions: one for old monthly, one for new annual
+		# at the moment i dont know how monthly will work in the new structure (old function remains). 
+		# annual will need the data re-arranging into country stacks of sectors.
+		
+	  
       dt_ncdf_summary <- createNETCDFeu(y, species, emep_inv, output_dir, time_dim, eu_tp_scheme, 
                                         eu_agg_schema, l_eu = l_eu_agg)
       
@@ -145,7 +152,7 @@ EMEPinputEU <- function(v_years, species, eu_agg_schema, time_dim = "month",
 	  # dt_emis_summary
 	  # dt_ncdf_summary
     
-  } # year
+ 
   
   
 } # end of function
@@ -153,7 +160,7 @@ EMEPinputEU <- function(v_years, species, eu_agg_schema, time_dim = "month",
 ######################################################################################################
 #### function to summarise the emissions file, before anything is done to it. 
 
-summariseEMEPfile <- function(emis_loc, species, y, i, emep_inv){
+summariseEMEPfile <- function(emis_loc, species, y, i, emep_inv, r_uk_EU_ext){
 
   # v_years  = vector, *numeric*, year to process.
   if(!is.numeric(y)) stop ("Year vector is not numeric")
@@ -187,8 +194,20 @@ summariseEMEPfile <- function(emis_loc, species, y, i, emep_inv){
     dt_emis[, EMEP_data := emep_y] 
   
     dt_tot <- dt_emis[,.(emis_t = sum(emis_t, na.rm=T)), by = .(ISO2, Year, EMEP_data, GNFR, Pollutant) ]
-	dt_tot[, c("Year","SNAP", "Region", "EMEP_Sector", "sec_long", "long_name", "Data_source") := 
-	      list(y, dt_sec[sec == i, SNAP], "eu", dt_sec[sec == i, str_pad(EMEP_sec, 2, "0", side = "left")], i, dt_sec[sec == i, name], "EMEP_unprocessed") ]
+	
+	dt_tot[, c("SNAP", 
+	           "Region", 
+			   "EMEP_Sector", 
+			   "sec_long", 
+			   "long_name", 
+			   "Data_source") := 
+	       list(dt_sec[sec == i, SNAP], 
+		       "eu", 
+			   dt_sec[sec == i, EMEP_sec], 
+			   i, 
+			   dt_sec[sec == i, name], 
+			   "EMEP_unprocessed") ]
+			   
 	setnames(dt_tot, "ISO2", "ISO")
   
   }else{
@@ -196,28 +215,32 @@ summariseEMEPfile <- function(emis_loc, species, y, i, emep_inv){
     # summarise the emissions totals
 	
     dt_tot <- data.table(ISO = NA,
-	                 Year = y,
-					 EMEP_data = emep_y,
-                     GNFR = dt_sec[sec == i, GNFRlong],
-					 Pollutant = species,
-					 emis_t = 0,
-                     SNAP = dt_sec[sec == i, SNAP],
-					 Region = "eu",
-                     EMEP_Sector = dt_sec[sec == i, str_pad(EMEP_sec, 2, "0", side = "left")],
-                     sec_long = i,
-                     long_name = dt_sec[sec == i, name],
-				     Data_source = "EMEP_mapped_time_series")
+	                     Year = y,
+					     EMEP_data = emep_y,
+                         GNFR = dt_sec[sec == i, GNFRlong],
+					     Pollutant = species,
+					     emis_t = 0,
+                         SNAP = dt_sec[sec == i, SNAP],
+					     Region = "eu",
+                         EMEP_Sector = dt_sec[sec == i, str_pad(EMEP_sec, 2, "0", side = "left")],
+                         sec_long = i,
+                         long_name = dt_sec[sec == i, name],
+				         Data_source = "EMEP_unprocessed")
      
   }
   
-  
+  # Check if the ISO codes in the emissions data are present in the v_iso from the model
+  # If not, something needs looking at - is the latest model version being used?
+  v_iso_emis <- unique(dt_emis[,ISO2])
+  if(any(!(v_iso_emis %in% dt_iso[,ISO_char]))) stop("There are extra ISO codes in the emissions - check the model version!")
+    
   return(list(f_diff, dt_tot))
   
 }
 
 ######################################################################################################
 #### function to collect EMEP sector data, per country, for diffuse emissions
-EMEPsectorEmissions <- function(fname, i, y, r_uk_EU_ext){
+EMEPsectorEmissions <- function(fname, i, y, species, r_uk_EU_ext){
    
   dt_emis <- fread(fname)
     
@@ -240,9 +263,10 @@ EMEPsectorEmissions <- function(fname, i, y, r_uk_EU_ext){
 	# There are 60 unique ISO codes in the EMEP data (in 2022 inventory)
    
   # lapply using a small function below  - which includes masking to UK boundary and setting NA to 0
-  l_r <- lapply(unique(dt_emis[,ISO2]), function(x) ISOsectorRaster(x, dt_emis = dt_emis, r_temp = r_dom_EU, 
-                                                                    i = i, y = y, UKmask = r_uk_EU_ext))
-  names(l_r) <- unique(dt_emis[,ISO2])
+  # use all iso codes in model, make a blank surface if needed. 
+  l_r <- lapply(dt_iso[,ISO_char], function(x) ISOsectorRaster(x, dt_emis = dt_emis, i = i, species = species,
+                                                   y = y, UKmask = r_uk_EU_ext))
+  names(l_r) <- dt_iso[,ISO_char]
   
   return(l_r)
   
@@ -251,15 +275,18 @@ EMEPsectorEmissions <- function(fname, i, y, r_uk_EU_ext){
 ######################################################################################################
 #### function to create raster from ISO information in EMEP emissions csv
 
- ISOsectorRaster <- function(iso, dt_emis, r_temp, i, y, UKmask){
+ ISOsectorRaster <- function(iso, dt_emis, i, species, y, UKmask){
 	 	 
 	 # subset the data to the ISO
 	 dt <- dt_emis[ISO2 == iso, c("Lon","Lat","emis_t")]
 	 
 	 # rasterise using a point matrix and value field
-	 r <- rasterize(as.matrix(dt[,c("Lon","Lat")]), y = r_temp, values = dt[["emis_t"]], fun = sum, na.rm=T)
+	 if(nrow(dt) == 0){	 
+	   r <- r_dom_EU
+	 }else{
+       r <- rasterize(as.matrix(dt[,c("Lon","Lat")]), y = r_dom_EU, values = dt[["emis_t"]], fun = sum, na.rm=T)	 
+	 }
 	 	 
-	 
 	 # For data prior to 1990, the 1990 file read in above needs to be adjusted
 	 # obtain scaling factor from CEDS and apply - this is for EU data prior to 1990 only
 	 if(y < 1990){
@@ -352,7 +379,7 @@ EMEPsectorEmissions <- function(fname, i, y, r_uk_EU_ext){
 	 r[is.na(r)] <- 0 ; r[is.nan(r)] <- 0 ; r[is.infinite(r)] <- 0 	
 	 
 	 # name
-	 names(r) <- paste0(iso,"_",i,"_emis_t")
+	 names(r) <- paste0(species,"_",iso,"_sector=",dt_sec[sec == i, EMEP_sec])
 
 	 return(r)
 	  
@@ -360,15 +387,15 @@ EMEPsectorEmissions <- function(fname, i, y, r_uk_EU_ext){
 
 ######################################################################################################
 #### function to split annual emissions out into months (or keep as annual)
-splitEUannual <- function(species, time_dim = c("year","month"), eu_tp_scheme, l_annual, i){
+splitEUannual <- function(species, time_dim = c("annual","month"), eu_tp_scheme, l_annual, i){
     
   time_dim <- match.arg(time_dim)
   
   # set time splits
-  if(time_dim == "year"){ i_time <- 1 }else{ i_time <- 1:12 }
+  if(time_dim == "annual"){ i_time <- 1 }else{ i_time <- 1:12 }
   
-  # if time dim is a year, no split
-  if(time_dim == "year"){
+  # if time dim is a annual, no split
+  if(time_dim == "annual"){
     
     l_s <- copy(l_annual)
 	names(l_s) <- names(l_annual)
@@ -387,17 +414,13 @@ splitEUannual <- function(species, time_dim = c("year","month"), eu_tp_scheme, l
 	
 	# If the tp_scheme = version of EMEP4UK (e.g. 'EMEP4UKv4.45'); use EMEP defaults of that version
 	# read in timing file for legacy temporal splits (subset to Eire or UK - SEA needs to match parent country)
-	if(species == "nmvoc"){
-	    dt_timing <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/model_inputs/EMEP4UK/",tp_scheme,"/MonthlyFacs.voc"))
-	}else{
-	    dt_timing <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/TEMREG/output/model_inputs/EMEP4UK/",tp_scheme,"/MonthlyFacs.",species))
-	}
-	   
+	dt_timing <- fread(paste0("/gws/nopw/j04/ukem/test/sam/ukem_pro/output/model_inputs/EMEP4UK/",tp_scheme,"/MonthlyFacs.",species))
+		   
     names(dt_timing) <- c("ISO","SNAP",month.abb[1:12])
-    dt_timing_m <- melt(dt_timing, id.vars = c("ISO","SNAP"), variable.name = "MON", value.name = "FAC")
+    dt_profs <- melt(dt_timing, id.vars = c("ISO","SNAP"), variable.name = "MON", value.name = "FAC")
     
 	# as there are up to 60 ISO codes in the list/stack, best to use lapply
-	l_s <- lapply(names(l_annual), function(x) emepISOprofile(x, species, dt_profs = dt_timing_m, i_time, l_annual, i))
+	l_s <- lapply(names(l_annual), function(x) emepISOprofile(x, species, dt_profs, i_time, l_annual, i))
 	
 	names(l_s) <- names(l_annual)
 		
@@ -417,7 +440,6 @@ splitEUannual <- function(species, time_dim = c("year","month"), eu_tp_scheme, l
 #### function to apply temporal profile splits by ISO ID
 emepISOprofile <- function(iso, species, dt_profs, i_time, l_annual, i){
     
-
   # subset list
   r <- l_annual[[iso]]
   
@@ -452,27 +474,34 @@ emepISOprofile <- function(iso, species, dt_profs, i_time, l_annual, i){
 
 ######################################################################################################
 #### function to summarise input emissions
-summariseEUemissions <- function(y, species, i, l_s){
+summariseEUemissions <- function(y, species, i, l_s, time_dim){
+  
+  # set time splits
+  if(time_dim == "annual"){ i_time <- 1 }else{ i_time <- 1:12 }
   
   # there are some instances where there are no emissions from the sector and it will error
   if(length(l_s) != 0){
   
     l <- lapply(l_s, function(x) global(x, sum, na.rm=T))
     l_dt <- lapply(l, function(x) as.data.table(x))
-    l_dt <- lapply(1:length(l_dt), function(x) l_dt[[x]][, ISO := names(l_dt)[x]])
-    l_dt <- lapply(l_dt, function(x) x[, month := paste0("emis_M",str_pad(1:12, 2, "0", side = "left"))])
+	l_dt <- lapply(names(l_s), function(x) l_dt[[x]][, layer_name := names(l_s[[x]])]) ; names(l_dt) <- names(l)
+	l_dt <- lapply(1:length(l_dt), function(x) l_dt[[x]][, ISO := names(l_dt)[x]])
+	l_dt <- lapply(l_dt, function(x) x[, step := paste0("t",i_time)])
     dt_emis <- rbindlist(l_dt, use.names=T)
     setnames(dt_emis, "sum", "emis_t")
-    dt_w <- dcast(dt_emis, ISO~month, value.var = "emis_t")
+    dt_w <- dcast(dt_emis, ISO+layer_name~step, value.var = "emis_t")
   
   }else{
    
-    dt_emis <- data.table(ISO = NA, month = paste0("emis_M",str_pad(1:12, 2, "0", side = "left")), emis_t = 0)
-	dt_w <- dcast(dt_emis, ISO~month, value.var = "emis_t")
+    dt_emis <- data.table(ISO = NA, 
+						  layer_name = paste0(species,"_NA_sector=",dt_sec[sec == i, EMEP_sec]), 
+						  step := paste0("t",i_time), 
+						  emis_t = 0)
+						  
+	dt_w <- dcast(dt_emis, ISO+layer_name~step, value.var = "emis_t")
   
   }
-  
-  
+   
   
   # summarise the emissions totals
   dt <- data.table(Year = y,
@@ -480,13 +509,13 @@ summariseEUemissions <- function(y, species, i, l_s){
                    Region = "eu",
                    GNFR = dt_sec[sec == i, GNFRlong],
                    SNAP = dt_sec[sec == i, SNAP],
-                   EMEP_Sector = dt_sec[sec == i, str_pad(EMEP_sec, 2, "0", side = "left")],
+                   EMEP_Sector = dt_sec[sec == i, EMEP_sec],
                    sec_long = i,
                    long_name = dt_sec[sec == i, name],
-				   Data_source = "EMEP_mapped_time_series")
+				   Data_source = "EMEP_processed")
   
   dt_i <- cbind(dt, dt_w)
-  dt_i[, ann_emis_kt := rowSums(.SD, na.rm=T)/1000, .SDcols = paste0("emis_M",str_pad(1:12, 2, "0", side = "left"))]  
+  dt_i[, ann_emis_kt := rowSums(.SD, na.rm=T)/1000, .SDcols = paste0("t",i_time)]  
    
   return(dt_i)  
   
@@ -494,22 +523,22 @@ summariseEUemissions <- function(y, species, i, l_s){
 
 ######################################################################################################
 #### function to aggregate the emissions in a nominated way; e.g. by sector, by ISO grouping etc
-aggregateEU <- function(y, species, eu_agg_schema = c(NA, "oneEU"), time_dim, l_eu_allSec){
+aggregateEU <- function(y, species, eu_agg_schema = c("ISO", "oneEU"), time_dim, l_eu_allSec){
 	
 	eu_agg_schema <- match.arg(eu_agg_schema)
 	
-	if(time_dim == "year"){ v_time <- 1 }else{ v_time <- v_yday }
+	if(time_dim == "annual"){ v_time <- 1 }else{ v_time <- v_yday }
     n_time <- length(v_time)
 	
-	if(is.na(eu_agg_schema)){
+	if(eu_agg_schema == "ISO"){
 	
-	  # there is no schema to aggregate and so the EU file remains as it is
+	  # there is no schema to aggregate and so the EU file remains as it is - split by ISO
 	
 	  return(l_eu_allSec)
 	
 	}else if(eu_agg_schema == "oneEU"){
 		
-	  # this schema aggregates all the data into one EU surface, per sector per month.
+	  # this schema aggregates all the data into one EU surface, per sector per time step.
 	  # this heavily reduces the variables to read (from ISO level)
 	  # but retains the separation by sector
 	  	  	  	  
@@ -552,9 +581,24 @@ sumMonths <- function(s, n_time){
 
 
 ######################################################################################################
-#### function to create a netCDF and input the data
+#### function to create a netCDF and input the data - simple routine chooser
 createNETCDFeu <- function(y, species, emep_inv, output_dir, time_dim, 
                            eu_tp_scheme, eu_agg_schema, l_eu){
+						   
+  #if(time_dim == "annual")
+  # If the time is annual, 
+
+}
+
+######################################################################################################
+#### function to create a netCDF and input the data - this is the ANNUAL/MONTHLY input (EMEPv5.0)
+
+
+
+######################################################################################################
+#### function to create a netCDF and input the data - this is the MONTHLY input (EMEPv4.45)
+createNETCDFeu_month <- function(y, species, emep_inv, output_dir, time_dim, 
+                                 eu_tp_scheme, eu_agg_schema, l_eu){
   
     
   # create output directory

@@ -1,0 +1,81 @@
+---
+params:
+ y: NA
+ species: NA
+ uk_folname: NA
+ map_yr_uk: NA
+ naei_inv: NA
+title: "EMEP4UK QAQC document - `r params$species` in year"
+author: Sam Tomlinson
+
+
+header-includes: 
+ \usepackage{geometry}
+ \geometry{top=2cm,left=2cm,bottom=2cm,right=2cm}
+ 
+output:
+  pdf_document
+---
+
+We will have to have some metadata, tables etc. 
+
+I think some incoming parameters, variables, will dictate the choice of file
+
+Can i pass the gg objects? Or maybe just code up the gg plots in here?
+
+There should be run metadata here
+
+\newpage
+
+$$\\[3cm]$$
+
+```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "UK Map"}
+#| fig-pos: "h"
+knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_1_UKTOTMAP.png")
+```
+
+Explanatory text stuff
+
+\newpage
+
+```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "Emissions processing"}
+#| fig-pos: "h"
+knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_2_UKINVBAR.png")
+```
+
+Explanatory text stuff
+
+```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "NetCDF input data"}
+#| fig-pos: "h"
+knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_3_UKNCBAR.png")
+```
+
+Explanatory text stuff
+
+\newpage
+
+```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "Fig 4"}
+#| fig-pos: "h"
+knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_4_UKMONTOTLINE.png")
+```
+
+Explanatory text stuff
+
+```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "Fig 5"}
+#| fig-pos: "h"
+knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_5_UKMONSECLINE.png")
+```
+
+Explanatory text stuff
+
+```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "Fig 6"}
+#| fig-pos: "h"
+knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_6_UKANNSECMAP.png")
+```
+
+Explanatory text stuff
+
+```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "Fig 7"}
+#| fig-pos: "h"
+knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_7_UKMONTOTMAP.png")
+```

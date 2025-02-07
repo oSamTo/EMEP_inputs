@@ -1,13 +1,31 @@
-#### set up the run ####
 
+#######################################################
+####                                               ####
+####    FILE TO SET RUN CHOICES, E.G THE YEAR,     ####
+####  THE POLLUTANT VECTOR, EMEP MODEL VERSION ETC ####
+####                                               ####
+#######################################################
+
+## EMEP model version
+# this makes the input to the model version. 
+emep_version <- "v5.0" # v4.34, v4.36, v4.45 , v5.0
+
+## vectors of emissions years and pollutants to run ##
 v_years <- c(2022) # what emissions years to process
 v_pollutants <- c("nox","nh3","sox","pm25","pmco","co","voc") # "nox","nh3","sox","pm25","pmco","co","voc", "cd", "cu", "ni", "pb", "zn" - CEH names, not EMEP model
 
+## time dimension to process the data into ##
 time_dim <- "annual" # annual, month, yday
-tp_scheme <- c("ukem_genYr") # c("EMEP4UKv4.45" , "EMEP4UKv5.0", "genYr", 2017:2021, "test", "ukem_genYr", ukem_2017:2023 
-#eu_tp_scheme <- "EMEP4UKv5.0" # EMEP4UKv4.45 / EMEP4UKv5.0 / EDGAR (no EDGAR at the mo)
 
-# reset the tp_scheme if time_dim is 'annual'
+## EMEP sectors to put into the netcdf - see dt_sec for choice (standard = 1:13)
+v_EMEP_sec <- 1:13
+
+## temporal profile schema ##
+# UK can be: "EMEP4UKv4.45" , "EMEP4UKv5.0", "ukem_genYr", "ukem_2017:2023", "test"
+# EU can be: "EMEP4UKv4.45" , "EMEP4UKv5.0", "test"  (EDGAR in the future)
+tp_scheme <- c("EMEP4UKv4.45")
+
+# however, reset the tp_scheme if time_dim is 'annual' - either UK or EU
 # we dont use temporal profiling for the annual total inputs
 if(time_dim == "annual") tp_scheme <- "annual"
 
@@ -21,11 +39,14 @@ emep_inv <- 2024 # emep_inv  = which inventory compilation year to use
 #emep_map_yr <- 2021
 
 ## aggregation schema
-uk_agg_schema <- "NA"    # none made yet. 
-eu_agg_schema <- "oneEU" # oneEU = one EU file. ISO = separate ISO inputs
+uk_agg_schema <- "allISO" # allISO = separate ISO inpus for UK/IE/SEA. oneUKIE = one file. 
+eu_agg_schema <- "allISO" # allISO = separate ISO inputs. oneEU = one EU file. 
 
-# break if EU is monthly AND ISO - the files are too big. 
-# if(eu_tp_scheme != "annual" & eu_agg_schema == "ISO") stop("Don't run EU monthly on ISO codes.") 
+# break if EU is monthly AND ISO - the files are too big. THIS WILL CHANGE 
+if(tp_scheme != "annual" & eu_agg_schema == "allISO") stop("Don't run EU monthly on ISO codes.")
+# break if EU is annual and agg schema is one EU - nothing accepts it. 
+if(tp_scheme == "annual" & eu_agg_schema == "oneEU") stop("Don't run EU annual with one aggregated surface.")
 
 ## choose output directory for the EMEP input files
-output_dir <- paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK/inv",naei_inv)
+output_dir <- paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",
+					 emep_version,"/inv",naei_inv)
