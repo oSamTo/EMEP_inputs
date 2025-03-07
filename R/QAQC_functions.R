@@ -2,7 +2,7 @@
 #### master function to generate QAQC
 create_qaqc <- function(y, species, uk_folname, eu_folname, map_yr_uk, naei_inv, 
                         emep_inv, time_dim, emep_version, v_EMEP_sec,
-						uk_agg_schema, eu_agg_schema){
+						uk_agg_schema, eu_agg_schema, tp_scheme){
 
   # lapply the QAQC over v_pollutants
     
@@ -144,8 +144,18 @@ create_qaqc <- function(y, species, uk_folname, eu_folname, map_yr_uk, naei_inv,
   print(paste0(format(Sys.time(), "%Y-%m-%d %X"),
                ":            rendering pdf..."))  
   
-  l_pdf_params <- list(y = y, species = species, uk_folname = uk_folname, 
-						  map_yr_uk = map_yr_uk, naei_inv = naei_inv)
+  l_pdf_params <- list(y = y, dt_poll = dt_poll, species = species, 
+                       uk_folname = uk_folname, eu_folname = eu_folname,
+					   map_yr_uk = map_yr_uk, naei_inv = naei_inv, 
+					   emep_inv = emep_inv, v_EMEP_sec = v_EMEP_sec, 
+					   dt_sec = dt_sec, time_dim = time_dim, 
+					   emep_version = emep_version, 
+					   uk_agg_schema = uk_agg_schema, 
+					   eu_agg_schema = eu_agg_schema,
+					   tp_scheme = tp_scheme,
+					   l_fname_uk_sums = l_fname_uk_sums, 
+					   l_uk_maps = l_uk_maps,
+					   dt_month = l_gg_p4[["table"]])
   
   # render the source of the document to the default output format:
   rmarkdown::render(input = "R/QAQC.Rmd", 
@@ -154,6 +164,12 @@ create_qaqc <- function(y, species, uk_folname, eu_folname, map_yr_uk, naei_inv,
                   output_dir = paste0(uk_folname,"/qaqc"),
 				  params = l_pdf_params)
   
+  #tinytex::parse_install(
+  #text = "! LaTeX Error: File `threeparttablex.sty' not found."
+#)
+ #%>%
+#	  row_spec(3, hline_after = T)
+
   # require(cowplot)
  # cp <- plot_grid(gg_p2, gg_p3, ncol = 1, align = "hv", axis = 'tblr', rel_heights = 1)
   #cp <- plot_grid(p2, p1, rel_widths = c(0.33, 1))
@@ -368,23 +384,25 @@ collect_eu_summaries <- function(y, species, eu_folname, emep_inv){
 #### specifically for line plots of totals per sector per month. 
 month_sector_theme <- function(sector) {
   
-  if(sector %in% c("A_PublicPower","E_Solvents","I_Offroad")){
+  if(sector %in% c("A_PublicPower", "F_RoadTransport")){
    x <- theme(plot.title = element_text(size = 20, hjust = 0.5),
           strip.text.x = element_text(size = 12),
           axis.title.x = element_blank(),
 		  margin(t = 2, r = 2, b = 2, l = 2, unit = "mm"))
-  }else if(sector %in% c("B_Industry","C_OtherStationaryComb","D_Fugitive", "F_RoadTransport", "G_Shipping", "H_Aviation")){
+  }else if(sector %in% c("B_Industry","C_OtherStationaryComb","D_Fugitive",
+						 "E_Solvents", "G_Shipping", "H_Aviation",
+						 "I_Offroad", "J_Waste")){
    x <- theme(plot.title = element_text(size = 20, hjust = 0.5),
           strip.text.x = element_text(size = 12),
           axis.title.y = element_blank(),
           axis.title.x = element_blank(),
 		  margin(t = 2, r = 2, b = 2, l = 2, unit = "mm"))
-  }else if(sector %in% c("J_Waste","K_AgriLivestock","L_AgriOther")){
+  }else if(sector %in% c("L_AgriOther", "M_Other")){
     x <- theme(plot.title = element_text(size = 20, hjust = 0.5),
                strip.text.x = element_text(size = 12),
                axis.title.y = element_blank(),
 		       margin(t = 2, r = 2, b = 2, l = 2, unit = "mm"))
-  }else if(sector == "M_Other"){
+  }else if(sector == "K_AgriLivestock"){
     x <- theme(plot.title = element_text(size = 20, hjust = 0.5),
                strip.text.x = element_text(size = 12),
 		       margin(t = 2, r = 2, b = 2, l = 2, unit = "mm"))
@@ -515,12 +533,24 @@ uk_bar_inv_ann <- function(fname_inv, fname_mask, y, species,
                                    "spatial_scaled","tot_masked","mon_masked"))]
   dt[,mask := factor(mask, levels = c("outwith", "sea", "terrestrial", "all"))]
   
+  # labels text
+  dt_text <- data.table(Area = rep(c("uk", "ie"), 5),
+	                    stage = rep(c("inv_spatial","inv_table",
+                                   "spatial_scaled","tot_masked","mon_masked"),
+								   each = 2),
+						emis_t = c(dt[, sum(emis_t), 
+						             by = .(Area, stage)][,V1]),	
+						label = as.character(round(dt[, sum(emis_t)/1000, 
+						             by = .(Area, stage)][,V1], 1)))
+  
   # plot
-  p <- ggplot(dt, aes(x = stage, y = emis_t/1000, group = mask, fill= mask))+
-    geom_bar(stat = "identity")+
+  p <- ggplot()+
+    geom_bar(data = dt, aes(x = stage, y = emis_t/1000, group = mask, fill= mask), stat = "identity")+
 	scale_fill_manual(values = c("#eecea6","#59aed3","#6fbe6d","#ea93ea"))+
-    labs(y = bquote(kt~a^-1))+
+    labs(y = bquote(kt~a^-1))+	
     facet_wrap(~Area, nrow=1, scales = "free_y")+
+	geom_text(data = dt_text, aes(x = stage, y = emis_t/1000, label = label), 
+	          size = 5)+
     theme_bw()+
     theme(strip.text = element_text(size = 20),
           legend.title = element_blank(), 
@@ -605,19 +635,33 @@ uk_bar_nc_ann <- function(fname_group, fname_ncinp, fname_ncout,
 					   
   dt[, stage := gsub("emis_t_", "", stage) ]
   
-  dt[, stage := factor(stage, levels = c("tot_masked","tot_grouped",
-                                         "mon_grouped","tot_ncinput",
-										 "tot_array","tot_ncfile",
-										 "time_layers","ncfile"))]
+  dt[, stage := factor(stage, levels = c("tot_masked", "tot_grouped",
+                                         "mon_grouped", "tot_ncinput",
+										 "tot_array", "time_layers", 
+										 "tot_ncoutput"))]
 										 
   dt[, Area := factor(Area, levels = c("ow","sea","ie","uk"))]
   
+  # labels text
+  dt_text <- data.table(stage = c("tot_masked", "tot_grouped",
+                                         "mon_grouped", "tot_ncinput",
+										 "tot_array", "time_layers", 
+										 "tot_ncoutput"),
+						emis_t = c(dt[, sum(emis_t), 
+						             by = .(stage)][,V1]),	
+						label = as.character(round(dt[, sum(emis_t)/1000, 
+						             by = .(stage)][,V1], 1)))
+  
   # plot
-  p <- ggplot(dt, aes(x = stage, y = emis_t/1000, group = Area, fill = Area))+
-    geom_bar(stat = "identity")+
+  p <- ggplot()+
+    geom_bar(data = dt, aes(x = stage, y = emis_t/1000, group = Area, 
+	                        fill = Area), 
+	         stat = "identity")+
 	scale_fill_manual(values = c("#eecea6","#59aed3","#8aee87","#6cb96a"),
 	                  labels = c("outwith","sea","IE (Terres)","UK (Terres)"))+
 	labs(y = bquote(kt~a^-1))+
+	geom_text(data = dt_text, aes(x = stage, y = emis_t/1000, label = label), 
+	          size = 5)+
     #facet_wrap(~Area, nrow=1, scales = "free_y")+
     theme_bw()+
     theme(strip.text = element_text(size = 20),
@@ -759,7 +803,7 @@ uk_lin_tot_mon <- function(fname_ncout, y, species, uk_folname,
     scale_x_continuous(breaks = 1:12)+
     facet_wrap(~Area, scales = "free_y", ncol = 1)+
 	labs(y = bquote(kt~a^-1))+
-	geom_text(data = dt_text, aes(x = time, y = fac, label = label), size = 3)+
+	geom_text(data = dt_text, aes(x = time, y = fac, label = label), size = 5)+
     theme_bw()+
     theme(strip.text = element_text(size = 20),
           legend.title = element_blank(), 
@@ -827,19 +871,19 @@ uk_lin_sec_mon <- function(dt_month, y, species, uk_folname,
   }
   
   # plot
-  label_plot <- ggdraw() + draw_label(paste0("Annual input file: using EMEP",
+  label_plot <- ggdraw() + draw_label(paste0("Annual input file:\n using EMEP",
                                              emep_version," profiles"),
-									  x = 0.5, y = 0.5, size = 22)
+									  x = 0.1, y = 0.65, size = 24)
 
   p <- l_p[[1]] + l_p[[2]] + l_p[[3]] + l_p[[4]] + l_p[[5]] + l_p[[6]] + 
        l_p[[7]] + l_p[[8]] + l_p[[9]] + l_p[[10]] + l_p[[11]] + l_p[[12]] + 
-	   l_p[[13]] + plot_spacer() + label_plot + plot_layout(ncol = 4)
+	   l_p[[13]] + plot_spacer() + label_plot + plot_layout(ncol = 5)
 	
   fname <- paste0(uk_folname,"/plots/e",y,"/",
 				  dt_poll[ceh_poll == species, emep_model],"_UKEIRE_",
 				  y,"emis_",map_yr_uk,"map_",naei_inv,"inv_5_UKMONSECLINE.png")
   
-  ggsave(fname, p, width = 14, height = 16)
+  ggsave(fname, p, width = 18, height = 12)
   
   return(p)
 

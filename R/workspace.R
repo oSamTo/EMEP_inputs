@@ -8,7 +8,8 @@
 
 ##############################################################################################################
 packs <- c("sf", "terra", "stringr", "dplyr", "ggplot2", "data.table", "purrr", "cowplot",
-		   "abind", "stats", "readxl", "ncdf4", "lubridate", "patchwork", "tidyterra")
+		   "abind", "stats", "readxl", "ncdf4", "lubridate", "patchwork", "tidyterra",
+		   "knitr", "kableExtra", "janitor")
 
 lapply(packs, require, character.only = TRUE)
 

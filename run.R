@@ -77,6 +77,6 @@ if(tp_scheme %in% c("EMEP4UKv4.45", "EMEP4UKv5.0", "annual", "test")){
 # this should be lapply over v_pollutants for a separate file. 
 create_qaqc(y, species, uk_folname, eu_folname, map_yr_uk, naei_inv, 
             emep_inv, time_dim, emep_version, v_EMEP_sec,
-			uk_agg_schema, eu_agg_schema)
+			uk_agg_schema, eu_agg_schema, tp_scheme)
 
 
