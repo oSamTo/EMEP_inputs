@@ -1,0 +1,14 @@
+File creation timestamp: 2025-01-04 17:49:52.245675
+Folder name: /gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK/inv2024
+Pollutants generated: sox
+Year of emissions generated: 2021
+NAEI inventory used: 2024
+NAEI UK map year used: 2022
+MapEire Eire map year used: 2019
+Aggregation schema: NA
+Periodicity of netcdf data: month
+Schema for temporal profiles: /gws/nopw/j04/ceh_generic/samtom/TEMREG/output/coeff_sector/GNFR/sox/ukem_genYr
+UK temporal profiles: SNAP onto GNFR
+
+Location of NH3 emissions: /gws/nopw/j04/ceh_generic/inventory_processor/data
+Location of NAEI/EIRE emissions: /gws/nopw/j04/ceh_generic/inventory_processor/data
