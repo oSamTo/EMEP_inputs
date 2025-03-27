@@ -12,19 +12,19 @@ create_qaqc <- function(y, species, uk_folname, eu_folname, map_yr_uk, naei_inv,
 
   # folders needed
   dir.create(file.path(uk_folname, "plots", paste0("e",y)), 
-			 showWarnings = FALSE, recursive = T)  
-  dir.create(file.path(uk_folname, "qaqc"), 
-			 showWarnings = FALSE, recursive = T)  
+			 showWarnings = FALSE, recursive = T)
+  dir.create(file.path(uk_folname, "qaqc", paste0("e",y)), 
+			 showWarnings = FALSE, recursive = T)
   dir.create(file.path(eu_folname, "plots", paste0("e",y)), 
-			 showWarnings = FALSE, recursive = T)  
-  dir.create(file.path(eu_folname, "qaqc"), 
-			 showWarnings = FALSE, recursive = T)  
+			 showWarnings = FALSE, recursive = T)
+  dir.create(file.path(eu_folname, "qaqc", paste0("e",y)), 
+			 showWarnings = FALSE, recursive = T)
     
   #######################
   #### DATA EXTRACTS ####
   #######################
     
-  species <- "nox" #
+  # species <- "nox" #
   
   print(paste0(format(Sys.time(), "%Y-%m-%d %X"),
                ":            collecting data - UK..."))  
@@ -186,7 +186,7 @@ create_qaqc <- function(y, species, uk_folname, eu_folname, map_yr_uk, naei_inv,
   rmarkdown::render(input = "R/QAQC.Rmd", 
                   output_file = paste0(dt_poll[ceh_poll == species, emep_model],
 				                       "_",y,"emis_",naei_inv,"inv_QAQC.pdf"),
-                  output_dir = paste0(uk_folname,"/qaqc"),
+                  output_dir = paste0(uk_folname,"/qaqc/e",y),
 				  params = l_pdf_params)
   
   #tinytex::parse_install(

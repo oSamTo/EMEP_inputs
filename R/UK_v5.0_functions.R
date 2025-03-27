@@ -79,7 +79,7 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
   if(map_yr_uk < 2018) stop ("UK spatial distribution must be 2018 or later")
   if(!(map_yr_ie %in% c(2016,2019))) stop ("Eire spatial distribution must be 2016 or 2019")
   
-  print(paste0(format(format(Sys.time(), "%Y-%m-%d %X"), "%Y-%m-%d %X"),": Creating EMEP4UK UKEIRE inputs (",time_dim,") for ",y,"..."))
+  print(paste0(format(Sys.time(), "%F %R"),": Creating EMEP4UK UKEIRE inputs (",time_dim,") for ",y,"..."))
   
   # For the years & pollutants, take the regional emissions in Lat Long and;
   #   i) convert point emissions (.csv) into a raster
@@ -1047,7 +1047,7 @@ create_NETCDF_uk_annual <- function(y, v_pollutants, folname, naei_inv,
   ncatt_put(nc_new, 0, "description", "UKIE_EMEP", prec = "char")
   ncatt_put(nc_new, 0, "Conventions", "CF-1.6 for coordinates", prec = "char")
   ncatt_put(nc_new, 0, "created_date", format(Sys.Date(), "%Y%m%d"), prec = "int")
-  ncatt_put(nc_new, 0, "created_hour",  gsub(":","",format(format(Sys.time(), "%Y-%m-%d %X"), "%X")), prec = "double") 
+  ncatt_put(nc_new, 0, "created_hour",  gsub(":","",format(Sys.time(), "%R")), prec = "double")
   ncatt_put(nc_new, 0, "projection", "lon lat", prec = "char")
   ncatt_put(nc_new, 0, "periodicity", "yearly", prec = "char")
   

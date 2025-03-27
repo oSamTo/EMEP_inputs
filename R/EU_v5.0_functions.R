@@ -15,7 +15,7 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
   # emissions year = *numeric*
   if(!is.numeric(emep_inv)) stop ("Reporting year is not numeric")
   
-  print(paste0(format(Sys.time(), "%Y-%m-%d %X"),": Creating EMEP4UK EU inputs (",time_dim,") for ",y,"..."))
+  print(paste0(format(Sys.time(), "%F %R"),": Creating EMEP4UK EU inputs (",time_dim,") for ",y,"..."))
     
   # For the years & pollutants, take the EU emissions in csv format and;
   #   i) convert every country/sector into a raster
@@ -41,7 +41,7 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
                                             PM:    pm25, pm10, pmco")
       ######################################################################################
       
-      print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":        ",species," data:"))
+      print(paste0(format(Sys.time(), "%F %R"),":        ",species," data:"))
       
       # we are using the EMEP csv emissions NOT the netcdf emissions
           # https://www.ceip.at/the-emep-grid/gridded-emissions/nox
@@ -62,7 +62,7 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
       # sector names to loop through - this is netcdf sector names (sec01 etc.)
       v_sectors <- dt_sec[EMEP_sec %in% v_EMEP_sec,unique(sec)]
       
-      print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":            gathering emissions..."))
+      print(paste0(format(Sys.time(), "%F %R"),":            gathering emissions..."))
 	  
       for(i in v_sectors){
         
@@ -135,12 +135,12 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
 		# EU: one EU territory file for month/annual data (i.e. no ISO). 
 		# ISO = separate ISO inputs for month/annual data.
 
-	  print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":            Reshaping..."))
+	  print(paste0(format(Sys.time(), "%F %R"),":            Reshaping..."))
 	  l_eu_toInp <- reshape_EU(y, species, eu_agg_schema, time_dim, l_eu_emis)
 	  
       ###################################################
       #### INPUT DATA TO NETCDF TO SPECIES VARIABLES ####
-      print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":            populating netcdf..."))
+      print(paste0(format(Sys.time(), "%F %R"),":            populating netcdf..."))
       	
 	  # input data and summarise what's going in. 
       dt_ncinput_summary <- input_data_NETCDF_eu(y, species, emep_inv, time_dim, v_EMEP_sec,
@@ -148,7 +148,7 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
       	  
       ##############################
 	  #### QAQC; TABLES & PLOTS ####
-	  print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":            summaries..."))
+	  print(paste0(format(Sys.time(), "%F %R"),":            summaries..."))
 	  
 	  # summarise the nc file itself, post writing. Double checker. (bit of a time sap)
 	  dt_ncoutput_summary <- summarise_nc_file_eu(fname_ncdf, y, species, emep_inv, time_dim, v_EMEP_sec)
@@ -163,12 +163,12 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
 	  # dt_emis_summary
 	  # dt_ncdf_summary
 	  
-      print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":            pollutant complete."))
+      print(paste0(format(Sys.time(), "%F %R"),":            pollutant complete."))
 	  
    } # pollutant loop
    
   
-  print(paste0(format(Sys.time(), "%Y-%m-%d %X"),": DONE."))
+  print(paste0(format(Sys.time(), "%F %R"),": DONE."))
   
 } # end of function
  
@@ -731,7 +731,7 @@ create_NETCDF_eu_annual <- function(y, v_pollutants, folname, emep_inv,
   ncatt_put(nc_new, 0, "description", "EU_EMEP", prec = "char")
   ncatt_put(nc_new, 0, "Conventions", "CF-1.6 for coordinates", prec = "char")
   ncatt_put(nc_new, 0, "created_date", format(Sys.Date(), "%Y%m%d"), prec = "int")
-  ncatt_put(nc_new, 0, "created_hour",  gsub(":","",format(format(Sys.time(), "%Y-%m-%d %X"), "%X")), prec = "double") 
+  ncatt_put(nc_new, 0, "created_hour",  gsub(":","",format(Sys.time(), "%F %R")), prec = "double") 
   ncatt_put(nc_new, 0, "projection", "lon lat", prec = "char")
   ncatt_put(nc_new, 0, "periodicity", "yearly", prec = "char")
   

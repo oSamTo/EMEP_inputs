@@ -92,7 +92,7 @@ Grid TM65 (Eire) into WGS84 lat lon, at 0.01$^\circ$ x 0.01$^\circ$ resolution.
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.7\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire total ",params$species," emissions annum-1 (Non-UK/Eire emissions for context).")}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_1_UKTOTMAP.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_1_UKTOTMAP.png"))
 ```
 
 \vspace{\baselineskip}
@@ -143,7 +143,7 @@ N.B. the map used is not necessarily the same as the emissions year (e.g. MapEir
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "Emissions processing from source to area-scaled totals.", label = fig-proc1}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_2_UKINVBAR.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_2_UKINVBAR.png"))
 ```
 
 Total `r params$species` in UK & Eire, processed: `r round(fread(params$l_fname_uk_sums[["masked"]])[Area == "uk",sum(emis_t_tot_masked, na.rm=T)/1000],1)` kt + `r round(fread(params$l_fname_uk_sums[["masked"]])[Area == "ie",sum(emis_t_tot_masked, na.rm=T)/1000],1)` kt = `r round(fread(params$l_fname_uk_sums[["processed"]])[,sum(emis_t_tot_grouped, na.rm=T)/1000],1)` kt. Spatial breakdown :
@@ -160,7 +160,7 @@ Figure \ref{fig:fig-proc2} shows the data progressing to NetCDF inputs - 'outwit
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "Area-scaled toals to NetCDF input data.", label = fig-proc2}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_3_UKNCBAR.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_3_UKNCBAR.png"))
 ```
 
 Emissions coming from processed inventories to NetCDF inputs; 'outwith' emissions (emissions outside 10km sea buffer) are masked and not used for UK/Eire (replaced by EMEP-EU).
@@ -195,7 +195,7 @@ Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, 
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.75\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire total ",params$species," emissions sector-1 annum-1")}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_6_UKANNSECMAP.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_6_UKANNSECMAP.png"))
 ```
 
 ```{r, message = FALSE, echo = FALSE}
@@ -222,7 +222,7 @@ Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, 
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = paste0("Emissions of ",params$species," month-1"), label = "fig-montot"}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_4_UKMONTOTLINE.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_4_UKMONTOTLINE.png"))
 ```
 
 Total monthly emissions of `r params$species` in UK, Eire and the SEA buffer. 
@@ -251,7 +251,7 @@ Also see Table 5 above for totals.
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.85\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire total ",params$species," emissions month-1")}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_7_UKMONTOTMAP.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_7_UKMONTOTMAP.png"))
 ```
 
 \newpage
@@ -264,7 +264,7 @@ Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, 
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.7\\linewidth", echo = FALSE, fig.cap = paste0("Emissions (kt) of ",params$species," month-1 sector-1")}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO/plots/e2022/nox_UKEIRE_2022emis_2022map_2024inv_5_UKMONSECLINE.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_5_UKMONSECLINE.png"))
 ```
 
 N.B. as UK data starts in SNAP sectors & Eire data in GNFR sectors, UK & Eire sectoral monthly emissions are sometimes flat
@@ -343,7 +343,7 @@ emissions take precedence outside of this mask.
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.9\\linewidth", echo = FALSE, fig.cap = paste0("EU total ",params$species," emissions annum-1 (UK/Eire emissions for context).")}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/EU/annual/TPannual_allISO/plots/e2022/nox_EU_2022emis_2022map_2024inv_8_EUTOTMAP.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$emep_inv,"/EU/",params$tp_scheme,"/TP",tp_scheme,"_",eu_agg_schema,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_8_EUTOTMAP.png"))
 ```
 
 \vspace{\baselineskip}
@@ -386,7 +386,7 @@ from EMEP/CEIP (inventory_data) and emissions post processing (processed_data).
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.35\\linewidth", echo = FALSE, fig.cap = "Emissions processing from source.", label = fig-procEU1}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/EU/annual/TPannual_allISO/plots/e2022/nox_EU_2022emis_2022map_2024inv_9_EUINVBAR.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$emep_inv,"/EU/",params$tp_scheme,"/TP",tp_scheme,"_",eu_agg_schema,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_9_EUINVBAR.png"))
 ```
 
 Total `r params$species` lost in EU domain, following processing: `r round(fread(params$l_fname_eu_sums[["inventory"]])[,sum(emis_t, na.rm=T)/1000]- fread(params$l_fname_eu_sums[["processed"]])[,sum(ann_emis_kt, na.rm=T)], 1)` kt. Spatial breakdown :
@@ -415,7 +415,7 @@ Figure \ref{fig:fig-procEU2} shows the data progressing to NetCDF inputs - emiss
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "Processed toals to NetCDF input data.", label = fig-procEU2}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/EU/annual/TPannual_allISO/plots/e2022/nox_EU_2022emis_2022map_2024inv_10_EUNCBAR.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$emep_inv,"/EU/",params$tp_scheme,"/TP",tp_scheme,"_",eu_agg_schema,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_10_EUNCBAR.png"))
 ```
 
 \newpage
@@ -442,7 +442,7 @@ Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, 
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.85\\linewidth", echo = FALSE, fig.cap = paste0("EMEP-EU total ",params$species," emissions sector-1 annum-1")}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/EU/annual/TPannual_allISO/plots/e2022/nox_EU_2022emis_2022map_2024inv_13_EUANNSECMAP.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$emep_inv,"/EU/",params$tp_scheme,"/TP",tp_scheme,"_",eu_agg_schema,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_13_EUANNSECMAP.png"))
 ```
 
 ```{r, message = FALSE, echo = FALSE}
@@ -475,7 +475,7 @@ Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, 
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = paste0("Emissions of ",params$species," month-1"), label = "fig-montotEU"}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/EU/annual/TPannual_allISO/plots/e2022/nox_EU_2022emis_2022map_2024inv_11_EUMONTOTLINE.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$emep_inv,"/EU/",params$tp_scheme,"/TP",tp_scheme,"_",eu_agg_schema,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_11_EUMONTOTLINE.png"))
 ```
 
 Total monthly emissions of `r params$species` in EU and ISOs nearest to UK/Eire. 
@@ -510,7 +510,7 @@ Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, 
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.7\\linewidth", echo = FALSE, fig.cap = paste0("Emissions (kt) of ",params$species," month-1 sector-1")}
 #| fig-pos: "h"
-knitr::include_graphics("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UKv5.0/inv2024/EU/annual/TPannual_allISO/plots/e2022/nox_EU_2022emis_2022map_2024inv_12_EUMONSECLINE.png")
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$emep_inv,"/EU/",params$tp_scheme,"/TP",tp_scheme,"_",eu_agg_schema,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_12_EUMONSECLINE.png"))
 ```
 
 ```{r, message = FALSE, echo = FALSE}

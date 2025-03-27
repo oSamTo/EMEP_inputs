@@ -11,7 +11,7 @@
 emep_version <- "v5.0" # v4.34, v4.36, v4.45 , v5.0
 
 ## vectors of emissions years and pollutants to run ##
-v_years <- c(2022) # what emissions years to process
+v_years <- c(2010,2015,2020) # what emissions years to process
 v_pollutants <- c("nox","nh3","sox","pm25","pmco","co","voc") # "nox","nh3","sox","pm25","pmco","co","voc", "cd", "cu", "ni", "pb", "zn" - CEH names, not EMEP model
 
 ## time dimension to process the data into ##
