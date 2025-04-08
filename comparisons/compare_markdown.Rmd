@@ -1,0 +1,227 @@
+---
+params:
+ species: NA
+ plot_dir: NA
+ emis_yr_1: NA
+ emis_yr_2: NA
+ folname_1: NA
+ folname_2: NA
+ l_fname_1: NA
+ l_fname_2: NA
+ l_m_1: NA
+ l_m_2: NA
+ uk_plot1: NA
+ uk_plot2: NA
+ uk_plot3: NA
+ uk_plot4: NA
+ uk_plot5: NA
+ uk_plot6: NA
+title: "EMEP4UK input files Comparison document - UK/EIRE & EU"
+author: "Sam Tomlinson"
+date: "`r Sys.Date()`"
+
+
+header-includes: 
+ \usepackage{geometry}
+ \geometry{top=1cm,left=1cm,bottom=1cm,right=1cm}
+ 
+output:
+  pdf_document:
+     fig_caption: true
+     extra_dependencies: ["threeparttable", "booktabs"]
+geometry: margin=1cm
+---
+
+```{r setup, include = FALSE, echo = FALSE}
+knitr::opts_knit$set(root.dir = r"[/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs]")
+```
+
+# UK/EIRE INPUT FILES
+
+Comparisons are made from File_2 perspective.
+
+## METADATA
+
+**Project:** NFC
+
+**Git Repo:** https://github.com/oSamTo/EMEP_inputs
+
+**JASMIN dir:** /gws/nopw/j04/ceh_generic/samtom/EMEP_inputs
+
+**Output dir:** `r gsub("plots", "", params$plot_dir)`
+
+\vspace{\baselineskip}
+
+**Folder_1:** `r params$folname_1`
+
+**File_1:** `r params$l_fname_1[["filename"]]`
+
+**Folder_2:** `r params$folname_2`
+
+**File_2:** `r params$l_fname_2[["filename"]]`
+
+\vspace{\baselineskip}
+```{r, message = FALSE, echo = FALSE}
+
+dt <- data.table(Variable = c("Pollutant", "Emission Year", "Inventory Year", 
+                              "EMEP version", "Time profiles", "Resolution"),
+                 File_1 = c(params$species, 
+				            params$l_fname_1[["metadata"]][,emis_y], 
+				            params$l_fname_1[["metadata"]][,inv_y], 
+							params$l_fname_1[["metadata"]][,EMEP_version], 
+							params$l_fname_1[["metadata"]][,EMEP_version], 
+							params$l_fname_1[["metadata"]][,res]),
+				 File_2 = c(params$species, 
+				            params$l_fname_2[["metadata"]][,emis_y], 
+				            params$l_fname_2[["metadata"]][,inv_y], 
+							params$l_fname_2[["metadata"]][,EMEP_version], 
+							params$l_fname_2[["metadata"]][,EMEP_version], 
+							params$l_fname_2[["metadata"]][,res]))
+				 
+kable(dt, align = "rcc", caption = "Metadata of inputs", 
+	  booktabs = TRUE)
+		 
+```
+
+Notes: 
+
+* Emissions may not have been processed to the same sectors or with identical
+methods, given the dateTime of production.
+
+* Emissions from the UK and Eire are masked to a UK+10km mask. EMEP/CEIP 
+emissions take precedence outside of this mask. 
+
+* The 10km strip from the land territory into the sea is combined (UK + Eire) to a 'SEA' ISO 
+code, for all sectors.
+
+\newpage
+
+## MAP: TOTAL EMISSION ANNUM^-1^
+
+```{r, eval = TRUE, fig.align = "center", out.width = "0.9\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire total ",params$species," emissions annum-1.")}
+#| fig-pos: "h"
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot1), rel_path = FALSE)
+```
+
+\vspace{\baselineskip}
+
+```{r, message = FALSE, echo = FALSE, label = tab-tot}
+
+dt_tots_1 <- copy(params$l_m_1[["summary"]])
+dt_tots_1 <- dt_tots_1[, .(emis_kt = sum(emis_t, na.rm=T)/1000), by = Area]
+
+dt_tots_2 <- copy(params$l_m_2[["summary"]])
+dt_tots_2 <- dt_tots_2[, .(emis_kt = sum(emis_t, na.rm=T)/1000), by = Area]
+
+dt1 <- data.table(Area = c("UK", "Eire", "SEA"),
+                  Species = params$species,
+ 				  File_1_kt = c(dt_tots_1[Area == "UK", round(emis_kt, 2)],
+				                dt_tots_1[Area == "IE", round(emis_kt, 2)],
+				                dt_tots_1[Area == "SEA", round(emis_kt, 2)]),
+				  File_2_kt = c(dt_tots_2[Area == "UK", round(emis_kt, 2)],
+				                dt_tots_2[Area == "IE", round(emis_kt, 2)],
+				                dt_tots_2[Area == "SEA", round(emis_kt, 2)]))
+								
+dt1[, diff_kt    := File_2_kt - File_1_kt]
+dt1[, diff_alpha := round(File_2_kt / File_1_kt, 3)]
+							  
+dt2 <- data.table(Area = c("Total"),
+                  Species = params$species,
+ 				  File_1_kt = dt_tots_1[, round(sum(emis_kt,na.rm=T), 2)],
+				  File_2_kt = dt_tots_2[, round(sum(emis_kt,na.rm=T), 2)])
+
+dt2[, diff_kt    := File_2_kt - File_1_kt]
+dt2[, diff_alpha := round(File_2_kt / File_1_kt, 3)]
+
+dt <- rbindlist(list(dt1, dt2), use.names = T)
+
+kable(dt, align = "cccc", caption = paste0("Annual emissions of ", params$species, " per ISO."), 
+	  booktabs = TRUE)
+```
+
+* N.B. UK and Eire totals in Table 2 are only on-land emissions.
+
+\newpage
+
+## MAP: SECTORAL EMISSIONS ANNUM^-1^
+
+```{r, eval = TRUE, fig.align = "center", out.width = "26%", echo = FALSE, fig.show="hold", fig.cap = ""}
+#| fig-pos: "h"
+knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[1]]),
+                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[2]]),
+						  paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[3]])), rel_path = FALSE)
+```
+
+```{r, eval = TRUE, fig.align = "center", out.width = "26%", echo = FALSE, fig.show="hold", fig.cap = ""}
+#| fig-pos: "h"
+knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[4]]),
+                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[5]]),
+						  paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[6]])), rel_path = FALSE)
+```
+
+```{r, eval = TRUE, fig.align = "center", out.width = "26%", echo = FALSE, fig.show="hold", fig.cap = ""}
+
+knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[7]]),
+                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[8]]),
+						  paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[9]])), rel_path = FALSE)
+```
+
+\newpage
+
+```{r, eval = TRUE, fig.align = "center", out.width = "28%", echo = FALSE, fig.show = "hold", fig.cap = ""}
+
+knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[10]]),
+                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[11]]),
+						  paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[12]])), rel_path = FALSE)
+```
+
+```{r, eval = TRUE, fig.align = "center", out.width = "0.8\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire sectoral ",params$species," emissions annum-1.")}
+#| fig-pos: "h"
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot6), rel_path = FALSE)
+```
+
+\newpage
+
+## MAP: EMISSIONS MONTH^-1^
+
+```{r, eval = TRUE, fig.align = "center", out.width = "26%", echo = FALSE, fig.show="hold", fig.cap = ""}
+
+knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[1]]),
+                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[2]]),
+						  paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[3]])), rel_path = FALSE)
+```
+
+```{r, eval = TRUE, fig.align = "center", out.width = "26%", echo = FALSE, fig.show="hold", fig.cap = ""}
+
+knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[4]]),
+                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[5]]),
+						  paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[6]])), rel_path = FALSE)
+```
+
+```{r, eval = TRUE, fig.align = "center", out.width = "26%", echo = FALSE, fig.show="hold", fig.cap = ""}
+
+knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[7]]),
+                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[8]]),
+						  paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[9]])), rel_path = FALSE)
+```
+
+\newpage
+
+```{r, eval = TRUE, fig.align = "center", out.width = "28%", echo = FALSE, fig.show = "hold", fig.cap = ""}
+
+knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[10]]),
+                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[11]]),
+						  paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[12]])), rel_path = FALSE)
+```
+
+```{r, eval = TRUE, fig.align = "center", out.width = "0.8\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire total ",params$species," emissions month-1.")}
+#| fig-pos: "h"
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot4), rel_path = FALSE)
+```
+
+\newpage
+
+```{r, eval = TRUE, fig.align = "center", out.width = "0.9\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire sectoral ",params$species," emissions month-1.")}
+#| fig-pos: "h"
+knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot5), rel_path = FALSE)
+```
