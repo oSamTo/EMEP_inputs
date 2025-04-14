@@ -566,11 +566,11 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
   
   ## reclassify and plot ##  
   # exract all the values present, into a vector. 
-  v_q <- c(0, 0.25, 0.5, 0.8, 0.95, 1.05, 1.2, 1.5, 2, 3, 4)
+  v_q <- c(0, 0.25, 0.5, 0.7, 0.8, 0.9, 0.98, 1.02, 1.1, 1.2, 1.3, 1.5, 2, 3)
     
-  v_cols <- c(grDevices::colorRampPalette(colors = c("#259bdf", "#d8f1ff"))(4),
-              "#d6d6d6",
-			  grDevices::colorRampPalette(colors = c("#ffdad8", "#f8493f"))(6))
+  v_cols <- c(grDevices::colorRampPalette(colors = c("#259bdf", "#d8f1ff"))(6),
+              "#ececec",
+			  grDevices::colorRampPalette(colors = c("#ffdad8", "#f8493f"))(7))
   
   # create a reclassification matrix and labels for the plot.
   m <- matrix(c(v_q, v_q[2:length(v_q)], ceiling(max(global(r_a, max, na.rm=T)$max)), 1:length(v_q)), ncol = 3)
@@ -608,12 +608,12 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
     theme_bw()+
     theme(strip.text.x = element_blank(),
 	  plot.title = element_text(size=18, hjust = 0.5),
-      legend.text = element_text(size=14),
+      legend.text = element_text(size=12),
       legend.title = element_text(size=16),
       legend.position = "right",
       legend.box.spacing = unit(2, "mm"),
       legend.margin = margin(0,0,0,0),
-      legend.key.height = unit(1,"cm"),
+      legend.key.height = unit(0.9,"cm"),
       plot.margin = unit(c(1, 1, 1, 1), "mm"))
   
   #fname <- paste0(plot_dir,"/test2.png")  
@@ -627,17 +627,17 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
   
   ## reclassify and plot ##  
   # exract all the values present, into a vector. 
-  v_q <- c(-1000, -10, -5, -1, -0.5, -0.1, 0.1, 0.5, 1, 5, 10, 1000)
+  v_q <- c(-1000, -10, -5, -1, -0.5, -0.1, -0.01, 0.01, 0.1, 0.5, 1, 5, 10, 1000)
   
   if(global(r_a, min, na.rm=T) < -1000) v_q[1] <- floor(global(r_a, min, na.rm=T)[,1])
-  if(global(r_a, max, na.rm=T) > 1000) v_q[12] <- ceiling(global(r_a, max, na.rm=T)[,1])
+  if(global(r_a, max, na.rm=T) > 1000) v_q[14] <- ceiling(global(r_a, max, na.rm=T)[,1])
     
-  v_cols <- c(grDevices::colorRampPalette(colors = c("#259bdf", "#d8f1ff"))(5),
-              "#d6d6d6",
-			  grDevices::colorRampPalette(colors = c("#ffdad8", "#f8493f"))(5))
+  v_cols <- c(grDevices::colorRampPalette(colors = c("#259bdf", "#d8f1ff"))(6),
+              "#ececec",
+			  grDevices::colorRampPalette(colors = c("#ffdad8", "#f8493f"))(6))
   
   # create a reclassification matrix and labels for the plot.
-  m <- matrix(c(v_q[1:11], v_q[2:12], 1:11), ncol = 3) 
+  m <- matrix(c(v_q[1:13], v_q[2:14], 1:13), ncol = 3) 
   
   # create labels
   v_labs <- unlist(lapply(1:nrow(m), function(x) paste0(round(m[x,1],2), "-", round(m[x,2], 2))))
@@ -670,12 +670,12 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
     theme_bw()+
     theme(strip.text.x = element_blank(),
 	  plot.title = element_text(size=18, hjust = 0.5),
-      legend.text = element_text(size=14),
+      legend.text = element_text(size=12),
       legend.title = element_text(size=16),
       legend.position = "right",
       legend.box.spacing = unit(2, "mm"),
       legend.margin = margin(0,0,0,0),
-      legend.key.height = unit(1,"cm"),
+      legend.key.height = unit(0.9,"cm"),
       plot.margin = unit(c(1, 1, 1, 1), "mm"))
   
   #fname <- paste0(plot_dir,"/test3.png")  
@@ -701,7 +701,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
   l <- list()
   
   # ignore 13, M_Other
-  for(i in 1:12){
+  for(i in 1:13){
     	print(i)
 	sec_GNFR <- dt_sec[sec == paste0("sec",str_pad(i, "width" = 2, side = "left", 0)), GNFRlong]
   
@@ -798,11 +798,11 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
   
     ## reclassify and plot ##  
     # exract all the values present, into a vector. 
-    v_q <- c(0, 0.25, 0.5, 0.8, 0.95, 1.05, 1.2, 1.5, 2, 3, 4)
+    v_q <- c(0, 0.25, 0.5, 0.7, 0.8, 0.9, 0.98, 1.02, 1.1, 1.2, 1.3, 1.5, 2, 3)
     
-    v_cols <- c(grDevices::colorRampPalette(colors = c("#259bdf", "#d8f1ff"))(4),
-                "#d6d6d6",
-	  		    grDevices::colorRampPalette(colors = c("#ffdad8", "#f8493f"))(6))
+    v_cols <- c(grDevices::colorRampPalette(colors = c("#259bdf", "#d8f1ff"))(6),
+                "#ececec",
+	  		    grDevices::colorRampPalette(colors = c("#ffdad8", "#f8493f"))(7))
   
     # create a reclassification matrix and labels for the plot.
     m <- matrix(c(v_q, v_q[2:length(v_q)], ceiling(max(global(r_a, max, na.rm=T)$max)), 1:length(v_q)), ncol = 3)
@@ -820,6 +820,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
     names(r_a_rc) <- paste0("file_2 / file_1")
   
     dt_levs <- levels(r_a_rc)[[1]]
+	#levels(r_a_rc)[[1]] <- data.table(ID = 1:11, sum = 1:11)
 
     # subset the colours and the labels based on factors present
     v_cols <- v_cols[unique(dt_levs$ID)]
@@ -829,7 +830,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
 	
 	r_a_rc <- copy(r_a)
 	r_a_rc[r_a_rc == 0] <- NA
-	v_cols <- "#d6d6d6"
+	v_cols <- "#ececec"
 	v_labs <- "1"
     
 	}
@@ -848,12 +849,12 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
       theme_bw()+
       theme(strip.text.x = element_blank(),
 	    plot.title = element_text(size=18, hjust = 0.5),
-        legend.text = element_text(size=14),
+        legend.text = element_text(size=12),
         legend.title = element_text(size=16),
         legend.position = "right",
         legend.box.spacing = unit(2, "mm"),
         legend.margin = margin(0,0,0,0),
-        legend.key.height = unit(1,"cm"),
+        legend.key.height = unit(0.9,"cm"),
         plot.margin = unit(c(1, 1, 1, 1), "mm"))
     
     #fname <- paste0(plot_dir,"/test2.png")  
@@ -865,24 +866,24 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
 	
 	if(global(r_a, sum, na.rm=T)[,1] != 0){
 	
-	r_a[is.na(r_a)] <- 0
-	r_a[is.infinite(r_a)] <- 0
+	#r_a[is.na(r_a)] <- 0
+	#r_a[is.infinite(r_a)] <- 0
     #r_a[r_a == 0] <- NA
     #r_a[is.infinite(r_a)] <- NA
     
     ## reclassify and plot ##  
     # exract all the values present, into a vector. 
-    v_q <- c(-1000, -10, -5, -1, -0.5, -0.1, 0.1, 0.5, 1, 5, 10, 1000)
+    v_q <- c(-1000, -10, -5, -1, -0.5, -0.1, -0.01, 0.01, 0.1, 0.5, 1, 5, 10, 1000)
     
     if(global(r_a, min, na.rm=T) < -1000) v_q[1] <- floor(global(r_a, min, na.rm=T)[,1])
-    if(global(r_a, max, na.rm=T) > 1000) v_q[12] <- ceiling(global(r_a, max, na.rm=T)[,1])
+    if(global(r_a, max, na.rm=T) > 1000) v_q[14] <- ceiling(global(r_a, max, na.rm=T)[,1])
       
-    v_cols <- c(grDevices::colorRampPalette(colors = c("#259bdf", "#d8f1ff"))(5),
-                "#d6d6d6",
-  			  grDevices::colorRampPalette(colors = c("#ffdad8", "#f8493f"))(5))
+    v_cols <- c(grDevices::colorRampPalette(colors = c("#259bdf", "#d8f1ff"))(6),
+                "#ececec",
+  			  grDevices::colorRampPalette(colors = c("#ffdad8", "#f8493f"))(6))
     
     # create a reclassification matrix and labels for the plot.
-    m <- matrix(c(v_q[1:11], v_q[2:12], 1:11), ncol = 3) 
+    m <- matrix(c(v_q[1:13], v_q[2:14], 1:13), ncol = 3) 
     
     # create labels
     v_labs <- unlist(lapply(1:nrow(m), function(x) paste0(round(m[x,1],2), "-", round(m[x,2], 2))))
@@ -894,6 +895,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
     names(r_a_rc) <- paste0("file_2 - file_1")
     
     dt_levs <- levels(r_a_rc)[[1]]
+	
    
     # subset the colours and the labels based on factors present
     v_cols <- v_cols[unique(dt_levs$ID)]
@@ -903,7 +905,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
 	
 	r_a_rc <- copy(r_a)
 	r_a_rc[r_a_rc == 0] <- NA
-	if(length(v_cols)==0) v_cols <- "#d6d6d6"
+	if(length(v_cols)==0) v_cols <- "#ececec"
 	if(length(v_labs)==0) v_labs <- "0"
 	
 	}
@@ -913,7 +915,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
       geom_spatraster(data = r_a_rc, na.rm = T)+
       # scale_fill_gradient2(low = "#16abf5", mid = "white", high = "#ff514e", midpoint = 5, breaks = 1:length(v_labs), labels = v_labs)+
       #scale_fill_brewer(labels = v_labs, palette = "RdBu", direction = brew_d, na.value = "grey90")+
-      {if(!is.na(global(r_a_rc,sum,na.rm=T)[,1]))scale_fill_manual(values = v_cols, labels = v_labs, na.value = "transparent")}+
+      {if(!is.na(global(r_a_rc,sum,na.rm=T)[,1]))scale_fill_manual(values = v_cols, labels = v_labs, na.value = "transparent")}+  
       #scale_y_continuous(expand = c(0, 0)) +
       labs(fill = "tonnes")+
       ggtitle(names(r_a_rc))+
@@ -923,12 +925,12 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
       theme_bw()+
       theme(strip.text.x = element_blank(),
 	    plot.title = element_text(size=18, hjust = 0.5),
-        legend.text = element_text(size=14),
+        legend.text = element_text(size=12),
         legend.title = element_text(size=16),
         legend.position = "right",
         legend.box.spacing = unit(2, "mm"),
         legend.margin = margin(0,0,0,0),
-        legend.key.height = unit(1,"cm"),
+        legend.key.height = unit(0.9,"cm"),
         plot.margin = unit(c(1, 1, 1, 1), "mm"))
     
     #fname <- paste0(plot_dir,"/test3.png")  
@@ -939,9 +941,9 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir){
     
 	fname <- paste0(plot_dir,"/",pollutant,"_UKEIRE_2.",i,"_UKSECMAP.png")  
     ggsave(fname, p, width = 10.4, height = 12, limitsize = F)
-	
+			
 	l[[i]] <- fname
-  
+   
   }
   
   return(l)
@@ -1052,11 +1054,11 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir){
   
     ## reclassify and plot ##  
     # exract all the values present, into a vector. 
-    v_q <- c(0, 0.25, 0.5, 0.8, 0.95, 1.05, 1.2, 1.5, 2, 3, 4)
+    v_q <- c(0, 0.25, 0.5, 0.7, 0.8, 0.9, 0.98, 1.02, 1.1, 1.2, 1.3, 1.5, 2, 3)
     
-    v_cols <- c(grDevices::colorRampPalette(colors = c("#259bdf", "#d8f1ff"))(4),
-                "#d6d6d6",
-	  		    grDevices::colorRampPalette(colors = c("#ffdad8", "#f8493f"))(6))
+    v_cols <- c(grDevices::colorRampPalette(colors = c("#259bdf", "#d8f1ff"))(6),
+                "#ececec",
+	  		    grDevices::colorRampPalette(colors = c("#ffdad8", "#f8493f"))(7))
   
     # create a reclassification matrix and labels for the plot.
     m <- matrix(c(v_q, v_q[2:length(v_q)], ceiling(max(global(r_a, max, na.rm=T)$max)), 1:length(v_q)), ncol = 3)
@@ -1084,7 +1086,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir){
 	r_a_rc <- copy(r_a)
 	r_a_rc[r_a_rc == 0] <- NA
 	names(r_a_rc) <- paste0("file_2 / file_1")
-	v_cols <- "#d6d6d6"
+	v_cols <- "#ececec"
 	v_labs <- "1"
     
 	}
@@ -1103,12 +1105,12 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir){
       theme_bw()+
       theme(strip.text.x = element_blank(),
 	    plot.title = element_text(size=18, hjust = 0.5),
-        legend.text = element_text(size=14),
+        legend.text = element_text(size=12),
         legend.title = element_text(size=16),
         legend.position = "right",
         legend.box.spacing = unit(2, "mm"),
         legend.margin = margin(0,0,0,0),
-        legend.key.height = unit(1,"cm"),
+        legend.key.height = unit(0.9,"cm"),
         plot.margin = unit(c(1, 1, 1, 1), "mm"))
     
     #fname <- paste0(plot_dir,"/test2.png")  
@@ -1127,17 +1129,17 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir){
     
     ## reclassify and plot ##  
     # exract all the values present, into a vector. 
-    v_q <- c(-1000, -10, -5, -1, -0.5, -0.1, 0.1, 0.5, 1, 5, 10, 1000)
+    v_q <- c(-1000, -10, -5, -1, -0.5, -0.1, -0.01, 0.01, 0.1, 0.5, 1, 5, 10, 1000)
     
     if(global(r_a, min, na.rm=T) < -1000) v_q[1] <- floor(global(r_a, min, na.rm=T)[,1])
-    if(global(r_a, max, na.rm=T) > 1000) v_q[12] <- ceiling(global(r_a, max, na.rm=T)[,1])
+    if(global(r_a, max, na.rm=T) > 1000) v_q[14] <- ceiling(global(r_a, max, na.rm=T)[,1])
       
-    v_cols <- c(grDevices::colorRampPalette(colors = c("#259bdf", "#d8f1ff"))(5),
-                "#d6d6d6",
-  			  grDevices::colorRampPalette(colors = c("#ffdad8", "#f8493f"))(5))
+    v_cols <- c(grDevices::colorRampPalette(colors = c("#259bdf", "#d8f1ff"))(6),
+                "#ececec",
+  			  grDevices::colorRampPalette(colors = c("#ffdad8", "#f8493f"))(6))
     
     # create a reclassification matrix and labels for the plot.
-    m <- matrix(c(v_q[1:11], v_q[2:12], 1:11), ncol = 3) 
+    m <- matrix(c(v_q[1:13], v_q[2:14], 1:13), ncol = 3) 
     
     # create labels
     v_labs <- unlist(lapply(1:nrow(m), function(x) paste0(round(m[x,1],2), "-", round(m[x,2], 2))))
@@ -1159,7 +1161,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir){
 	r_a_rc <- copy(r_a)
 	r_a_rc[r_a_rc == 0] <- NA
 	names(r_a_rc) <- paste0("file_2 - file_1")
-	if(length(v_cols)==0) v_cols <- "#d6d6d6"
+	if(length(v_cols)==0) v_cols <- "#ececec"
 	if(length(v_labs)==0) v_labs <- "0"
 	
 	}
@@ -1179,12 +1181,12 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir){
       theme_bw()+
       theme(strip.text.x = element_blank(),
 	    plot.title = element_text(size=18, hjust = 0.5),
-        legend.text = element_text(size=14),
+        legend.text = element_text(size=12),
         legend.title = element_text(size=16),
         legend.position = "right",
         legend.box.spacing = unit(2, "mm"),
         legend.margin = margin(0,0,0,0),
-        legend.key.height = unit(1,"cm"),
+        legend.key.height = unit(0.9,"cm"),
         plot.margin = unit(c(1, 1, 1, 1), "mm"))
     
     #fname <- paste0(plot_dir,"/test3.png")  

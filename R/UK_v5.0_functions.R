@@ -79,7 +79,7 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
   if(map_yr_uk < 2018) stop ("UK spatial distribution must be 2018 or later")
   if(!(map_yr_ie %in% c(2016,2019))) stop ("Eire spatial distribution must be 2016 or 2019")
   
-  print(paste0(format(Sys.time(), "%F %R"),": Creating EMEP4UK UKEIRE inputs (",time_dim,") for ",y,"..."))
+  print(paste0(format(Sys.time(), "%F %T"),": Creating EMEP4UK UKEIRE inputs (",time_dim,") for ",y,"..."))
   
   # For the years & pollutants, take the regional emissions in Lat Long and;
   #   i) convert point emissions (.csv) into a raster
@@ -111,23 +111,8 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
                                             PM:    pm25, pm10, pmco")
     ######################################################################################
       
-    print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":        ",species," data:"))        
-	 
-	# set emissions location. 
-	# use the default emissions location for all processed emissions from inventory, if not set in the alternative table
-	# THIS ISN'T REALLY IN USE AT THE MOMENT, but the basis is as follow;
-	if(species %in% dt_alt_emis[,poll]){
-	 
-	  emis_loc <- dt_alt_emis[poll == species, loc]
-	  loc_text <- "alternative"
-	 
-	}else{
-	 
-	  emis_loc <- "/gws/nopw/j04/ceh_generic/inventory_processor/data"
-	  loc_text <- "standard"
-	 
-	}
-	
+    print(paste0(format(Sys.time(), "%F %T"),":        ",species," data:"))        
+		
 	# create folder, move old netCDF files. ABANDONED THIS FOR NOW. 
 	# archive_data(species, folname)	
 	 
@@ -145,23 +130,25 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
     # sector names to loop through - this is netcdf sector names (sec01 etc.)
     v_sectors <- dt_sec[EMEP_sec %in% v_EMEP_sec, unique(sec)]
 	
-    print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":            gathering emissions..."))
+    print(paste0(format(Sys.time(), "%F %T"),":            gathering emissions..."))
      
     for(i in v_sectors){
        
       if(i == "") next # not interested in currently blank EMEP-named sectors
       if(dt_sec[sec == i, GNFRlong]  == "" ) next # not interested in blank named GNFR sectors either
-      # print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":         ",i))
-       
+      # print(paste0(format(Sys.time(), "%F %T"),":         ",i))
+      	  
       ####################################
       #### LISTS OF EMISSION SURFACES ####
        
 	  # we do not make a new sea list here, because the temporal data doesn't exist.
 	  # i.e. we need to keep the sea buffer emissions associated with country of origin. 
-      l_uk <- UKIE_sector_Emissions(emis_loc, species, y, i, time_dim, res_crs, 
-	                                map_yr = map_yr_uk, naei_inv, country = "uk")
-      l_ie <- UKIE_sector_Emissions(emis_loc, species, y, i, time_dim, res_crs, 
-	                                map_yr = map_yr_ie, naei_inv, country = "ie")
+      l_uk <- UKIE_sector_Emissions(dt_alt_emis, species, y, i, 
+	                                time_dim, res_crs, map_yr = map_yr_uk, 
+									naei_inv, country = "uk")
+      l_ie <- UKIE_sector_Emissions(dt_alt_emis, species, y, i, 
+	                                time_dim, res_crs, map_yr = map_yr_ie, 
+									naei_inv, country = "ie")
        
       ########################
       #### TEMPORAL SPLIT ####
@@ -215,14 +202,14 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
 	 ####################################################
      #### AGGREGATION BY SECTOR OR ISO (IF REQUIRED) ####
 	 	  
-	 #print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":               Aggregating by sector and/or ISO code..."))
+	 #print(paste0(format(Sys.time(), "%F %T"),":               Aggregating by sector and/or ISO code..."))
 	 #l_eu_agg <- aggregateEU(y, species, schema, time_dim, l_eu_allSec)
 	 ## code to go here for any aggregations, e.g. ISO code ##
 	 # will need to create 'l_uk_agg' object, like in EU code
      
      ###################################################
      #### INPUT DATA TO NETCDF TO SPECIES VARIABLES ####
-     print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":            populating netcdf..."))
+     print(paste0(format(Sys.time(), "%F %T"),":            populating netcdf..."))
      
 	 # input data and summarise what's going in. 
 	 l_ukiesea_emis <- list("GB" = l_uk_emis, "IE" = l_ie_emis, "SEA" = l_sea_emis) # use GB, not UK
@@ -233,7 +220,7 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
      	  
 	 ##############################
      #### QAQC; TABLES & PLOTS ####
-     print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":            summaries..."))
+     print(paste0(format(Sys.time(), "%F %T"),":            summaries..."))
 	 
 	 dt_inv_summary  <- rbindlist(l_inv_summary, use.names=T)
 	 dt_mask_summary <- rbindlist(l_mask_summary, use.names=T)
@@ -248,7 +235,7 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
 				        dt_inv = dt_inv_summary, dt_mask = dt_mask_summary, dt_group = dt_group_summary,
 				        dt_ncinp = dt_ncinput_summary, dt_ncout = dt_ncoutput_summary)
   	
-	 print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":            pollutant complete."))
+	 print(paste0(format(Sys.time(), "%F %T"),":            pollutant complete."))
 	 
 	 # tidy
      remove(l_ukiesea_emis)
@@ -259,14 +246,15 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
 	 
 	} # pollutant loop
   
-  print(paste0(format(Sys.time(), "%Y-%m-%d %X"),": DONE."))
+  print(paste0(format(Sys.time(), "%F %T"),": DONE."))
   
 } # end of function
         
 
 ######################################################################################################
 #### function to collect sector data for diffuse and points, based on country and sector
-UKIE_sector_Emissions <- function(emis_loc, species, y, i, time_dim, res_crs, map_yr, naei_inv, country = c("uk", "ie")){
+UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, time_dim, res_crs,
+                                  map_yr, naei_inv, country = c("uk", "ie")){
   
   country <- match.arg(country)
   
@@ -296,30 +284,112 @@ UKIE_sector_Emissions <- function(emis_loc, species, y, i, time_dim, res_crs, ma
   #          |-----------|-----------|-----------|-----------|-----------|-----------|
   
     
-  
+  ## emissions file locations: 
+  # check the dt_alt_emis for any surfaces - where present, use them. 
+  # if not present, use the default location;
+		# "/gws/nopw/j04/ceh_generic/inventory_processor/data"
+    
   # read both points files, easier to subset. 
+  ## UK
   if(country == "uk"){
     
-	# diffuse filename (current year)
-	f_diff <- paste0(emis_loc,"/NAEI/inv",naei_inv,"/maps/NAEI_",dt_poll[ceh_poll == species, invProc],
+	alt_checker <- nrow(dt_alt_emis[poll == species & diff_or_pt == "diff" & 
+	                    sector == dt_sec[sec == i, GNFRlong] & iso == "GB"])
+		
+	if(alt_checker > 1) stop("Alternative emissions has too many surfaces for poll/sector/iso")
+	
+	## Diffuse UK
+	if(alt_checker == 1){
+ 
+      fol_emis <- alt_checker[, loc]
+	  fname_emis <- alt_checker[, fname]
+	  
+	  f_diff <- file.path(fol_emis, fname_emis)
+	  
+      loctext_diff <- "alt_file"
+ 
+    }else{
+ 
+      fol_emis <- "/gws/nopw/j04/ceh_generic/inventory_processor/data"
+	  
+	  f_diff <- paste0(fol_emis,"/NAEI/inv",naei_inv,"/maps/NAEI_",dt_poll[ceh_poll == species, invProc],
 					 "_DIFFUSE_inv",naei_inv,"_emis_",naei_inv-2,"/GNFR/NAEI_", 
 					 dt_poll[ceh_poll == species, invProc],"_DIFFUSE_inv",naei_inv,"_emis_",naei_inv-2,
 					 "_GNFR_",dt_sec[sec == i, GNFRlong],"_t_LL.tif")
-  
-    # set the points filename - the NAEI data from 1990 to current year
-    f_pt <- c(paste0(emis_loc,"/NAEI/inv",naei_inv,"/points/NAEI_AllPoll_POINTS_inv",naei_inv,
+	  	  
+      loctext_diff <- "inventory"
+ 
+    }
+	
+	## Points UK
+	# (this is more unlikely, but could happen, e.g. power)
+	
+	alt_checker <- nrow(dt_alt_emis[poll == species & diff_or_pt == "pt" & 
+	                    sector == dt_sec[sec == i, GNFRlong] & iso == "GB"])
+	
+    if(alt_checker > 1) stop("Alternative emissions has too many surfaces for poll/sector/iso")
+	
+    if(alt_checker == 1){
+ 
+      fol_emis <- alt_checker[, loc]
+	  fname_emis <- alt_checker[, fname]
+	  
+	  ## WE NEED TO READ IN 1990+ FILE AND 1950-2000 FILE AND REMOVE THE NECESSARY EMISSIONS
+	  
+	  stop("make code to replace existing points in time series data")
+	  
+	  f_pt <- file.path(fol_emis, fname_emis)
+	  
+      loctext_pt <- "alt_file"
+ 
+    }else{
+ 
+      fol_emis <- "/gws/nopw/j04/ceh_generic/inventory_processor/data"
+	  	  
+	  f_pt <- c(paste0(fol_emis,"/NAEI/inv",naei_inv,"/points/NAEI_AllPoll_POINTS_inv",naei_inv,
 	          "_emis_1990_",naei_inv-2,"_GNFR_t_LL.csv"),
-			  paste0(emis_loc,"/../../samtom/SPEED/power_station_emissions_ALL_1950-2000_GNFR_t_LL.csv"))
-      
-  }else{
+			  paste0(fol_emis,"/../../samtom/SPEED/power_station_emissions_ALL_1950-2000_GNFR_t_LL.csv"))
+	  	  
+      loctext_pt <- "inventory"
+ 
+    }
   
-    # diffuse filename - Eire inventory is currently set to 2021 with 2019 maps
-	f_diff <- paste0(emis_loc,"/MapEire/inv2021/maps/tif/MapEire_",dt_poll[ceh_poll == species, invProc],
-	                 "_DIFFUSE_inv2021_emis_2019/GNFR/MapEire_", dt_poll[ceh_poll == species, invProc],
-					 "_DIFFUSE_inv2021_emis_2019_GNFR_",dt_sec[sec == i, GNFRlong],"_t_LL.tif")
+  ## EIRE
+  }else if(country == "ie"){
   
+    alt_checker <- nrow(dt_alt_emis[poll == species & diff_or_pt == "diff" & 
+	                    sector == dt_sec[sec == i, GNFRlong] & iso == "IE"])
+	
+    if(alt_checker > 1) stop("Alternative emissions has too many surfaces for poll/sector/iso")
+	  
+    ## Diffuse Eire
+	if(alt_checker == 1){
+ 
+      fol_emis <- alt_checker[, loc]
+	  fname_emis <- alt_checker[, fname]
+	  
+	  f_diff <- file.path(fol_emis, fname_emis)
+	  
+      loctext_diff <- "alt_file"
+ 
+    }else{
+ 
+      fol_emis <- "/gws/nopw/j04/ceh_generic/inventory_processor/data"
+	  
+	  # diffuse filename - Eire inventory is currently set to 2021 with 2019 maps
+	  f_diff <- paste0(fol_emis,"/MapEire/inv2021/maps/tif/MapEire_",dt_poll[ceh_poll == species, invProc],
+	                   "_DIFFUSE_inv2021_emis_2019/GNFR/MapEire_", dt_poll[ceh_poll == species, invProc],
+					   "_DIFFUSE_inv2021_emis_2019_GNFR_",dt_sec[sec == i, GNFRlong],"_t_LL.tif")
+	  	  
+      loctext_diff <- "inventory"
+ 
+    }
+  
+    ## Points Eire
     # set the points filename
+	# you cant replace Eire points at the moment, as they are not separate in source data
     f_pt <- "no_file"
+	loctext_pt <- "no_file"
   
   }
   
@@ -333,8 +403,7 @@ UKIE_sector_Emissions <- function(emis_loc, species, y, i, time_dim, res_crs, ma
     
     r_diff <- r_dom_UKIE
     
-  } # end of read diffuse
-    
+  } # end of read diffuse    
   
   ### read point data ###
   # this is decided by country, UK should always have point files to read
@@ -379,7 +448,7 @@ UKIE_sector_Emissions <- function(emis_loc, species, y, i, time_dim, res_crs, ma
       
     } # end of read points
     
-  }else{
+  }else if(country == "ie"){
     
     r_pt <- r_dom_UKIE
     
@@ -391,95 +460,158 @@ UKIE_sector_Emissions <- function(emis_loc, species, y, i, time_dim, res_crs, ma
   
   ###############
   ### SCALING ###
-    
-  if(country == "uk"){
   
-    # read in the SNAP time series;
-         # SNAP maps were put into GNFR maps, so there will be 0 data in some GNFRs 
-		 # but there may be data in equiv inventory GNFRs, as it's just sector totalling, so data will be lost to maps of 0
-	# use the ACTUAL amounts, not the alpha - this is due to the complex relationship of point & 
-	#                                         diffuse data, data completeness and relative scaling causing error 
+  # Scale the mapped data to a chosen year - scale by emissions, not an alpha factor
+  # BUT, if alternative emission supplied, do not scale that surface; use as is.
+  
+  if(country == "uk"){
     
-	# anything prior to 1970 (or 1980 for NH3) needs the SPEED totals.
-	if(y >= 1980){
+	# read in the SNAP time series;
+           # SNAP maps were put into GNFR maps, so there will be 0 data in some GNFRs 
+	  	   # but there may be data in equiv inventory GNFRs, as it's just sector totalling, so data will be lost to maps of 0
+	  # use the ACTUAL amounts, not the alpha - this is due to the complex relationship of point & 
+	  #                                         diffuse data, data completeness and relative scaling causing error 
+    
+	  # anything prior to 1970 (or 1980 for NH3) needs the SPEED totals.
+	  if(y >= 1980){
 	  
-	  f_alpha <- paste0(emis_loc,"/NAEI/inv",naei_inv,"/alpha/NAEI_AllPoll_TOTALS_inv",naei_inv,"_emis_1970-",naei_inv-2,"_SNAP_alpha.csv")
-      dt_alpha <- fread(f_alpha)
+	    f_alpha <- paste0("/gws/nopw/j04/ceh_generic/inventory_processor/data/NAEI/inv",naei_inv,"/alpha/NAEI_AllPoll_TOTALS_inv",naei_inv,"_emis_1970-",naei_inv-2,"_SNAP_alpha.csv")
+        dt_alpha <- fread(f_alpha)
 	
-	}else if(y >= 1970 & species != "nh3"){
+	  }else if(y >= 1970 & species != "nh3"){
 	  
-	  f_alpha <- paste0(emis_loc,"/NAEI/inv",naei_inv,"/alpha/NAEI_AllPoll_TOTALS_inv",naei_inv,"_emis_1970-",naei_inv-2,"_SNAP_alpha.csv")
-      dt_alpha <- fread(f_alpha)
+	    f_alpha <- paste0("/gws/nopw/j04/ceh_generic/inventory_processor/data/NAEI/inv",naei_inv,"/alpha/NAEI_AllPoll_TOTALS_inv",naei_inv,"_emis_1970-",naei_inv-2,"_SNAP_alpha.csv")
+        dt_alpha <- fread(f_alpha)
 	
-	}else{
+	  }else{
 	  
-	  f_alpha <- paste0(emis_loc,"/../../samtom/SPEED/SPEED_AllPoll_TOTALS_invNA_emis_1960-1970_SNAP_alpha.csv")
-      dt_alpha <- fread(f_alpha)
+	    f_alpha <- paste0("/gws/nopw/j04/ceh_generic/samtom/SPEED/SPEED_AllPoll_TOTALS_invNA_emis_1960-1970_SNAP_alpha.csv")
+        dt_alpha <- fread(f_alpha)
 	
-	}
+	  }
 	
-	# subset the value required. GNFR UK maps are forced from SNAP maps. Remember;
-			# to scale industry by SNAPs 3 & 4 together (inventory processor combines 3 & 4 to B_Industry)
-			# all of SNAP 8 is in I_Offroad (inventory_processor).
-				# While G_Shipping and H_Aviation are empty, shouldn't take the risk using SN08 > once
-			# all of SNAP 10 is in K_AgriLivestock (inventory_processor).
-				# While L_AgriOther is empty, shouldn't take the risk using SN10 > once
-			# set secs 14 to 19 as NA, as they are not used yet, and causes double counting in summary
+	  # subset the value required. GNFR UK maps are just SNAP maps re-assigned. Remember;
+		  	  # to scale industry by SNAPs 3 & 4 together (inventory processor combines 3 & 4 to B_Industry)
+			  # all of SNAP 8 is in I_Offroad (inventory_processor).
+			  	  # While G_Shipping and H_Aviation are empty, shouldn't take the risk using SN08 > once
+			  # all of SNAP 10 is in K_AgriLivestock (inventory_processor).
+				  # While L_AgriOther is empty, shouldn't take the risk using SN10 > once
+			  # set secs 14 to 19 as NA, as they are not used yet, and causes double counting in summary
 				
-	if(i == "sec02"){
-	  scaling_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] & Year == y & AREA == toupper(country) & SNAP %in% c(3:4), sum(tot_emis_t, na.rm=T)]
-	}else if(i %in% c("sec07","sec08","sec12")){
-	  scaling_value <- NA
-	}else if(i %in% c("sec14","sec15","sec16","sec17","sec18","sec19")){
-	  scaling_value <- NA
-	}else{
-	  scaling_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] & Year == y & AREA == toupper(country) & SNAP == dt_sec[sec == i, SNAP], tot_emis_t]
-	}
+	  if(i == "sec02"){ # B_Industry
+	    scaling_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] & Year == y & AREA == toupper(country) & SNAP %in% c(3:4), sum(tot_emis_t, na.rm=T)]
+	  }else if(i %in% c("sec07","sec08","sec12")){ # G_Shipping, H_Aviation & L_AgriOther
+	    scaling_value <- NA
+	  }else if(i %in% c("sec14","sec15","sec16","sec17","sec18","sec19")){ # empty GNFR
+	    scaling_value <- NA
+	  }else{ # All other
+	    scaling_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] & Year == y & AREA == toupper(country) & SNAP == dt_sec[sec == i, SNAP], tot_emis_t]
+	  }
+	  	
+	  if(length(scaling_value) == 0) scaling_value <- 0
+	  if(is.na(scaling_value)) scaling_value <- 0
+	  
+	  # This is the same value irrespective of whether alt_emis were used or not. 
+	  inventory_table_value <- copy(scaling_value)
+	  	  
+	  
+    # if the data are alternative emissions, use that value as scalar, i.e. OVERWRITE.
+	if(loctext_diff == "alt_file" & loctext_pt == "alt_file"){
+	  
+	  if(i %in% c("sec02", "sec07", "sec08", "sec09")) stop("Blended sectors have not been coded for scaling yet.")
+	  
+	  # if both diffuse AND points are supplied as alternative files, no scaling	
+	  scaling_value <- global(r, sum, na.rm=T)[,1]
+	  scalar_used <- "no"
+	  
+	  replacement_value <- scaling_value - inventory_table_value
 	
-	if(length(scaling_value) == 0) scaling_value <- 0
-	if(is.na(scaling_value)) scaling_value <- 0
+	# if the data are alternative emissions, use that value as scalar, i.e. OVERWRITE.
+	}else if(loctext_diff == "alt_file" | loctext_pt == "alt_file"){
+	  
+	  if(i %in% c("sec02", "sec07", "sec08", "sec09")) stop("Blended sectors have not been coded for scaling yet.")
+	  # if either diffuse OR points are supplied as alternative files;
+		# still no scaling, as assumption is the year/inventory is not changing.
+	  scaling_value <- global(r, sum, na.rm=T)[,1]
+	  scalar_used <- "no"
+	  
+	  replacement_value <- scaling_value - inventory_table_value
+	  
+    # if the data are NOT alternative emissions, use scalars
+	}else{
+	  
+      scalar_used <- "yes"
+	  
+	  replacement_value <- NA
+	
+	} # ifelse for scalar needed or not. 
   
   }else if(country == "ie"){
-  
-   # the base year for Eire is 2019, from a 2021 inventory. Alpha factor needed if y != 2019. Data from EMEP/CEDS. 
-   # EMEP data is centred on inv-2 though, so need to re-work data to be relative to 2019
+  	
+	# the base year for Eire is 2019, from a 2021 inventory. Alpha factor needed if y != 2019. Data from EMEP/CEDS. 
+      # EMEP data is centred on inv-2 though, so need to re-work data to be relative to 2019
       
-   ## this should mirror the EU method for 1970 - 1989 & 1990 - y, apart from I_Offroad. 
-   #		1990 to present: 
-   # 				use EMEP alpha value against the MapEire map
-   # 		Prior to 1990, CEDS values: 
-   #				In EU, I_Offroad is actual, but here it stays alpha.
-   #				Aviation: use the global CEDS value (alpha)
-   #				ANY other: use ISO alpha
+      ## this should mirror the EU method for 1970 - 1989 & 1990 - y, apart from I_Offroad. 
+      #		1990 to present: 
+      # 				use EMEP alpha value against the MapEire map
+      # 		Prior to 1990, CEDS values: 
+      #				In EU, I_Offroad is actual, but here it stays alpha.
+      #				Aviation: use the global CEDS value (alpha)
+      #				ANY other: use ISO alpha
 		 
    
-   if(y >= 1990){
+      if(y >= 1990){
      
-	 f_alpha <- paste0(emis_loc,"/EMEP/inv",naei_inv,"/alpha/EMEP_AllPoll_TOTALS_inv",naei_inv,"_emis_1970-",naei_inv-2,"_GNFR_alpha.csv")
-     dt_alpha <- fread(f_alpha)
+	    f_alpha <- paste0("/gws/nopw/j04/ceh_generic/inventory_processor/data/EMEP/inv",naei_inv,"/alpha/EMEP_AllPoll_TOTALS_inv",naei_inv,"_emis_1970-",naei_inv-2,"_GNFR_alpha.csv")
+        dt_alpha <- fread(f_alpha)
 	 
-	 scaling_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] & Year == y  & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong], tot_emis_t]
+  	    scaling_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] & Year == y  & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong], tot_emis_t]
    
-   }else{
+      }else{
      
-	 # if before 1990, find the 1990 EMEP value and scale by EMEP scalar, apply to 2019 map
-     dt_ceds_alpha <- fread(paste0(emis_loc,"/../../samtom/SPEED/CEDS_for_EMEP/",dt_poll[ceh_poll == species, SPEED],"_CEDS_1950_1990_ISO_GNFR_kt.csv"))
-	 dt_emep_alpha <- fread(paste0(emis_loc,"/EMEP/inv",naei_inv,"/alpha/EMEP_AllPoll_TOTALS_inv",naei_inv,"_emis_1970-",naei_inv-2,"_GNFR_alpha.csv"))
+	    # if before 1990, find the 1990 EMEP value and scale by EMEP scalar, apply to 2019 map
+        dt_ceds_alpha <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/SPEED/CEDS_for_EMEP/",dt_poll[ceh_poll == species, SPEED],"_CEDS_1950_1990_ISO_GNFR_kt.csv"))
+	    dt_emep_alpha <- fread(paste0("/gws/nopw/j04/ceh_generic/inventory_processor/data/EMEP/inv",naei_inv,"/alpha/EMEP_AllPoll_TOTALS_inv",naei_inv,"_emis_1970-",naei_inv-2,"_GNFR_alpha.csv"))
 	 
-	 if(i == "sec08"){	 
-	   emep_alpha <- dt_ceds_alpha[Year == y & ISO2 == "XX" & GNFR == dt_sec[sec == i, GNFRlong], alpha]
-	 }else{	 
-       emep_alpha <- dt_ceds_alpha[Year == y & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong], alpha]
-	 }
+	    if(i == "sec08"){	 
+	      emep_alpha <- dt_ceds_alpha[Year == y & ISO2 == "XX" & GNFR == dt_sec[sec == i, GNFRlong], alpha]
+	    }else{	 
+          emep_alpha <- dt_ceds_alpha[Year == y & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong], alpha]
+	    }
 	 
-	   emep90_t  <- dt_emep_alpha[Pollutant == dt_poll[ceh_poll == species, SPEED] & Year == 1990 & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong], tot_emis_t]
-	   scaling_value <- (emep_alpha * emep90_t)	 
+	     emep90_t  <- dt_emep_alpha[Pollutant == dt_poll[ceh_poll == species, SPEED] & Year == 1990 & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong], tot_emis_t]
+	     scaling_value <- (emep_alpha * emep90_t)
 	 
-   }
+      }
    		
-	if(length(scaling_value) == 0) scaling_value <- 0
-	if(is.na(scaling_value)) scaling_value <- 0
+	  if(length(scaling_value) == 0) scaling_value <- 0
+	  if(is.na(scaling_value)) scaling_value <- 0
+	  
+	  # This is the same value irrespective of whether alt_emis were used or not. 
+	  inventory_table_value <- copy(scaling_value)
+	    
+	
+	# if the data are alternative emissions, use that value as scalar, i.e. OVERWRITE.
+	# points are always 'no_file' for Ireland
+	if(loctext_diff == "alt_file"){
+	  
+	  if(i %in% c("sec02", "sec07", "sec08", "sec09")) stop("Blended sectors have not been coded for scaling yet.")
+	  # if both diffuse AND points are supplied as alternative files, no scaling	
+	  scaling_value <- global(r, sum, na.rm=T)[,1]
+	  scalar_used <- "no"
+		  
+	  replacement_value <- scaling_value - inventory_table_value
+    # if the data are NOT alternative emissions, use scalars
+	# points are always 'no_file' for Ireland
+	}else{
+	
+      scalar_used <- "yes"
+      
+	  replacement_value <- NA
+    } # ifelse for scalar needed or not. 
    
+   
+  # no country
   }else{
     
 	# error catch
@@ -519,7 +651,8 @@ UKIE_sector_Emissions <- function(emis_loc, species, y, i, time_dim, res_crs, ma
   dt_inv <- data.table(Area = country,
                        mask = "all",  
 					   Pollutant = species, 
-					   data_source = "inventory",
+					   data_source_diff = loctext_diff,
+					   data_source_pt = loctext_pt,
 					   emis_y = y, 
 					   inv_y = naei_inv, 
 					   sec_EMEP = i,
@@ -529,8 +662,11 @@ UKIE_sector_Emissions <- function(emis_loc, species, y, i, time_dim, res_crs, ma
 					   time_res = time_dim,
                        emis_t_diffmap = global(r_diff, sum, na.rm=T)$sum, 
 					   emis_t_pt = global(r_pt, sum, na.rm=T)$sum,
-					   emis_t_inv_spatial = global(r, sum, na.rm=T)$sum, 
-					   emis_t_inv_table = scaling_value,
+					   emis_t_spatial = global(r, sum, na.rm=T)$sum, 
+					   emis_t_spatial_inv = inventory_table_value,
+					   replacement_t = replacement_value,
+					   scaling = scalar_used,
+					   emis_t_scalar = scaling_value,
 					   emis_t_spatial_scaled = global(rs, sum, na.rm=T)$sum)
   
   l <- list(r, r_t, r_t10, r_ow, r_sea, dt_inv)
@@ -870,7 +1006,7 @@ summarise_UKIE_emissions <- function(y, naei_inv, species, i, time_dim,
 #### function to create directory and archive anything that exists in the target directory. 
 archive_data <- function(species, folname){
 
-  print(paste0(format(Sys.time(), "%Y-%m-%d %X"),":      Creating new directory and archiving previously run data..."))
+  print(paste0(format(Sys.time(), "%F %T"),":      Creating new directory and archiving previously run data..."))
   
   dir.create(file.path(folname), showWarnings = FALSE, recursive = T)  
   

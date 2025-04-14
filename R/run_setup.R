@@ -5,14 +5,37 @@
 ####  THE POLLUTANT VECTOR, EMEP MODEL VERSION ETC ####
 ####                                               ####
 #######################################################
+require(data.table)
+
+########################
+## EMEP MODEL VERSION ##
 
 ## EMEP model version
 # this makes the input to the model version. 
 emep_version <- "v5.0" # v4.34, v4.36, v4.45 , v5.0
 
+#######################
+## OUTPUT QAQC FILES ##
+output_QAQC <- TRUE
+
+#################################
+## EMISSIONS & INVENTORY YEARS ##
+
 ## vectors of emissions years and pollutants to run ##
-v_years <- c(2010,2015,2020) # what emissions years to process
+v_years <- c(2022) # what emissions years to process
 v_pollutants <- c("nox","nh3","sox","pm25","pmco","co","voc") # "nox","nh3","sox","pm25","pmco","co","voc", "cd", "cu", "ni", "pb", "zn" - CEH names, not EMEP model
+
+# UK & Eire emission years
+naei_inv  = 2024 # naei_inv  = which inventory compilation year to use
+map_yr_uk = 2022 # map_yr_uk = what year is the NAEI spatial distribution for the data
+map_yr_ie = 2019 # map_yr_ie = what year is the MapEire spatial distribution for the data: 2019
+
+# EMEP EU emission years
+emep_inv <- 2024 # emep_inv  = which inventory compilation year to use
+#emep_map_yr <- 2021
+
+#########################
+## TEMPORAL PARAMETERS ##
 
 ## time dimension to process the data into ##
 time_dim <- "annual" # annual, month, yday
@@ -29,14 +52,8 @@ tp_scheme <- c("EMEP4UKv4.45")
 # we dont use temporal profiling for the annual total inputs
 if(time_dim == "annual") tp_scheme <- "annual"
 
-# UK & Eire emission years
-naei_inv  = 2024 # naei_inv  = which inventory compilation year to use
-map_yr_uk = 2022 # map_yr_uk = what year is the NAEI spatial distribution for the data
-map_yr_ie = 2019 # map_yr_ie = what year is the MapEire spatial distribution for the data: 2019
-
-# EMEP EU emission years
-emep_inv <- 2024 # emep_inv  = which inventory compilation year to use
-#emep_map_yr <- 2021
+##########################
+## COUNTRY AGGREGATIONS ##
 
 ## aggregation schema
 uk_agg_schema <- "allISO" # allISO = separate ISO inpus for UK/IE/SEA. oneUKIE = one file. 
@@ -47,6 +64,26 @@ if(tp_scheme != "annual" & eu_agg_schema == "allISO") stop("Don't run EU monthly
 # break if EU is annual and agg schema is one EU - nothing accepts it. 
 if(tp_scheme == "annual" & eu_agg_schema == "oneEU") stop("Don't run EU annual with one aggregated surface.")
 
+######################
+## OUTPUT LOCATIONS ##
+
 ## choose output directory for the EMEP input files
-output_dir <- paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",
+# STANDARD/NFC = paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",
+#					    emep_version,"/inv",naei_inv)
+
+output_project <- "NFC"
+
+output_dir <- paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/",output_project,"/EMEP4UK",
 					 emep_version,"/inv",naei_inv)
+
+###########################
+## ALTERNATIVE EMISSIONS ##
+# a table to nominate file locations for different emissions - e.g. older years, different projects, and so on. 
+
+dt_alt_emis <- fread(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/",output_project,"/alternate_emissions.csv"))
+
+# do some checks on the alternative emissions files. 
+if(any(!(dt_alt_emis[,iso] %in% c("GB", "IE")))) stop("ISO code error in alternative emissions")
+if(any(!(dt_alt_emis[,poll] %in% v_pollutants))) stop("Pollutant error in alternative emissions")
+if(any(!(dt_alt_emis[,diff_or_pt] %in% c("diff", "pt")))) stop("Alternative emissions need to be 'diff' or 'pt'")
+# if(any(!(dt_alt_emis[,sector] %in% dt_sec[, GNFRlong]))) stop("Sector name error in alternative emissions")

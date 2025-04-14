@@ -44,9 +44,9 @@ output:
 
 **Git Repo:** https://github.com/oSamTo/EMEP_inputs
 
-**JASMIN dir:** /gws/nopw/j04/ceh_generic/samtom/EMEP_inputs
+**JASMIN dir:** /gws/nopw/j04/ceh_generic/samtom
 
-**Output dir:** `r gsub("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/", "", params$uk_folname)`
+**Output dir:** `r gsub("/gws/nopw/j04/ceh_generic/samtom/", "", params$uk_folname)`
 
 **EMEP version:** `r params$emep_version`
 
@@ -72,6 +72,8 @@ kable(dt, align = "cccccccc", caption = "Metadata of inputs",
 		 
 ```
 
+
+
 Notes: 
 
 * Emissions from the UK and Eire are processed to consistent sector categories (see 
@@ -92,7 +94,7 @@ Grid TM65 (Eire) into WGS84 lat lon, at 0.01$^\circ$ x 0.01$^\circ$ resolution.
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.7\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire total ",params$species," emissions annum-1 (Non-UK/Eire emissions for context).")}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_1_UKTOTMAP.png"))
+knitr::include_graphics(paste0(uk_folname,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_1_UKTOTMAP.png"))
 ```
 
 \vspace{\baselineskip}
@@ -143,7 +145,7 @@ N.B. the map used is not necessarily the same as the emissions year (e.g. MapEir
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "Emissions processing from source to area-scaled totals.", label = fig-proc1}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_2_UKINVBAR.png"))
+knitr::include_graphics(paste0(uk_folname,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_2_UKINVBAR.png"))
 ```
 
 Total `r params$species` in UK & Eire, processed: `r round(fread(params$l_fname_uk_sums[["masked"]])[Area == "uk",sum(emis_t_tot_masked, na.rm=T)/1000],1)` kt + `r round(fread(params$l_fname_uk_sums[["masked"]])[Area == "ie",sum(emis_t_tot_masked, na.rm=T)/1000],1)` kt = `r round(fread(params$l_fname_uk_sums[["processed"]])[,sum(emis_t_tot_grouped, na.rm=T)/1000],1)` kt. Spatial breakdown :
@@ -156,60 +158,185 @@ Total `r params$species` in UK & Eire, processed: `r round(fread(params$l_fname_
 
 * Outwith 10km = `r round(fread(params$l_fname_uk_sums[["processed"]])[Area == "ow", sum(emis_t_tot_grouped, na.rm=T)/1000], 1)` kt
 
+**Overall: Of `r round(fread(params$l_fname_uk_sums[["processed"]])[, sum(emis_t_tot_grouped, na.rm=T)/1000], 1)` kt processed, `r round(fread(params$l_fname_uk_sums[["processed"]])[Area != "ow", sum(emis_t_tot_grouped, na.rm=T)/1000], 1)` kt are input to .nc file, and `r round(fread(params$l_fname_uk_sums[["processed"]])[Area == "ow", sum(emis_t_tot_grouped, na.rm=T)/1000], 1)` kt are masked (dropped).**
+
 Figure \ref{fig:fig-proc2} shows the data progressing to NetCDF inputs - 'outwith' data (data outside 10km buffer) is dropped. 
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "Area-scaled toals to NetCDF input data.", label = fig-proc2}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_3_UKNCBAR.png"))
+knitr::include_graphics(paste0(uk_folname,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_3_UKNCBAR.png"))
 ```
 
 Emissions coming from processed inventories to NetCDF inputs; 'outwith' emissions (emissions outside 10km sea buffer) are masked and not used for UK/Eire (replaced by EMEP-EU).
 
 \newpage
 
-## EMISSIONS SECTORAL CLASSIFICATIONS
+## ALTERNATIVE EMISSIONS - INPUT
 
-### UK data starts in SNAP sectors, Eire data in GNFR sectors. 
+**Input files:**
 
-* All UK SNAP03 & SNAP04 goes to B_Industry.
-
-* All UK SNAP08 goes to I_Offroad. 
-
-* All UK SNAP10 goes to K_AgriLivestock. 
+`r if(nrow(fread(l_fname_uk_sums[["inventory"]])[Area == "uk" & (data_source_diff == "alt_file" | data_source_pt == "alt_file")]) > 0){paste0("UK: Some alternate (non-inventory) sources of emissions were used for ",params$species,":")}else{paste0("UK: No alternative (non-inventory) sources of emissions were used for ",params$species,".")}`
 
 ```{r, message = FALSE, echo = FALSE}
 
-dt <- params$dt_sec[,-1]
+dt <- fread(params$l_fname_uk_sums[["inventory"]])
+dt <- dt[Area == "uk"]
+dt <- dt[data_source_diff == "alt_file" | data_source_pt == "alt_file"]
 
-kable(dt, align = "rcccccl", caption = "Sectoral lookup table, SNAP <--> GNFR", 
+if(nrow(dt) > 0){
+
+ dt[, c("Pollutant", "mask", "sec_EMEP", "sec_SNAP", "sec_long", "time_res", "scaling", "emis_t_diffmap", 
+       "emis_t_pt", "emis_t_scalar", "emis_t_spatial_scaled") := NULL]
+
+ setnames(dt, c("emis_y", "inv_y", "sec_GNFR", 
+                "data_source_diff", "data_source_pt", 
+                "emis_t_spatial", "emis_t_spatial_inv", "replacement_t" ), 
+              c("Emis_Year", "Inv_Year", "GNFR",
+			    "source_diff", "source_pt",
+			    "alt_emis_t", "inv_emis_t", "emis_delta_t"))
+
+ dt <- dt[,c("Area", "Emis_Year", "Inv_Year", "GNFR", "source_diff", "source_pt",
+             "alt_emis_t", "inv_emis_t", "emis_delta_t")]
+
+ kable(dt, align = "ccccccccc", caption = "Alternative input files", 
 	  booktabs = TRUE)
+
+}else{
+
+ dt <- data.table(Area = "No files", Emis_Year = NA, Inv_Year = NA, 
+                  GNFR = NA, source_diff = NA,
+				  source_pt = NA, alt_emis_t = NA, 
+				  emis_delta_t = NA)
+ 
+ kable(dt, align = "ccccccccc", caption = "No alternative input files", 
+	  booktabs = TRUE)
+	  
+}
+		 
 ```
+
+`r if(nrow(fread(l_fname_uk_sums[["inventory"]])[Area == "ie" & (data_source_diff == "alt_file" | data_source_pt == "alt_file")]) > 0){paste0("Eire: Some alternate (non-inventory) sources of emissions were used for ",params$species,":")}else{paste0("Eire: No alternative (non-inventory) sources of emissions were used for ",params$species,".")}`
+
+```{r, message = FALSE, echo = FALSE}
+
+dt <- fread(params$l_fname_uk_sums[["inventory"]])
+dt <- dt[Area == "ie"]
+dt <- dt[data_source_diff == "alt_file" | data_source_pt == "alt_file"]
+
+if(nrow(dt) > 0){
+
+ dt[, c("Pollutant", "mask", "sec_EMEP", "sec_SNAP", "sec_long", "time_res", "scaling", "emis_t_diffmap", 
+       "emis_t_pt", "emis_t_scalar", "emis_t_spatial_scaled") := NULL]
+
+ setnames(dt, c("emis_y", "inv_y", "sec_GNFR", 
+                "data_source_diff", "data_source_pt", 
+                "emis_t_spatial", "emis_t_spatial_inv", "replacement_t" ), 
+              c("Emis_Year", "Inv_Year", "GNFR",
+			    "source_diff", "source_pt",
+			    "alt_emis_t", "inv_emis_t", "emis_delta_t"))
+
+ dt <- dt[,c("Area", "Emis_Year", "Inv_Year", "GNFR", "source_diff", "source_pt",
+             "alt_emis_t", "inv_emis_t", "emis_delta_t")]
+
+ kable(dt, align = "ccccccccc", caption = "Alternative input files", 
+	  booktabs = TRUE)
+
+}else{
+
+ dt <- data.table(Area = "No files", Emis_Year = NA, Inv_Year = NA, 
+                  GNFR = NA, source_diff = NA,
+				  source_pt = NA, alt_emis_t = NA, 
+				  emis_delta_t = NA)
+ 
+ kable(dt, align = "ccccccccc", caption = "No alternative input files", 
+	  booktabs = TRUE)
+	  
+}
+		 
+```
+
+
+```{r, eval=TRUE, fig.align="center", out.width = "0.7\\linewidth", echo = FALSE, fig.cap = "Inventory emissions vs altered emissions - TOTAL (if any).", label = fig-altemistot}
+#| fig-pos: "h"
+knitr::include_graphics(paste0(uk_folname,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_3b_UKALTTOTBAR.png"))
+```
+
+```{r, eval=TRUE, fig.align="center", out.width = "0.5\\linewidth", echo = FALSE, fig.cap = "Inventory emissions vs altered emissions - SECTORS (if any).", label = fig-altemissec}
+#| fig-pos: "h"
+
+fname <- paste0(uk_folname,"/plots/e",params$y,"/",params$species,"_UKEIRE_",
+                params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,
+				"inv_3c_UKALTSECBAR.png")
+
+if(file.exists(fname)){
+
+  knitr::include_graphics(fname)
+  
+}else{
+  paste0("No sectoral changes.")
+}
+
+```
+
 
 \newpage
 
-## MAP: SECTORAL EMISSIONS ANNUM^-1^
+## MAP: SECTORAL EMISSIONS ANNUM^-1^ - NC FILE
 
 ### UK and Eire temporal schema: `r params$time_dim`
 
-Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, " schema: data/temporal/EMEP4UK",params$emep_version,"/")}else{paste0("UKEM ", params$tp_scheme, " schema: /gws/nopw/j04/ukem/test/sam/ukem_pro/output/")}`
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.75\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire total ",params$species," emissions sector-1 annum-1")}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_6_UKANNSECMAP.png"))
+knitr::include_graphics(paste0(uk_folname,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_6_UKANNSECMAP.png"))
 ```
 
 ```{r, message = FALSE, echo = FALSE}
 
+# sectors/areas with other emissions
+dt_alt <- fread(params$l_fname_uk_sums[["inventory"]])
+dt_alt <- dt_alt[data_source_diff == "alt_file" | data_source_pt == "alt_file"]
+
+# final output values
 dt_out <- fread(params$l_fname_uk_sums[["ncoutput"]])
 
 dt_long <- dt_out[,list(emis_kt = round(sum(emis_t_tot_ncoutput, na.rm=T)/1000,3)), by = .(Area, sec_name)]
 dt_wide <- dcast(dt_long, sec_name~Area, value.var = "emis_kt")
-dt_wide[, Total := rowSums(.SD, na.rm=T), .SDcols = c("GB", "IE", "SEA")]
-dt_wide <- adorn_totals(dt_wide)
+dt_wide[, ncTotal := rowSums(.SD, na.rm=T), .SDcols = c("GB", "IE", "SEA")]
 setnames(dt_wide, "sec_name", "Sector")
 
-kable(dt_wide, align = "rccc", caption = paste0(params$species," emissions (kt) per sector per ISO"), 
-	  booktabs = TRUE)
+
+# sector totals lost to mask
+dt_proc <- fread(params$l_fname_uk_sums[["processed"]])
+dt_proc <- dt_proc[Area == "ow", .(OW = round(sum(emis_t_tot_grouped, na.rm=T)/1000, 3)), by = sec_GNFR]
+setnames(dt_proc, "sec_GNFR", "Sector")
+
+# join
+dt_all <- dt_proc[dt_wide, on = "Sector"]
+dt_all[, Total := rowSums(.SD, na.rm=T), .SDcols = c("ncTotal", "OW")]
+dt_all <- adorn_totals(dt_all)
+dt_all <- dt_all[,c("Sector", "GB", "IE", "SEA", "ncTotal", "OW", "Total" )]
+
+dt_all[, c("GB", "IE", "SEA", "OW") :=  lapply(.SD, as.character), .SDcols = c("GB", "IE", "SEA", "OW")]
+
+# loop through alternative sectors and add a colour
+if(nrow(dt_alt) > 0){
+  
+  for(i in 1:nrow(dt_alt)){
+    
+	alt_sec <- dt_alt[i, sec_GNFR]
+	alt_iso <- dt_alt[i, toupper(Area)] ; if(alt_iso == "UK") alt_iso <- "GB"
+	
+	ref_row <- which(dt_all[,Sector] == alt_sec)
+	ref_col <- which(names(dt_all) == alt_iso)
+	
+	dt_all[ref_row, paste0(alt_iso)] <- paste0("\\textcolor{red}{", dt_all[Sector == alt_sec][,get(alt_iso)],"}")
+	
+  }
+  
+}
+
+kable(dt_all, align = "rcccccc", caption = paste0(params$species," emissions (kt) per sector per ISO (red values have alternative data sources) (Totals match Processing Flow totals)"), booktabs = TRUE, escape = FALSE)
 ```
 
 \newpage
@@ -222,7 +349,7 @@ Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, 
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = paste0("Emissions of ",params$species," month-1"), label = "fig-montot"}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_4_UKMONTOTLINE.png"))
+knitr::include_graphics(paste0(uk_folname,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_4_UKMONTOTLINE.png"))
 ```
 
 Total monthly emissions of `r params$species` in UK, Eire and the SEA buffer. 
@@ -251,7 +378,7 @@ Also see Table 5 above for totals.
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.85\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire total ",params$species," emissions month-1")}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_7_UKMONTOTMAP.png"))
+knitr::include_graphics(paste0(uk_folname,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_7_UKMONTOTMAP.png"))
 ```
 
 \newpage
@@ -262,16 +389,19 @@ knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/out
 
 Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, " schema: data/temporal/EMEP4UK",params$emep_version,"/")}else{paste0("UKEM ", params$tp_scheme, " schema: /gws/nopw/j04/ukem/test/sam/ukem_pro/output/")}`
 
-```{r, eval=TRUE, fig.align="center", out.width = "0.7\\linewidth", echo = FALSE, fig.cap = paste0("Emissions (kt) of ",params$species," month-1 sector-1")}
+```{r, eval=TRUE, fig.align="center", out.width = "0.8\\linewidth", echo = FALSE, fig.cap = paste0("Emissions (kt) of ",params$species," month-1 sector-1")}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$naei_inv,"/UKEIRE/",params$tp_scheme,"/TP",tp_scheme,"_",uk_agg_schema,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_5_UKMONSECLINE.png"))
+knitr::include_graphics(paste0(uk_folname,"/plots/e",params$y,"/",params$species,"_UKEIRE_",params$y,"emis_",params$map_yr_uk,"map_",params$naei_inv,"inv_5_UKMONSECLINE.png"))
 ```
 
 N.B. as UK data starts in SNAP sectors & Eire data in GNFR sectors, UK & Eire sectoral monthly emissions are sometimes flat
 
+\vspace{\baselineskip}
+
 ```{r, message = FALSE, echo = FALSE}
 
 dt <- copy(params$dt_month_uk)
+dt <- dt[Area == "uk"]
 dt[, Area := toupper(Area)]
 dt[, emis_kt := round(emis_t/1000, 2)]
 dt[, time := paste0("M", time)]
@@ -281,7 +411,27 @@ dt_wide <- dcast(dt, Sector+Area~time, value.var = "emis_kt")
 dt_wide[, Total := rowSums(.SD, na.rm=T), .SDcols = paste0("M",1:12)]
 dt_wide <- adorn_totals(dt_wide)
 
-kable(dt_wide[Area != "SEA"], align = "rcccccccccccccc", caption = paste0("Monthly ", params$species, " emissions (kt) per sector per ISO"), booktabs = TRUE)
+kable(dt_wide, align = "rcccccccccccccc", caption = paste0("Monthly ", params$species, " emissions (kt) per sector (UK)"), booktabs = TRUE)
+ #%>%
+ # kable_styling(font_size = 7)
+```
+
+\vspace{\baselineskip}
+
+```{r, message = FALSE, echo = FALSE}
+
+dt <- copy(params$dt_month_uk)
+dt <- dt[Area == "ie"]
+dt[, Area := toupper(Area)]
+dt[, emis_kt := round(emis_t/1000, 2)]
+dt[, time := paste0("M", time)]
+dt[, time := factor(time, levels = paste0("M",1:12))]
+setnames(dt, "sec_name", "Sector")
+dt_wide <- dcast(dt, Sector+Area~time, value.var = "emis_kt")
+dt_wide[, Total := rowSums(.SD, na.rm=T), .SDcols = paste0("M",1:12)]
+dt_wide <- adorn_totals(dt_wide)
+
+kable(dt_wide, align = "rcccccccccccccc", caption = paste0("Monthly ", params$species, " emissions (kt) per sector (EIRE)"), booktabs = TRUE)
  #%>%
  # kable_styling(font_size = 7)
 ```
@@ -343,7 +493,7 @@ emissions take precedence outside of this mask.
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.9\\linewidth", echo = FALSE, fig.cap = paste0("EU total ",params$species," emissions annum-1 (UK/Eire emissions for context).")}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$emep_inv,"/EU/",params$tp_scheme,"/TP",tp_scheme,"_",eu_agg_schema,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_8_EUTOTMAP.png"))
+knitr::include_graphics(paste0(eu_folname,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_8_EUTOTMAP.png"))
 ```
 
 \vspace{\baselineskip}
@@ -386,7 +536,7 @@ from EMEP/CEIP (inventory_data) and emissions post processing (processed_data).
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.35\\linewidth", echo = FALSE, fig.cap = "Emissions processing from source.", label = fig-procEU1}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$emep_inv,"/EU/",params$tp_scheme,"/TP",tp_scheme,"_",eu_agg_schema,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_9_EUINVBAR.png"))
+knitr::include_graphics(paste0(eu_folname,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_9_EUINVBAR.png"))
 ```
 
 Total `r params$species` lost in EU domain, following processing: `r round(fread(params$l_fname_eu_sums[["inventory"]])[,sum(emis_t, na.rm=T)/1000]- fread(params$l_fname_eu_sums[["processed"]])[,sum(ann_emis_kt, na.rm=T)], 1)` kt. Spatial breakdown :
@@ -415,21 +565,7 @@ Figure \ref{fig:fig-procEU2} shows the data progressing to NetCDF inputs - emiss
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = "Processed toals to NetCDF input data.", label = fig-procEU2}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$emep_inv,"/EU/",params$tp_scheme,"/TP",tp_scheme,"_",eu_agg_schema,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_10_EUNCBAR.png"))
-```
-
-\newpage
-
-## EMISSIONS SECTORAL CLASSIFICATIONS
-
-### EU data starts in GNFR sectors. 
-
-```{r, message = FALSE, echo = FALSE}
-
-dt <- params$dt_sec[,-1]
-
-kable(dt, align = "rcccccl", caption = "Sectoral lookup table, SNAP <--> GNFR", 
-	  booktabs = TRUE)
+knitr::include_graphics(paste0(eu_folname,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_10_EUNCBAR.png"))
 ```
 
 \newpage
@@ -442,7 +578,7 @@ Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, 
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.85\\linewidth", echo = FALSE, fig.cap = paste0("EMEP-EU total ",params$species," emissions sector-1 annum-1")}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$emep_inv,"/EU/",params$tp_scheme,"/TP",tp_scheme,"_",eu_agg_schema,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_13_EUANNSECMAP.png"))
+knitr::include_graphics(paste0(eu_folname,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_13_EUANNSECMAP.png"))
 ```
 
 ```{r, message = FALSE, echo = FALSE}
@@ -475,7 +611,7 @@ Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, 
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = paste0("Emissions of ",params$species," month-1"), label = "fig-montotEU"}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$emep_inv,"/EU/",params$tp_scheme,"/TP",tp_scheme,"_",eu_agg_schema,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_11_EUMONTOTLINE.png"))
+knitr::include_graphics(paste0(eu_folname,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_11_EUMONTOTLINE.png"))
 ```
 
 Total monthly emissions of `r params$species` in EU and ISOs nearest to UK/Eire. 
@@ -510,7 +646,7 @@ Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, 
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.7\\linewidth", echo = FALSE, fig.cap = paste0("Emissions (kt) of ",params$species," month-1 sector-1")}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",params$emep_version,"/inv",params$emep_inv,"/EU/",params$tp_scheme,"/TP",tp_scheme,"_",eu_agg_schema,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_12_EUMONSECLINE.png"))
+knitr::include_graphics(paste0(eu_folname,"/plots/e",params$y,"/",params$species,"_EU_",params$y,"emis_",params$y,"map_",params$emep_inv,"inv_12_EUMONSECLINE.png"))
 ```
 
 ```{r, message = FALSE, echo = FALSE}
@@ -533,3 +669,26 @@ kable(dt_wide, align = "rcccccccccccccc", caption = paste0("Monthly ", params$sp
 \newpage
 
 # TIME SERIES
+
+
+
+\newpage
+
+## EMISSIONS SECTORAL CLASSIFICATIONS
+
+### UK data starts in SNAP sectors, Eire data in GNFR sectors. 
+
+* All UK SNAP03 & SNAP04 goes to B_Industry.
+
+* All UK SNAP08 goes to I_Offroad. 
+
+* All UK SNAP10 goes to K_AgriLivestock. 
+
+```{r, message = FALSE, echo = FALSE}
+
+dt <- params$dt_sec[,-1]
+
+kable(dt, align = "rcccccl", caption = "Sectoral lookup table, SNAP <--> GNFR", 
+	  booktabs = TRUE)
+```
+

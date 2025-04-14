@@ -1,12 +1,13 @@
 source("R/run_setup.R")
 source("R/workspace.R")
 
+
 ##########################################################
 ####                                                  ####
 ####    THIS RUN FILE WILL TAKE NAEI EMISSIONS FILES  ####
 ####  ALREADY CONVERTED TO LATLONG FOR THE UK @ 0.01  ####
 ####  DEGREE AND OUTPUT EMEP NETCDF FILES. USE FILE   ####
-###   RUN_SETUP.R TO MAKE CHOICES FOR DATA CREATION   ####
+###   R/RUN_SETUP.R TO MAKE CHOICES FOR DATA INPUTS   ####
 ####                                                  ####
 ##########################################################
 
@@ -29,10 +30,6 @@ time_dim <- dt_cj[i_a, time_dim]
 tp_scheme <- dt_cj[i_a, tp_scheme]
 uk_agg_schema <- dt_cj[i_a, uk_agg_schema]
 eu_agg_schema <- dt_cj[i_a, eu_agg_schema]
-
-## a table to nominate file locations for different emissions - e.g. older years, different projects, and so on. 
-dt_alt_emis <- data.table(poll = c("nh3"), 
-                          loc = c("/gws/nopw/j04/ceh_generic/inventory_processor/data"))
 
 # set the root folder name, for writing. 
 uk_folname <- paste0(output_dir, "/UKEIRE/", time_dim, "/TP", 
@@ -75,12 +72,15 @@ if(tp_scheme %in% c("EMEP4UKv4.45", "EMEP4UKv5.0", "annual", "test")){
 
 ## QAQC ##
 # this should be lapply over v_pollutants for a separate file. 
-for(species in v_pollutants){
+if(output_QAQC){
+  
+  for(species in v_pollutants){
 
-  create_qaqc(y, species, uk_folname, eu_folname, map_yr_uk, naei_inv, 
-              emep_inv, time_dim, emep_version, v_EMEP_sec,
-	   		  uk_agg_schema, eu_agg_schema, tp_scheme)
+    create_qaqc(y, species, uk_folname, eu_folname, map_yr_uk, naei_inv, 
+                emep_inv, time_dim, emep_version, v_EMEP_sec,
+	         	uk_agg_schema, eu_agg_schema, tp_scheme)
 			  
+  }
+  
 }
-
 

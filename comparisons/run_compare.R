@@ -18,13 +18,13 @@ folname_1 <- "outputs/EMEP4UK/inv2023/emis2021/UKEIRE/TP2021_AGGNA"
 emis_yr_1 <- 2021
 
 folname_2 <- "outputs/EMEP4UKv5.0/inv2024/UKEIRE/annual/TPannual_allISO"
-emis_yr_2 <- 2022
-
-
+emis_yr_2 <- 2021
 
 ## Do an output for one nominated pollutant. 
 # (as from: dt_poll[, emep_model]
 pollutant <- "nox"
+
+
 
 output_comparison(pollutant, folname_1, emis_yr_1, folname_2, emis_yr_2)
 

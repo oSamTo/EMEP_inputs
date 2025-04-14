@@ -3,3 +3,5 @@
 .RData
 .Ruserdata
 *.nc
+outputs/*
+!outputs/**/*.pdf

@@ -77,7 +77,14 @@ create_qaqc <- function(y, species, uk_folname, eu_folname, map_yr_uk, naei_inv,
 					     fname_ncout = l_fname_uk_sums[["ncoutput"]], 
 					     y, species, uk_folname, map_yr_uk, 
 					     naei_inv, dt_emis = l_gg_p2[["table"]])
-       
+  
+  # 3b. Bar graph; changes to TOTAL inventory totals with alternate emissions (added after)
+  gg_p3b <- uk_bar_tot_ann_alt(fname_in = l_fname_uk_sums[["inventory"]],
+                               fname_out = l_fname_uk_sums[["ncoutput"]])
+  
+  # 3c. Bar graph; changes to SECTORAL inventory totals with alternate emissions (added after)
+  gg_p3c <- uk_bar_sec_ann_alt(fname = l_fname_uk_sums[["inventory"]])
+  
   # 4. Line plot; UK/IE emissions of total by month in netcdf
     # if(time_dim == "annual") ; produce a plot using the EMEP version profiles
   l_gg_p4 <- uk_lin_tot_mon(fname_ncout = l_fname_uk_sums[["ncoutput"]], 
@@ -85,7 +92,7 @@ create_qaqc <- function(y, species, uk_folname, eu_folname, map_yr_uk, naei_inv,
 				  	        naei_inv, time_dim, emep_version)
   
   gg_p4 <- l_gg_p4[["plot"]] 
-    
+      
   # 5. Line plot; UK/IE emissions of total by sector by month in netcdf
     # if(time_dim == "annual") ; produce a plot using the EMEP version profiles.
   gg_p5 <- uk_lin_sec_mon(dt_month = l_gg_p4[["table"]], y,
@@ -530,37 +537,37 @@ uk_bar_inv_ann <- function(fname_inv, fname_mask, y, species,
   dt_inv <- fread(fname_inv)
   
   dt_inv_t <- dt_inv[, lapply(.SD, sum, na.rm=T), by = .(Area, mask, Pollutant, 
-                              data_source, emis_y, inv_y), 
-                              .SDcols = c("emis_t_inv_spatial",
-							        "emis_t_inv_table","emis_t_spatial_scaled")]
+                              emis_y, inv_y), 
+                              .SDcols = c("emis_t_spatial",
+							        "emis_t_scalar","emis_t_spatial_scaled")]
 							  
   dt_inv_m <- melt(dt_inv_t, id.vars = c("Area","mask","Pollutant",
-                                         "data_source","emis_y","inv_y"),
+                                         "emis_y","inv_y"),
 				   variable.name = "stage", value.name = "emis_t")
   
   # summarise the read and masked uk/eire data
   dt_mask <- fread(fname_mask)
   
   dt_mask_t <- dt_mask[, lapply(.SD, sum, na.rm=T), by = .(Area, mask, 
-                                Pollutant, data_source, emis_y, inv_y), 
+                                Pollutant, emis_y, inv_y), 
                                 .SDcols = c("emis_t_tot_masked","tsum")]
 								
   setnames(dt_mask_t, "tsum", "mon_masked")
   
   dt_mask_m <- melt(dt_mask_t, id.vars = c("Area","mask","Pollutant",
-                                           "data_source","emis_y","inv_y"),
+                                           "emis_y","inv_y"),
 				    variable.name = "stage", value.name = "emis_t")
   
   # put into one table   
   dt <- rbindlist(list(dt_inv_m, dt_mask_m), use.names = T)  
   dt[, stage := gsub("emis_t_", "", stage) ]
-  dt[, stage := factor(stage, levels = c("inv_spatial","inv_table",
+  dt[, stage := factor(stage, levels = c("spatial","scalar",
                                    "spatial_scaled","tot_masked","mon_masked"))]
   dt[,mask := factor(mask, levels = c("outwith", "sea", "terrestrial", "all"))]
   
   # labels text
   dt_text <- data.table(Area = rep(c("uk", "ie"), 5),
-	                    stage = rep(c("inv_spatial","inv_table",
+	                    stage = rep(c("spatial","scalar",
                                    "spatial_scaled","tot_masked","mon_masked"),
 								   each = 2),
 						emis_t = c(dt[, sum(emis_t), 
@@ -606,18 +613,18 @@ uk_bar_nc_ann <- function(fname_group, fname_ncinp, fname_ncout,
   # area masks, bring over the total masked, from plot 1, grouped by mask area
   dt_p1_tot <- dt_emis[stage == "tot_masked", 
                        list(emis_t = sum(emis_t, na.rm=T)), 
-					 by = .(Area, Pollutant, data_source, emis_y, inv_y, stage)]
+					 by = .(Area, Pollutant, emis_y, inv_y, stage)]
   
   # summarise processed data, grouped by mask areas
   dt_group <- fread(fname_group)
   dt_group_t <- dt_group[, lapply(.SD, sum, na.rm=T), 
-                           by = .(Area, Pollutant, data_source, emis_y, inv_y), 
+                           by = .(Area, Pollutant, emis_y, inv_y), 
 						   .SDcols = c("emis_t_tot_grouped","tsum")]
 						   
   setnames(dt_group_t, "tsum", "mon_grouped")
   
   dt_group_m <- melt(dt_group_t, id.vars = c("Area","Pollutant",
-                                             "data_source","emis_y","inv_y"),
+                                             "emis_y","inv_y"),
 				     variable.name = "stage", value.name = "emis_t")
   
   # summarise data input to nc file  
@@ -628,14 +635,14 @@ uk_bar_nc_ann <- function(fname_group, fname_ncinp, fname_ncout,
   dt_ncinp[Area == "gb", Area := "uk"] # change gb back to uk (from nc file)
   
   dt_ncinp_t <- dt_ncinp[, lapply(.SD, sum, na.rm=T), by = .(Area, Pollutant, 
-                                  data_source, emis_y, inv_y), 
+                                  emis_y, inv_y), 
 						          .SDcols = c("emis_t_tot_ncinput",
 								              "emis_t_tot_array","tsum")]
 						   
   setnames(dt_ncinp_t, "tsum", "time_layers")  
   
   dt_ncinp_m <- melt(dt_ncinp_t, id.vars = c("Area","Pollutant",
-                                             "data_source","emis_y","inv_y"),
+                                             "emis_y","inv_y"),
 				     variable.name = "stage", value.name = "emis_t")
   
   # summary data that has been read from output nc file (i.e. separate process)
@@ -647,11 +654,11 @@ uk_bar_nc_ann <- function(fname_group, fname_ncinp, fname_ncout,
   
   dt_ncout_t <- dt_ncout[time_res == "annual", lapply(.SD, sum, na.rm=T), 
                                              by = .(Area, Pollutant, 
-											        data_source, emis_y, inv_y), 
+											        emis_y, inv_y), 
 											 .SDcols = c("emis_t_tot_ncoutput")]
     
   dt_ncout_m <- melt(dt_ncout_t, id.vars = c("Area","Pollutant",
-                                             "data_source","emis_y","inv_y"),
+                                             "emis_y","inv_y"),
 				     variable.name = "stage", value.name = "emis_t")
 					 
   # put into one table
@@ -707,6 +714,158 @@ uk_bar_nc_ann <- function(fname_group, fname_ncinp, fname_ncout,
   
   return(p)
    
+}
+
+################################################################################
+#### 3b. function to plot bar chart of differences when using alternate emissions - TOTAL
+uk_bar_tot_ann_alt <- function(fname_in, fname_out){
+
+  # get data of what should be in inventory  
+  dt_in <- fread(fname_in)  
+  dt_out <- fread(fname_out)
+  
+  ## INPUT DATA ##
+  # assign flags for plotting
+  dt_in[, change_flag := "No Change"]
+  dt_in[data_source_diff == "alt_file" | data_source_pt == "alt_file", change_flag := sec_GNFR]
+  
+  col_names <- c("Area", "sec_GNFR", "emis_t_spatial_inv", "emis_t_spatial_scaled", "change_flag")
+  dt_in <- dt_in[,..col_names]
+  setnames(dt_in, c("emis_t_spatial_inv", "emis_t_spatial_scaled"), c("Inventory", "thisProject"))
+
+  # melt
+  dtm_in <- melt(dt_in, id.vars = c("Area", "sec_GNFR", "change_flag"), variable.name = "source", variable.factor = FALSE, value.name = "emis_t")
+  dtm_in[, Area := toupper(Area)]
+   
+  # get sectors and subset (keep ie for plot)
+  v_graph_secs <- dtm_in[change_flag != "No Change", unique(sec_GNFR)]
+  
+  ## PROCESSED DATA ##
+  setnames(dt_out, c("sec_name", "emis_t_tot_ncoutput"), c("sec_GNFR", "ncFile"))
+  dt_out[, change_flag := "No Change"]
+  dt_out[sec_GNFR %in% v_graph_secs, change_flag := sec_GNFR]
+  
+  col_names <- c("Area", "sec_GNFR", "ncFile", "change_flag")
+  dt_out <- dt_out[,..col_names]
+  
+  # melt
+  dtm_out <- melt(dt_out, id.vars = c("Area", "sec_GNFR", "change_flag"), variable.name = "source", variable.factor = FALSE, value.name = "emis_t")
+  dtm_out[Area == "GB", Area := "UK"]
+  
+  
+  ## COMBINE ##
+  #dtm <- rbindlist(list(dtm_in, dtm_out), use.names = T)
+  dtm <- copy(dtm_in)
+  
+  ## LABELS ##
+  dt_temp <- dtm[, .(emis_t = sum(emis_t, na.rm=T)), by = .(Area, source)]
+  
+  #dt_text <- data.table(Area = rep(c("UK", "IE", "SEA"), each = 3),
+  #                      source = rep(c("Inventory", "thisProject", "ncFile"), 3))
+  dt_text <- data.table(Area = rep(c("UK", "IE"), each = 2),
+                        source = rep(c("Inventory", "thisProject"), 2))
+  
+  dt_text <- dt_temp[dt_text, on = c("Area", "source")]
+  dt_text[, label := as.character(round(emis_t/1000, 2))]
+  
+  ## FACTORS ##
+  dtm[, Area := factor(Area, levels = c("IE", "UK"))]
+  dtm[, source := factor(source, levels = c("Inventory", "thisProject"))]
+  dtm[, sec_GNFR := factor(sec_GNFR, levels = dtm[,unique(sec_GNFR)])]
+  
+  dt_text[, Area := factor(Area, levels = c("IE", "UK"))]
+  dt_text[, source := factor(source, levels = c("Inventory", "thisProject"))]
+  
+  
+  # plot
+  p <- ggplot()+
+    geom_bar(data = dtm, aes(x = source, y = emis_t/1000, group = sec_GNFR, 
+	                        fill = change_flag), stat = "identity")+	
+	labs(y = bquote(kt~a^-1))+	
+	geom_text(data = dt_text, aes(x = source, y = emis_t/1000, label = label), 
+	          size = 5)+
+    facet_wrap(~Area, nrow=1, scales = "free_y")+
+    theme_bw()+
+    theme(strip.text = element_text(size = 20),
+          legend.title = element_blank(), 
+          legend.position = "right",
+          legend.text = element_text(size = 16),
+          axis.text.x = element_text(angle = 45, hjust = 1, size = 16),
+          axis.title.x = element_blank(),
+          axis.text.y = element_text(size = 14),
+		  axis.title.y = element_text(size = 16),
+		  margin(t = 2, r = 2, b = 2, l = 2, unit = "mm"))
+  
+  fname <- paste0(uk_folname,"/plots/e",y,"/",
+                  dt_poll[ceh_poll == species, emep_model],"_UKEIRE_",
+				  y,"emis_",map_yr_uk,"map_",naei_inv,"inv_3b_UKALTTOTBAR.png")
+  
+  ggsave(fname, p, width = 12, height = 5)
+  
+  return(p)
+ 
+}
+
+################################################################################
+#### 3c. function to plot bar chart of differences when using alternate emissions - SECTORS
+uk_bar_sec_ann_alt <- function(fname){
+
+  # get data of what should be in inventory  
+  dt <- fread(fname)
+  
+  # get sectors and subset (keep ie for plot)
+  v_graph_secs <- dt[data_source_diff == "alt_file" | data_source_pt == "alt_file", unique(sec_GNFR)]
+  dt <- dt[sec_GNFR %in% v_graph_secs]
+      
+  if(nrow(dt) == 0){
+  
+    p <- NA
+
+    return(p)
+  }  
+	  
+  # assign flags for plotting
+  dt[, change_flag := "No Change"]
+  dt[data_source_diff == "alt_file" | data_source_pt == "alt_file", change_flag := "Change"]
+  
+  
+  # subsets
+  col_names <- c("Area", "sec_GNFR", "emis_t_spatial_inv", "emis_t_spatial_scaled", "change_flag")
+  dt <- dt[,..col_names]
+  setnames(dt, c("emis_t_spatial_inv", "emis_t_spatial_scaled"), c("Inventory", "thisProject"))
+
+  # get sectors have change for individual plots
+  # 
+  
+  dtm <- melt(dt, id.vars = c("Area", "sec_GNFR", "change_flag"), variable.name = "source", value.name = "emis_t")
+  dtm[, source := factor(source, levels = c("Inventory", "thisProject"))]
+  #dtm[, sec_GNFR := factor(sec_GNFR, levels = dtm[,unique(sec_GNFR)])]
+  
+  # plot
+  p <- ggplot()+
+    geom_bar(data = dtm, aes(x = interaction(source, Area), y = emis_t/1000, group = change_flag, 
+	                        fill = change_flag), stat = "identity")+	
+	labs(y = bquote(kt~a^-1))+	
+    facet_wrap(~sec_GNFR, scales = "free_y")+
+    theme_bw()+
+    theme(strip.text = element_text(size = 20),
+          legend.title = element_blank(), 
+          legend.position = "right",
+          legend.text = element_text(size = 16),
+          axis.text.x = element_text(angle = 45, hjust = 1, size = 16),
+          axis.title.x = element_blank(),
+          axis.text.y = element_text(size = 14),
+		  axis.title.y = element_text(size = 16),
+		  margin(t = 2, r = 2, b = 2, l = 2, unit = "mm"))
+  
+  fname <- paste0(uk_folname,"/plots/e",y,"/",
+                  dt_poll[ceh_poll == species, emep_model],"_UKEIRE_",
+				  y,"emis_",map_yr_uk,"map_",naei_inv,"inv_3c_UKALTSECBAR.png")
+  
+  ggsave(fname, p, width = 10, height = 7)
+  
+  return(p)
+ 
 }
 
 ################################################################################

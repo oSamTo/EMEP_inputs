@@ -15,7 +15,7 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
   # emissions year = *numeric*
   if(!is.numeric(emep_inv)) stop ("Reporting year is not numeric")
   
-  print(paste0(format(Sys.time(), "%F %R"),": Creating EMEP4UK EU inputs (",time_dim,") for ",y,"..."))
+  print(paste0(format(Sys.time(), "%F %T"),": Creating EMEP4UK EU inputs (",time_dim,") for ",y,"..."))
     
   # For the years & pollutants, take the EU emissions in csv format and;
   #   i) convert every country/sector into a raster
@@ -41,7 +41,7 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
                                             PM:    pm25, pm10, pmco")
       ######################################################################################
       
-      print(paste0(format(Sys.time(), "%F %R"),":        ",species," data:"))
+      print(paste0(format(Sys.time(), "%F %T"),":        ",species," data:"))
       
       # we are using the EMEP csv emissions NOT the netcdf emissions
           # https://www.ceip.at/the-emep-grid/gridded-emissions/nox
@@ -62,7 +62,7 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
       # sector names to loop through - this is netcdf sector names (sec01 etc.)
       v_sectors <- dt_sec[EMEP_sec %in% v_EMEP_sec,unique(sec)]
       
-      print(paste0(format(Sys.time(), "%F %R"),":            gathering emissions..."))
+      print(paste0(format(Sys.time(), "%F %T"),":            gathering emissions..."))
 	  
       for(i in v_sectors){
         
@@ -109,6 +109,8 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
         
         l_eu_summary[[i]] <- dt_totals
         
+		rm(l_eu)
+		rm(l_eu_prof)
         
       } # sector loop
       
@@ -135,12 +137,12 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
 		# EU: one EU territory file for month/annual data (i.e. no ISO). 
 		# ISO = separate ISO inputs for month/annual data.
 
-	  print(paste0(format(Sys.time(), "%F %R"),":            Reshaping..."))
+	  print(paste0(format(Sys.time(), "%F %T"),":            Reshaping..."))
 	  l_eu_toInp <- reshape_EU(y, species, eu_agg_schema, time_dim, l_eu_emis)
 	  
       ###################################################
       #### INPUT DATA TO NETCDF TO SPECIES VARIABLES ####
-      print(paste0(format(Sys.time(), "%F %R"),":            populating netcdf..."))
+      print(paste0(format(Sys.time(), "%F %T"),":            populating netcdf..."))
       	
 	  # input data and summarise what's going in. 
       dt_ncinput_summary <- input_data_NETCDF_eu(y, species, emep_inv, time_dim, v_EMEP_sec,
@@ -148,7 +150,7 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
       	  
       ##############################
 	  #### QAQC; TABLES & PLOTS ####
-	  print(paste0(format(Sys.time(), "%F %R"),":            summaries..."))
+	  print(paste0(format(Sys.time(), "%F %T"),":            summaries..."))
 	  
 	  # summarise the nc file itself, post writing. Double checker. (bit of a time sap)
 	  dt_ncoutput_summary <- summarise_nc_file_eu(fname_ncdf, y, species, emep_inv, time_dim, v_EMEP_sec)
@@ -163,12 +165,17 @@ EMEP_EU_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"),
 	  # dt_emis_summary
 	  # dt_ncdf_summary
 	  
-      print(paste0(format(Sys.time(), "%F %R"),":            pollutant complete."))
+	  rm(l_eu_emis)      
+	  rm(dt_emep_emis)
+      rm(l_eu_summary)
+	  rm(l_eu_toInp)
 	  
+      print(paste0(format(Sys.time(), "%F %T"),":            pollutant complete."))
+	  	  
    } # pollutant loop
    
   
-  print(paste0(format(Sys.time(), "%F %R"),": DONE."))
+  print(paste0(format(Sys.time(), "%F %T"),": DONE."))
   
 } # end of function
  
@@ -207,6 +214,7 @@ summarise_EMEP_file <- function(emis_loc, species, y, i, emep_inv, r_uk_EU_ext){
   if(nrow(dt_emis) != 0){
   
     dt_emis[, EMEP_data := emep_y] 
+	dt_emis[ISO2 == "KZT", ISO2 := "KZ"] # reset KZT iso to KZ, (pre-2024 inventory)
   
     dt_tot <- dt_emis[,.(emis_t = sum(emis_t, na.rm=T)), by = .(ISO2, Year, EMEP_data, GNFR, Pollutant) ]
 	
@@ -248,7 +256,7 @@ summarise_EMEP_file <- function(emis_loc, species, y, i, emep_inv, r_uk_EU_ext){
   # If not, something needs looking at - is the latest model version being used?
   v_iso_emis <- unique(dt_emis[,ISO2])
   if(any(!(v_iso_emis %in% dt_iso[,ISO_char]))) stop("There are extra ISO codes in the emissions - check the model version!")
-    
+    	
   return(list(f_diff, dt_tot))
   
 }
@@ -258,6 +266,12 @@ summarise_EMEP_file <- function(emis_loc, species, y, i, emep_inv, r_uk_EU_ext){
 EMEP_sector_Emissions <- function(fname, i, y, species, r_uk_EU_ext){
    
   dt_emis <- fread(fname)
+  dt_emis[ISO2 == "KZT", ISO2 := "KZ"] # reset KZT iso to KZ, (pre-2024 inventory)
+  
+  # stop check for ISO names
+  v_iso_emis <- unique(dt_emis[,ISO2])
+  if(any(!(v_iso_emis %in% dt_iso[,ISO_char]))) stop("There are extra ISO codes in the emissions - check the model version!")
+    
     
   #####################
   ### ALPHA SCALING ###
@@ -279,7 +293,7 @@ EMEP_sector_Emissions <- function(fname, i, y, species, r_uk_EU_ext){
    
   # lapply using a small function below  - which includes masking to UK boundary and setting NA to 0
   # use all iso codes in model, make a blank surface if needed. 
-  l_r <- lapply(dt_iso[,ISO_char], function(x) ISO_sector_Raster(x, dt_emis = dt_emis, i = i, species = species,
+  l_r <- lapply(dt_iso[,ISO_char], function(x) ISO_sector_raster(x, dt_emis = dt_emis, i = i, species = species,
                                                    y = y, UKmask = r_uk_EU_ext))
   names(l_r) <- dt_iso[,ISO_char]
   
@@ -290,7 +304,7 @@ EMEP_sector_Emissions <- function(fname, i, y, species, r_uk_EU_ext){
 ######################################################################################################
 #### function to create raster from ISO information in EMEP emissions csv
 
- ISO_sector_Raster <- function(iso, dt_emis, i, species, y, UKmask){
+ ISO_sector_raster <- function(iso, dt_emis, i, species, y, UKmask){
 	 	 
 	 # subset the data to the ISO
 	 dt <- dt_emis[ISO2 == iso, c("Lon","Lat","emis_t")]
