@@ -4,4 +4,4 @@
 .Ruserdata
 *.nc
 outputs/*
-!outputs/**/*.pdf
+!/outputs/**/*.pdf
