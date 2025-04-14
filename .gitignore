@@ -3,5 +3,5 @@
 .RData
 .Ruserdata
 *.nc
-outputs/*
-!outputs/**/*.pdf
+outputs/**/*.csv
+outputs/**/*.png
