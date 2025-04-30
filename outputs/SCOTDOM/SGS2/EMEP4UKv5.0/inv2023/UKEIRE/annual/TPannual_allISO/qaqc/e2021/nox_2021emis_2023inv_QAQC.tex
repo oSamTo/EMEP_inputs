@@ -1,0 +1,1541 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{geometry} \geometry{top=1cm,left=1cm,bottom=1cm,right=1cm}
+\usepackage{threeparttable}
+\usepackage{booktabs}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={EMEP4UK input files QAQC document - UK/EIRE \& EU},
+  pdfauthor={Sam Tomlinson},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{EMEP4UK input files QAQC document - UK/EIRE \& EU}
+\author{Sam Tomlinson}
+\date{2025-04-17}
+
+\begin{document}
+\maketitle
+
+\section{UK/EIRE INPUT FILES}\label{ukeire-input-files}
+
+\subsection{METADATA}\label{metadata}
+
+\textbf{Project:} SCOTDOM
+
+\textbf{Scenario:} SGS2
+
+\textbf{Git Repo:} \url{https://github.com/oSamTo/EMEP_inputs}
+
+\textbf{JASMIN dir:} /gws/nopw/j04/ceh\_generic/samtom
+
+\textbf{Output dir:}
+EMEP\_inputs/outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/UKEIRE/annual/TPannual\_allISO
+
+\textbf{EMEP version:} v5.0
+
+\vspace{\baselineskip}
+
+Input files processed to 0.01\(^\circ\) x 0.01\(^\circ\) resolution, in
+WGS84.
+
+\vspace{\baselineskip}
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.0789}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1184}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1316}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1447}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1316}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1316}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1316}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1316}}@{}}
+\caption{Metadata of inputs}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Species
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Inv\_Year
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Emis\_Year
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+temp\_res
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+orig\_sec
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+orig\_res
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+orig\_crs
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Species
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Inv\_Year
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Emis\_Year
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+temp\_res
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+orig\_sec
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+orig\_res
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+orig\_crs
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+UK & nox & 2023 & 2021 & annual & SNAP & 1km & BNG \\
+Eire & nox & 2023 & 2021 & annual & GNFR & 1km & TM65 \\
+SEA & nox & as above & as above & N/A & N/A & N/A & N/A \\
+\end{longtable}
+
+Notes:
+
+\begin{itemize}
+\item
+  Emissions from the UK and Eire are processed to consistent sector
+  categories (see /data/lookups/EMEP\_sectors.csv) and masked to a
+  UK+10km mask. EMEP/CEIP emissions take precedence outside of this
+  mask.
+\item
+  The 10km strip from the land territory into the sea is combined (UK +
+  Eire) to a `SEA' ISO code, for all sectors.
+\item
+  Emissions maps are pre-processed from 1km x 1km BNG (UK) and 1km x 1km
+  Irish Grid TM65 (Eire) into WGS84 lat lon, at 0.01\(^\circ\) x
+  0.01\(^\circ\) resolution.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    This is done in /gws/nopw/j04/ceh\_generic/inventory\_processor
+  \end{itemize}
+\end{itemize}
+
+\newpage
+
+\subsection{\texorpdfstring{MAP: TOTAL EMISSION
+ANNUM\textsuperscript{-1}}{MAP: TOTAL EMISSION ANNUM-1}}\label{map-total-emission-annum-1}
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.7\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/UKEIRE/annual/TPannual_allISO/plots/e2021/nox_UKEIRE_2021emis_2021map_2023inv_1_UKTOTMAP} 
+
+}
+
+\caption{UK/Eire total nox emissions annum-1 (Non-UK/Eire emissions for context).}\label{fig:unnamed-chunk-2}
+\end{figure}
+
+\vspace{\baselineskip}
+
+\begin{longtable}[]{@{}ccccc@{}}
+\caption{Annual emissions of nox per ISO.}\tabularnewline
+\toprule\noalign{}
+Area & Species & Total\_kt & mean\_t & max\_t \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Area & Species & Total\_kt & mean\_t & max\_t \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+UK & nox & 566.11 & 1.59 & 7840.19 \\
+Eire & nox & 93.74 & 0.92 & 3932.92 \\
+SEA & nox & 32.75 & 0.29 & 592.74 \\
+Overall & nox & 692.60 & 1.22 & 7840.19 \\
+\end{longtable}
+
+\begin{itemize}
+\tightlist
+\item
+  N.B. UK and Eire totals in Table 2 are only on-land emissions.
+\end{itemize}
+
+\newpage
+
+\subsection{PROCESSING FLOW}\label{processing-flow}
+
+The processing in Figure \ref{fig:fig-proc1} shows total emissions as
+taken from the maps (inv\_spatial), the inventory table (inv\_table),
+the scaled maps (spatial\_scaled), and the area aggregated totals using
+the mask.
+
+N.B. the map used is not necessarily the same as the emissions year
+(e.g.~MapEire from 2019).
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.6\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/UKEIRE/annual/TPannual_allISO/plots/e2021/nox_UKEIRE_2021emis_2021map_2023inv_2_UKINVBAR} 
+
+}
+
+\caption{Emissions processing from source to area-scaled totals.}\label{fig:fig-proc1}
+\end{figure}
+
+Total nox in UK \& Eire, processed: 873 kt + 100 kt = 973 kt. Spatial
+breakdown :
+
+\begin{itemize}
+\item
+  UK = 566.1 kt
+\item
+  Eire = 93.7 kt
+\item
+  SEA = 32.7 kt
+\item
+  Outwith 10km = 280.4 kt
+\end{itemize}
+
+\textbf{Overall: Of 973 kt processed, 692.6 kt are input to .nc file,
+and 280.4 kt are masked (dropped).}
+
+Figure \ref{fig:fig-proc2} shows the data progressing to NetCDF inputs -
+`outwith' data (data outside 10km buffer) is dropped.
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.6\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/UKEIRE/annual/TPannual_allISO/plots/e2021/nox_UKEIRE_2021emis_2021map_2023inv_3_UKNCBAR} 
+
+}
+
+\caption{Area-scaled toals to NetCDF input data.}\label{fig:fig-proc2}
+\end{figure}
+
+Emissions coming from processed inventories to NetCDF inputs; `outwith'
+emissions (emissions outside 10km sea buffer) are masked and not used
+for UK/Eire (replaced by EMEP-EU).
+
+\newpage
+
+\subsection{ALTERNATIVE EMISSIONS -
+INPUT}\label{alternative-emissions---input}
+
+\textbf{Input files:}
+
+UK: Some alternate (non-inventory) sources of emissions were used for
+nox:
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0536}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.2054}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.1161}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0982}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0982}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0893}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.1071}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.1071}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.1250}}@{}}
+\caption{Alternative input files}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+GNFR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+source\_diff
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+source\_pt
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+emis\_diff
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+emis\_pt
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+alt\_emis\_t
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+inv\_emis\_t
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+emis\_delta\_t
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+GNFR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+source\_diff
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+source\_pt
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+emis\_diff
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+emis\_pt
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+alt\_emis\_t
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+inv\_emis\_t
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+emis\_delta\_t
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+uk & C\_OtherStationaryComb & alt\_file & inventory & 58506.26 &
+4302.336 & 62808.59 & 66192.49 & -3383.893 \\
+\end{longtable}
+
+Eire: No alternative (non-inventory) sources of emissions were used for
+nox.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1515}}
+  >{\centering\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0909}}
+  >{\centering\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1970}}
+  >{\centering\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+  >{\centering\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1818}}
+  >{\centering\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.2121}}@{}}
+\caption{No alternative input files}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+GNFR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+source\_diff
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+source\_pt
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+alt\_emis\_t
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+emis\_delta\_t
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+GNFR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+source\_diff
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+source\_pt
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+alt\_emis\_t
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+emis\_delta\_t
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+No files & NA & NA & NA & NA & NA \\
+\end{longtable}
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.7\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/UKEIRE/annual/TPannual_allISO/plots/e2021/nox_UKEIRE_2021emis_2021map_2023inv_3b_UKALTTOTBAR} 
+
+}
+
+\caption{Inventory emissions vs altered emissions - TOTAL (if any).}\label{fig:fig-altemistot}
+\end{figure}
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.5\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/UKEIRE/annual/TPannual_allISO/plots/e2021/nox_UKEIRE_2021emis_2021map_2023inv_3c_UKALTSECBAR} 
+
+}
+
+\caption{Inventory emissions vs altered emissions - SECTORS (if any).}\label{fig:fig-altemissec}
+\end{figure}
+
+\newpage
+
+\subsection{\texorpdfstring{MAP: SECTORAL EMISSIONS
+ANNUM\textsuperscript{-1} - NC
+FILE}{MAP: SECTORAL EMISSIONS ANNUM-1 - NC FILE}}\label{map-sectoral-emissions-annum-1---nc-file}
+
+\subsubsection{UK and Eire temporal schema:
+annual}\label{uk-and-eire-temporal-schema-annual}
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.75\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/UKEIRE/annual/TPannual_allISO/plots/e2021/nox_UKEIRE_2021emis_2021map_2023inv_6_UKANNSECMAP} 
+
+}
+
+\caption{UK/Eire total nox emissions sector-1 annum-1}\label{fig:unnamed-chunk-5}
+\end{figure}
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.2444}}
+  >{\centering\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.2778}}
+  >{\centering\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.0889}}
+  >{\centering\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.0889}}
+  >{\centering\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1000}}
+  >{\centering\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1000}}
+  >{\centering\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1000}}@{}}
+\caption{nox emissions (kt) per sector per ISO (red values have
+alternative data sources) (Totals match Processing Flow
+totals)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Sector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+GB
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+IE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SEA
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+ncTotal
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+OW
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Sector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+GB
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+IE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SEA
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+ncTotal
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+OW
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+A\_PublicPower & 87.329 & 8.525 & 0 & 95.854 & 40.921 & 136.775 \\
+B\_Industry & 122.433 & 8.896 & 0.001 & 131.330 & 0 & 131.330 \\
+C\_OtherStationaryComb & \textcolor{red}{62.808} & 8.076 & 0.001 &
+70.885 & 0 & 70.885 \\
+D\_Fugitive & 0 & 0 & 0 & 0.000 & 0.029 & 0.029 \\
+E\_Solvents & 0.062 & 0.006 & 0 & 0.068 & 0 & 0.068 \\
+F\_RoadTransport & 184.893 & 25.335 & 0 & 210.228 & 0 & 210.228 \\
+G\_Shipping & 0 & 1.598 & 3.673 & 5.271 & 1.896 & 7.167 \\
+H\_Aviation & 0 & 0.597 & 0 & 0.597 & 0 & 0.597 \\
+I\_Offroad & 76.071 & 4.498 & 29.069 & 109.638 & 237.544 & 347.182 \\
+J\_Waste & 3.072 & 0.017 & 0 & 3.089 & 0 & 3.089 \\
+K\_AgriLivestock & 27.439 & 0.969 & 0.004 & 28.412 & 0 & 28.412 \\
+L\_AgriOther & 0 & 35.221 & 0 & 35.221 & 0 & 35.221 \\
+M\_Other & 1.999 & 0 & 0 & 1.999 & 0 & 1.999 \\
+Total & 566.106 & 93.738 & 32.748 & 692.592 & 280.39 & 972.982 \\
+\end{longtable}
+
+\newpage
+
+\subsection{\texorpdfstring{EMISSIONS
+MONTH\textsuperscript{-1}}{EMISSIONS MONTH-1}}\label{emissions-month-1}
+
+\subsubsection{UK and Eire temporal schema:
+annual}\label{uk-and-eire-temporal-schema-annual-1}
+
+Source: EMEP v5.0 schema: data/temporal/EMEP4UKv5.0/
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.6\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/UKEIRE/annual/TPannual_allISO/plots/e2021/nox_UKEIRE_2021emis_2021map_2023inv_4_UKMONTOTLINE} 
+
+}
+
+\caption{Emissions of nox month-1}\label{fig:fig-montot}
+\end{figure}
+
+Total monthly emissions of nox in UK, Eire and the SEA buffer. As annual
+emissions input into NetCDF, using model profiles.
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0612}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0714}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0714}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0714}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0714}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0714}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0714}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0714}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0714}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0714}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0714}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0714}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0714}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0816}}@{}}
+\caption{Total monthly nox emissions (kt)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M5
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M6
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M7
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M8
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M11
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M12
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M5
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M6
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M7
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M8
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M11
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M12
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+IE & 5.15 & 5.37 & 7.34 & 8.14 & 6.72 & 6.11 & 6.19 & 6.96 & 10.85 &
+13.88 & 10.54 & 6.38 & 93.63 \\
+SEA & 2.51 & 2.70 & 2.94 & 2.87 & 2.71 & 2.79 & 2.72 & 2.52 & 2.66 &
+2.83 & 2.83 & 2.66 & 32.74 \\
+UK & 47.70 & 48.38 & 53.78 & 51.72 & 44.78 & 44.61 & 41.65 & 39.53 &
+45.88 & 51.90 & 49.22 & 47.16 & 566.31 \\
+Total & 55.36 & 56.45 & 64.06 & 62.73 & 54.21 & 53.51 & 50.56 & 49.01 &
+59.39 & 68.61 & 62.59 & 56.20 & 692.68 \\
+\end{longtable}
+
+\newpage
+
+\subsection{\texorpdfstring{MAP: EMISSIONS
+MONTH\textsuperscript{-1}}{MAP: EMISSIONS MONTH-1}}\label{map-emissions-month-1}
+
+Also see Table 5 above for totals.
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.85\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/UKEIRE/annual/TPannual_allISO/plots/e2021/nox_UKEIRE_2021emis_2021map_2023inv_7_UKMONTOTMAP} 
+
+}
+
+\caption{UK/Eire total nox emissions month-1}\label{fig:unnamed-chunk-8}
+\end{figure}
+
+\newpage
+
+\subsection{\texorpdfstring{SECTORAL EMISSIONS
+MONTH\textsuperscript{-1}}{SECTORAL EMISSIONS MONTH-1}}\label{sectoral-emissions-month-1}
+
+\subsubsection{UK and Eire temporal schema:
+annual}\label{uk-and-eire-temporal-schema-annual-2}
+
+Source: EMEP v5.0 schema: data/temporal/EMEP4UKv5.0/
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.8\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/UKEIRE/annual/TPannual_allISO/plots/e2021/nox_UKEIRE_2021emis_2021map_2023inv_5_UKMONSECLINE} 
+
+}
+
+\caption{Emissions (kt) of nox month-1 sector-1}\label{fig:unnamed-chunk-9}
+\end{figure}
+
+N.B. as UK data starts in SNAP sectors \& Eire data in GNFR sectors, UK
+\& Eire sectoral monthly emissions are sometimes flat
+
+\vspace{\baselineskip}
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.1833}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0500}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0583}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0583}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0583}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0583}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0583}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0583}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0583}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0583}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0583}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0583}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0583}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0583}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0667}}@{}}
+\caption{Monthly nox emissions (kt) per sector (UK)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Sector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M5
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M6
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M7
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M8
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M11
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M12
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Sector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M5
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M6
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M7
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M8
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M11
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M12
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+A\_PublicPower & UK & 8.75 & 8.19 & 9.03 & 8.11 & 6.06 & 6.64 & 6.54 &
+5.46 & 6.35 & 6.96 & 6.89 & 8.41 & 87.39 \\
+B\_Industry & UK & 10.20 & 10.69 & 11.45 & 10.84 & 9.95 & 10.10 & 9.61 &
+9.00 & 9.58 & 10.37 & 10.47 & 10.23 & 122.49 \\
+C\_OtherStationaryComb & UK & 8.75 & 8.18 & 8.98 & 7.64 & 4.60 & 3.95 &
+1.71 & 1.15 & 2.74 & 4.38 & 4.92 & 6.03 & 63.03 \\
+D\_Fugitive & UK & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00
+& 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+E\_Solvents & UK & 0.00 & 0.00 & 0.00 & 0.01 & 0.01 & 0.01 & 0.01 & 0.01
+& 0.01 & 0.01 & 0.00 & 0.00 & 0.07 \\
+F\_RoadTransport & UK & 13.61 & 14.33 & 15.39 & 15.78 & 16.07 & 15.99 &
+15.69 & 15.55 & 15.73 & 16.36 & 15.65 & 14.68 & 184.83 \\
+G\_Shipping & UK & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00
+& 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+H\_Aviation & UK & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00
+& 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+I\_Offroad & UK & 5.83 & 6.28 & 6.84 & 6.68 & 6.29 & 6.49 & 6.32 & 5.84
+& 6.17 & 6.58 & 6.58 & 6.19 & 76.09 \\
+J\_Waste & UK & 0.26 & 0.26 & 0.26 & 0.26 & 0.26 & 0.26 & 0.26 & 0.26 &
+0.26 & 0.26 & 0.26 & 0.26 & 3.12 \\
+K\_AgriLivestock & UK & 0.14 & 0.29 & 1.66 & 2.26 & 1.38 & 1.02 & 1.36 &
+2.11 & 4.88 & 6.81 & 4.28 & 1.18 & 27.37 \\
+L\_AgriOther & UK & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 &
+0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+M\_Other & UK & 0.17 & 0.17 & 0.17 & 0.17 & 0.17 & 0.17 & 0.17 & 0.17 &
+0.17 & 0.17 & 0.17 & 0.17 & 2.04 \\
+Total & - & 47.71 & 48.39 & 53.78 & 51.75 & 44.79 & 44.63 & 41.67 &
+39.55 & 45.89 & 51.90 & 49.22 & 47.15 & 566.43 \\
+\end{longtable}
+
+\vspace{\baselineskip}
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.2000}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0545}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0545}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0545}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0545}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0545}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0545}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0545}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0545}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0545}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0636}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0636}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0636}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0545}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0636}}@{}}
+\caption{Monthly nox emissions (kt) per sector (EIRE)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Sector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M5
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M6
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M7
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M8
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M11
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M12
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Sector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M5
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M6
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M7
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M8
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M11
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M12
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+A\_PublicPower & IE & 0.76 & 0.77 & 0.67 & 0.74 & 0.73 & 0.66 & 0.73 &
+0.68 & 0.62 & 0.73 & 0.75 & 0.69 & 8.53 \\
+B\_Industry & IE & 0.76 & 0.75 & 0.79 & 0.76 & 0.74 & 0.75 & 0.71 & 0.64
+& 0.70 & 0.76 & 0.77 & 0.77 & 8.90 \\
+C\_OtherStationaryComb & IE & 1.09 & 1.04 & 1.04 & 0.94 & 0.69 & 0.57 &
+0.22 & 0.19 & 0.36 & 0.56 & 0.64 & 0.76 & 8.10 \\
+D\_Fugitive & IE & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00
+& 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+E\_Solvents & IE & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00
+& 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+F\_RoadTransport & IE & 1.82 & 1.91 & 2.09 & 2.15 & 2.19 & 2.19 & 2.18 &
+2.18 & 2.19 & 2.26 & 2.15 & 2.00 & 25.31 \\
+G\_Shipping & IE & 0.13 & 0.13 & 0.14 & 0.14 & 0.13 & 0.14 & 0.13 & 0.12
+& 0.13 & 0.14 & 0.14 & 0.14 & 1.61 \\
+H\_Aviation & IE & 0.05 & 0.05 & 0.05 & 0.05 & 0.05 & 0.05 & 0.05 & 0.04
+& 0.05 & 0.05 & 0.05 & 0.05 & 0.59 \\
+I\_Offroad & IE & 0.36 & 0.35 & 0.38 & 0.38 & 0.37 & 0.39 & 0.38 & 0.33
+& 0.36 & 0.39 & 0.40 & 0.39 & 4.48 \\
+J\_Waste & IE & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 &
+0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+K\_AgriLivestock & IE & 0.00 & 0.01 & 0.06 & 0.08 & 0.05 & 0.04 & 0.05 &
+0.07 & 0.17 & 0.24 & 0.15 & 0.04 & 0.96 \\
+L\_AgriOther & IE & 0.18 & 0.37 & 2.12 & 2.90 & 1.77 & 1.30 & 1.74 &
+2.70 & 6.27 & 8.75 & 5.49 & 1.52 & 35.11 \\
+M\_Other & IE & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 &
+0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+Total & - & 5.15 & 5.38 & 7.34 & 8.14 & 6.72 & 6.09 & 6.19 & 6.95 &
+10.85 & 13.88 & 10.54 & 6.36 & 93.59 \\
+\end{longtable}
+
+\newpage
+
+\section{EU INPUTS FILES}\label{eu-inputs-files}
+
+\subsection{METADATA}\label{metadata-1}
+
+\textbf{Project:} NFC
+
+\textbf{Git Repo:} \url{https://github.com/oSamTo/EMEP_inputs}
+
+\textbf{JASMIN dir:} /gws/nopw/j04/ceh\_generic/samtom/EMEP\_inputs
+
+\textbf{Output dir:}
+outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/EU/annual/TPannual\_allISO
+
+\textbf{EMEP version:} v5.0
+
+\vspace{\baselineskip}
+
+Input files processed to 0.1\(^\circ\) x 0.1\(^\circ\) resolution, in
+WGS84.
+
+\vspace{\baselineskip}
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1139}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1139}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1266}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1392}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1266}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1266}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1266}}
+  >{\centering\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1266}}@{}}
+\caption{Metadata of inputs}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Species
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Inv\_Year
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Emis\_Year
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+temp\_res
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+orig\_sec
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+orig\_res
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+orig\_crs
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Species
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Inv\_Year
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Emis\_Year
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+temp\_res
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+orig\_sec
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+orig\_res
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+orig\_crs
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+EU ISOs & nox & 2023 & 2021 & annual & GNFR & 0.1 & WGS84 \\
+\end{longtable}
+
+\textbf{EMEP ISO codes:} AL, AT, BE, BG, DK, FI, FR, GR, HU, IS, IE, IT,
+LU, NL, NO, PL, PT, RO, ES, SE, CH, TR, GB, BAS, NOS, ATL, MED, BLS, BY,
+UA, MD, EE, LV, LT, CZ, SK, SI, HR, BA, MK, KZ, GE, CY, AM, MT, LI, DE,
+RU, MC, NOA, KG, AZ, RS, ME, UZ, TM, CAS, TJ, RUE, AST
+
+Notes:
+
+\begin{itemize}
+\item
+  Emissions from the EU (and wider) domain remain in GNFR sectors (see
+  /data/lookups/EMEP\_sectors.csv) with UK+10km data masked out.
+  EMEP/CEIP emissions take precedence outside of this mask.
+\item
+  Emissions data are provided in WGS84 lat lon, at 0.1\(^\circ\) x
+  0.1\(^\circ\) resolution.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    This is done in /gws/nopw/j04/ceh\_generic/inventory\_processor
+  \end{itemize}
+\end{itemize}
+
+\newpage
+
+\subsection{\texorpdfstring{MAP: TOTAL EMISSION
+ANNUM\textsuperscript{-1}}{MAP: TOTAL EMISSION ANNUM-1}}\label{map-total-emission-annum-1-1}
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.9\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/EU/annual/TPannual_allISO/plots/e2021/nox_EU_2021emis_2021map_2023inv_8_EUTOTMAP} 
+
+}
+
+\caption{EU total nox emissions annum-1 (UK/Eire emissions for context).}\label{fig:unnamed-chunk-13}
+\end{figure}
+
+\vspace{\baselineskip}
+
+\begin{longtable}[]{@{}ccccc@{}}
+\caption{Annual emissions of nox per ISO.}\tabularnewline
+\toprule\noalign{}
+Area & Species & Total\_kt & mean\_t & max\_t \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Area & Species & Total\_kt & mean\_t & max\_t \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+EU & nox & 21962.49 & 39.59 & 206161.8 \\
+\end{longtable}
+
+\begin{itemize}
+\tightlist
+\item
+  N.B. EU totals in table above have UK \& Eire masked out.
+\end{itemize}
+
+\newpage
+
+\subsection{PROCESSING FLOW}\label{processing-flow-1}
+
+Figure \ref{fig:fig-procEU1} shows total EMEP emissions as taken from
+EMEP/CEIP (inventory\_data) and emissions post processing
+(processed\_data).
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.35\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/EU/annual/TPannual_allISO/plots/e2021/nox_EU_2021emis_2021map_2023inv_9_EUINVBAR} 
+
+}
+
+\caption{Emissions processing from source.}\label{fig:fig-procEU1}
+\end{figure}
+
+Total nox lost in EU domain, following processing: 752.3 kt. Spatial
+breakdown :
+
+\begin{longtable}[]{@{}ccccc@{}}
+\caption{Emissions lost in EMEP domain per ISO.}\tabularnewline
+\toprule\noalign{}
+ISO & inventory\_kt & processed\_kt & lost\_kt & proc\_ratio \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+ISO & inventory\_kt & processed\_kt & lost\_kt & proc\_ratio \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+ATL & 695.2 & 673.7 & -21.5 & 0.969 \\
+GB & 681.8 & 88.1 & -593.7 & 0.129 \\
+IE & 100.0 & 3.3 & -96.7 & 0.033 \\
+NOS & 562.1 & 521.8 & -40.3 & 0.928 \\
+Total & 2039.1 & 1286.9 & -752.2 & 2.059 \\
+\end{longtable}
+
+Figure \ref{fig:fig-procEU2} shows the data progressing to NetCDF inputs
+- emissions inside 10km sea buffer are masked and not used for EMEP-EU.
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.6\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/EU/annual/TPannual_allISO/plots/e2021/nox_EU_2021emis_2021map_2023inv_10_EUNCBAR} 
+
+}
+
+\caption{Processed toals to NetCDF input data.}\label{fig:fig-procEU2}
+\end{figure}
+
+\newpage
+
+\subsection{\texorpdfstring{MAP: SECTORAL EMISSIONS
+ANNUM\textsuperscript{-1}}{MAP: SECTORAL EMISSIONS ANNUM-1}}\label{map-sectoral-emissions-annum-1}
+
+\subsubsection{EU temporal schema:
+annual}\label{eu-temporal-schema-annual}
+
+Source: EMEP v5.0 schema: data/temporal/EMEP4UKv5.0/
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.85\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/EU/annual/TPannual_allISO/plots/e2021/nox_EU_2021emis_2021map_2023inv_13_EUANNSECMAP} 
+
+}
+
+\caption{EMEP-EU total nox emissions sector-1 annum-1}\label{fig:unnamed-chunk-14}
+\end{figure}
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.2614}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.1136}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0909}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0909}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0909}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0909}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0909}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0795}}
+  >{\centering\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0909}}@{}}
+\caption{nox emissions (kt) per sector in EU, plus UK proximal
+ISOs}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Sector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+EU
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+FR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+NL
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+BE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+DE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+ES
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+NOS
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+ATL
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Sector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+EU
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+FR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+NL
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+BE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+DE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+ES
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+NOS
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+ATL
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+A\_PublicPower & 3953.18 & 25.48 & 14.02 & 8.08 & 203.25 & 30.75 & 0.0 &
+0.00 \\
+B\_Industry & 2313.73 & 88.55 & 28.57 & 37.83 & 160.35 & 109.37 & 0.0 &
+0.00 \\
+C\_OtherStationaryComb & 2217.47 & 82.57 & 15.26 & 15.74 & 86.75 & 48.52
+& 0.0 & 0.00 \\
+D\_Fugitive & 124.16 & 1.11 & 0.00 & 0.05 & 1.66 & 4.03 & 0.0 & 0.00 \\
+E\_Solvents & 15.28 & 0.81 & 0.03 & 0.04 & 0.21 & 0.10 & 0.0 & 0.00 \\
+F\_RoadTransport & 6918.71 & 332.44 & 58.96 & 51.68 & 318.91 & 229.64 &
+0.0 & 0.00 \\
+G\_Shipping & 3297.77 & 3.06 & 22.27 & 5.35 & 22.40 & 4.15 & 521.8 &
+673.66 \\
+H\_Aviation & 66.17 & 5.96 & 2.45 & 1.62 & 6.49 & 4.52 & 0.0 & 0.00 \\
+I\_Offroad & 1281.67 & 66.23 & 35.80 & 7.82 & 60.02 & 49.10 & 0.0 &
+0.00 \\
+J\_Waste & 138.36 & 2.86 & 0.28 & 0.43 & 0.74 & 58.19 & 0.0 & 0.00 \\
+K\_AgriLivestock & 191.50 & 9.15 & 3.50 & 1.57 & 1.31 & 7.11 & 0.0 &
+0.00 \\
+L\_AgriOther & 1334.70 & 137.39 & 29.38 & 11.88 & 106.69 & 74.98 & 0.0 &
+0.00 \\
+M\_Other & 109.80 & 0.00 & 0.17 & 0.00 & 0.00 & 0.00 & 0.0 & 0.00 \\
+Total & 21962.50 & 755.61 & 210.69 & 142.09 & 968.78 & 620.46 & 521.8 &
+673.66 \\
+\end{longtable}
+
+\newpage
+
+\subsection{\texorpdfstring{EMISSIONS
+MONTH\textsuperscript{-1}}{EMISSIONS MONTH-1}}\label{emissions-month-1-1}
+
+\subsubsection{EMEP-EU temporal schema:
+annual}\label{emep-eu-temporal-schema-annual}
+
+Source: EMEP v5.0 schema: data/temporal/EMEP4UKv5.0/
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.6\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/EU/annual/TPannual_allISO/plots/e2021/nox_EU_2021emis_2021map_2023inv_11_EUMONTOTLINE} 
+
+}
+
+\caption{Emissions of nox month-1}\label{fig:fig-montotEU}
+\end{figure}
+
+Total monthly emissions of nox in EU and ISOs nearest to UK/Eire. As
+annual emissions input into NetCDF, using model profiles.
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0367}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0734}}
+  >{\centering\arraybackslash}p{(\columnwidth - 26\tabcolsep) * \real{0.0826}}@{}}
+\caption{Total monthly nox emissions (kt)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+ISO
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M5
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M6
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M7
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M8
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M11
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M12
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+ISO
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M5
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M6
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M7
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M8
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M11
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M12
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+EU & 1848.2 & 1882.8 & 1901.0 & 1859.3 & 1751.7 & 1705.2 & 1687.2 &
+1687.6 & 1834.8 & 2009.3 & 1942.6 & 1858.4 & 21968.1 \\
+FR & 58.3 & 62.6 & 65.0 & 67.7 & 57.0 & 51.1 & 51.8 & 53.9 & 69.7 & 85.4
+& 74.0 & 59.4 & 755.9 \\
+NL & 15.3 & 16.0 & 23.2 & 25.7 & 20.5 & 18.6 & 14.6 & 13.3 & 14.1 & 16.3
+& 17.3 & 15.9 & 210.8 \\
+BE & 11.4 & 11.9 & 13.0 & 12.8 & 11.1 & 11.0 & 10.0 & 9.9 & 12.2 & 14.4
+& 13.0 & 11.5 & 142.2 \\
+DE & 82.7 & 85.4 & 87.3 & 84.2 & 73.2 & 68.5 & 66.4 & 67.1 & 81.4 & 97.4
+& 91.7 & 83.8 & 969.1 \\
+ES & 48.9 & 50.5 & 47.0 & 45.3 & 44.9 & 43.8 & 47.5 & 47.9 & 60.6 & 72.7
+& 61.2 & 50.2 & 620.5 \\
+NOS & 43.5 & 43.5 & 43.5 & 43.5 & 43.5 & 43.5 & 43.5 & 43.5 & 43.5 &
+43.5 & 43.5 & 43.5 & 522.0 \\
+ATL & 56.1 & 56.1 & 56.1 & 56.1 & 56.1 & 56.1 & 56.1 & 56.1 & 56.1 &
+56.1 & 56.1 & 56.1 & 673.2 \\
+\end{longtable}
+
+\newpage
+
+\subsection{\texorpdfstring{SECTORAL EMISSIONS
+MONTH\textsuperscript{-1}}{SECTORAL EMISSIONS MONTH-1}}\label{sectoral-emissions-month-1-1}
+
+\subsubsection{EMEP-EU temporal schema:
+annual}\label{emep-eu-temporal-schema-annual-1}
+
+Source: EMEP v5.0 schema: data/temporal/EMEP4UKv5.0/
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.7\linewidth]{../outputs/SCOTDOM/SGS2/EMEP4UKv5.0/inv2023/EU/annual/TPannual_allISO/plots/e2021/nox_EU_2021emis_2021map_2023inv_12_EUMONSECLINE} 
+
+}
+
+\caption{Emissions (kt) of nox month-1 sector-1}\label{fig:unnamed-chunk-17}
+\end{figure}
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.1667}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0379}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0606}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0606}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0606}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0606}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0606}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0606}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0606}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0606}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0606}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0606}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0606}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0606}}
+  >{\centering\arraybackslash}p{(\columnwidth - 28\tabcolsep) * \real{0.0682}}@{}}
+\caption{Monthly nox emissions (kt) per sector per ISO}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Sector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+ISO
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M5
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M6
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M7
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M8
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M11
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M12
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Sector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+ISO
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M5
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M6
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M7
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M8
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M9
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M11
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+M12
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Total
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+A\_PublicPower & EU & 373.0 & 359.1 & 341.5 & 335.3 & 315.4 & 301.0 &
+296.4 & 294.5 & 303.2 & 327.5 & 346.1 & 362.1 & 3955.1 \\
+B\_Industry & EU & 208.7 & 215.1 & 216.2 & 201.7 & 190.5 & 185.0 & 171.8
+& 157.6 & 169.8 & 191.7 & 200.8 & 206.6 & 2315.5 \\
+C\_OtherStationaryComb & EU & 277.7 & 296.9 & 259.3 & 202.3 & 147.8 &
+128.4 & 117.2 & 115.8 & 119.6 & 144.7 & 179.4 & 235.7 & 2224.8 \\
+D\_Fugitive & EU & 10.3 & 10.3 & 10.4 & 10.3 & 10.3 & 10.3 & 10.4 & 10.4
+& 10.4 & 10.4 & 10.4 & 10.4 & 124.3 \\
+E\_Solvents & EU & 1.2 & 1.2 & 1.2 & 1.3 & 1.3 & 1.3 & 1.3 & 1.3 & 1.3 &
+1.3 & 1.2 & 1.2 & 15.1 \\
+F\_RoadTransport & EU & 537.4 & 550.3 & 567.6 & 579.8 & 588.8 & 590.4 &
+587.9 & 584.8 & 586.0 & 602.1 & 585.1 & 556.8 & 6917.0 \\
+G\_Shipping & EU & 273.1 & 274.3 & 276.0 & 276.2 & 276.0 & 276.5 & 274.9
+& 271.4 & 273.1 & 276.2 & 275.8 & 274.3 & 3297.8 \\
+H\_Aviation & EU & 5.2 & 5.4 & 5.6 & 5.7 & 5.7 & 5.9 & 5.7 & 5.2 & 5.3 &
+5.7 & 5.6 & 5.3 & 66.3 \\
+I\_Offroad & EU & 99.3 & 102.8 & 107.7 & 109.8 & 110.1 & 113.2 & 110.3 &
+103.3 & 106.9 & 110.7 & 106.3 & 101.2 & 1281.6 \\
+J\_Waste & EU & 11.6 & 11.4 & 11.6 & 11.5 & 11.6 & 11.5 & 11.6 & 11.6 &
+11.5 & 11.6 & 11.5 & 11.6 & 138.6 \\
+K\_AgriLivestock & EU & 5.8 & 6.5 & 12.9 & 15.8 & 11.6 & 10.0 & 11.6 &
+15.2 & 28.3 & 37.4 & 25.4 & 10.7 & 191.2 \\
+L\_AgriOther & EU & 35.8 & 40.3 & 82.0 & 100.4 & 73.5 & 62.5 & 79.0 &
+107.6 & 210.2 & 280.9 & 185.9 & 73.4 & 1331.5 \\
+M\_Other & EU & 9.1 & 9.1 & 9.1 & 9.1 & 9.1 & 9.1 & 9.1 & 9.1 & 9.1 &
+9.1 & 9.1 & 9.1 & 109.2 \\
+Total & - & 1848.2 & 1882.7 & 1901.1 & 1859.2 & 1751.7 & 1705.1 & 1687.2
+& 1687.8 & 1834.7 & 2009.3 & 1942.6 & 1858.4 & 21968.0 \\
+\end{longtable}
+
+\newpage
+
+\section{TIME SERIES}\label{time-series}
+
+\newpage
+
+\subsection{EMISSIONS SECTORAL
+CLASSIFICATIONS}\label{emissions-sectoral-classifications}
+
+\subsubsection{UK data starts in SNAP sectors, Eire data in GNFR
+sectors.}\label{uk-data-starts-in-snap-sectors-eire-data-in-gnfr-sectors.}
+
+\begin{itemize}
+\item
+  All UK SNAP03 \& SNAP04 goes to B\_Industry.
+\item
+  All UK SNAP08 goes to I\_Offroad.
+\item
+  All UK SNAP10 goes to K\_AgriLivestock.
+\end{itemize}
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.2683}}
+  >{\centering\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.0732}}
+  >{\centering\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.0854}}
+  >{\centering\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.0488}}
+  >{\centering\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.0488}}
+  >{\centering\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1220}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.3537}}@{}}
+\caption{Sectoral lookup table, SNAP \textless--\textgreater{}
+GNFR}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+GNFRlong
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SNAP
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+sec
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+s1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+s2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+EMEP\_sec
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+name
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+GNFRlong
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+SNAP
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+sec
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+s1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+s2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+EMEP\_sec
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+name
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+A\_PublicPower & 1 & sec01 & 1 & 1 & 1 & PublicPower \\
+B\_Industry & 3 & sec02 & 3 & 3 & 2 & Industry \\
+C\_OtherStationaryComb & 2 & sec03 & 2 & 2 & 3 & OtherStationaryComb \\
+D\_Fugitive & 5 & sec04 & 5 & 5 & 4 & Fugitive \\
+E\_Solvents & 6 & sec05 & 6 & 2 & 5 & Solvents \\
+F\_RoadTransport & 7 & sec06 & 7 & 2 & 6 & RoadTransport \\
+G\_Shipping & 8 & sec07 & 8 & 8 & 7 & Shipping \\
+H\_Aviation & 8 & sec08 & 8 & 7 & 8 & Aviation \\
+I\_Offroad & 8 & sec09 & 8 & 2 & 9 & Offroad \\
+J\_Waste & 9 & sec10 & 9 & 6 & 10 & Waste \\
+K\_AgriLivestock & 10 & sec11 & 10 & 2 & 11 & AgriLivestock \\
+L\_AgriOther & 10 & sec12 & 10 & 2 & 12 & AgriOther \\
+M\_Other & 11 & sec13 & 5 & 5 & 13 & Other \\
+O\_AviCruise & NA & & NA & NA & NA & AviationCruise \\
+P\_IntShipping & 8 & & NA & NA & NA & InternationalShipping \\
+Q\_LULUCF & NA & & NA & NA & NA & LULUCF \\
+& 1 & sec14 & 1 & 1 & 1 & PublicPower\_Point \\
+& 1 & sec15 & 1 & 3 & 1 & PublicPower\_Area \\
+& 7 & sec16 & 7 & 2 & 16 & RoadTransportExhaustGasoline \\
+& 7 & sec17 & 7 & 2 & 17 & RoadTransportExhaustDiesel \\
+& 7 & sec18 & 7 & 2 & 18 & RoadTransportExhaustLPGgas \\
+& 7 & sec19 & 7 & 2 & 19 & RoadTransportNonExhaustOther \\
+\end{longtable}
+
+\end{document}

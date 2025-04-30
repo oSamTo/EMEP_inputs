@@ -1,6 +1,6 @@
 ################################################################################
 #### master function to generate QAQC
-create_qaqc <- function(y, species, uk_folname, eu_folname, map_yr_uk, naei_inv, 
+create_qaqc <- function(project, scenario, y, species, uk_folname, eu_folname, map_yr_uk, naei_inv, 
                         emep_inv, time_dim, emep_version, v_EMEP_sec,
 						uk_agg_schema, eu_agg_schema, tp_scheme){
 
@@ -173,7 +173,8 @@ create_qaqc <- function(y, species, uk_folname, eu_folname, map_yr_uk, naei_inv,
   print(paste0(format(Sys.time(), "%Y-%m-%d %X"),
                ":            rendering pdf..."))  
   
-  l_pdf_params <- list(y = y, dt_poll = dt_poll, species = species, 
+  l_pdf_params <- list(project = project, scenario = scenario, 
+                       y = y, dt_poll = dt_poll, species = species, 
                        uk_folname = uk_folname, eu_folname = eu_folname,
 					   map_yr_uk = map_yr_uk, naei_inv = naei_inv, 
 					   emep_inv = emep_inv, v_EMEP_sec = v_EMEP_sec, 

@@ -64,8 +64,8 @@ vectorPolls <- function(dt_PID, class = c("ceh","emep","mapeire","naei")){
 ######################################################################################################
 #### function to take NAEI emissions, make ready to EMEP format and create netCDFs for UK & Eire
 EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yday"), 
-			                 v_EMEP_sec, naei_inv, map_yr_uk, map_yr_ie, folname, tp_scheme,
-                             uk_agg_schema, dt_alt_emis){
+			                 v_EMEP_sec, naei_inv, map_yr_uk, map_yr_ie, folname, 
+							 project, scenario, tp_scheme, uk_agg_schema, dt_alt_emis){
 	
   time_dim <- match.arg(time_dim)
   
@@ -79,7 +79,7 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
   if(map_yr_uk < 2018) stop ("UK spatial distribution must be 2018 or later")
   if(!(map_yr_ie %in% c(2016,2019))) stop ("Eire spatial distribution must be 2016 or 2019")
   
-  print(paste0(format(Sys.time(), "%F %T"),": Creating EMEP4UK UKEIRE inputs (",time_dim,") for ",y,"..."))
+  print(paste0(format(Sys.time(), "%F %T"),": Creating ",project," EMEP4UK UKEIRE inputs (",time_dim,") for ",y,"..."))
   
   # For the years & pollutants, take the regional emissions in Lat Long and;
   #   i) convert point emissions (.csv) into a raster
@@ -143,13 +143,13 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
        
 	  # we do not make a new sea list here, because the temporal data doesn't exist.
 	  # i.e. we need to keep the sea buffer emissions associated with country of origin. 
-      l_uk <- UKIE_sector_Emissions(dt_alt_emis, species, y, i, 
+      l_uk <- UKIE_sector_Emissions(dt_alt_emis, species, y, i, project, scenario,
 	                                time_dim, res_crs, map_yr = map_yr_uk, 
 									naei_inv, country = "uk")
-      l_ie <- UKIE_sector_Emissions(dt_alt_emis, species, y, i, 
+      l_ie <- UKIE_sector_Emissions(dt_alt_emis, species, y, i, project, scenario, 
 	                                time_dim, res_crs, map_yr = map_yr_ie, 
 									naei_inv, country = "ie")
-       
+      
       ########################
       #### TEMPORAL SPLIT ####
       # if the time_dim is 'annual', the data stays as 1 annual total.
@@ -185,7 +185,7 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
 	  dt_inv_summary <- rbindlist(list(l_uk$ann_summary, l_ie$ann_summary), use.names = T)
 	
 	  # make summaries for all masked areas
-	  l_maskgroup_summary <- summarise_UKIE_emissions(y, naei_inv, species, i, time_dim,
+	  l_maskgroup_summary <- summarise_UKIE_emissions(project, scenario, y, naei_inv, species, i, time_dim,
                                                       l_uk_inv = l_uk, l_ie_inv = l_ie, 
 													  l_s_uk = l_s_uk, l_s_ie = l_s_ie,
 													  l_s_sea = l_s_sea, l_s_ow = l_s_ow)
@@ -214,7 +214,7 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
 	 # input data and summarise what's going in. 
 	 l_ukiesea_emis <- list("GB" = l_uk_emis, "IE" = l_ie_emis, "SEA" = l_sea_emis) # use GB, not UK
 	 
-     dt_ncinput_summary <- input_data_NETCDF_uk(y, species, naei_inv, map_yr_uk, map_yr_ie, 
+     dt_ncinput_summary <- input_data_NETCDF_uk(project, scenario, y, species, naei_inv, map_yr_uk, map_yr_ie, 
 	                                            time_dim, v_EMEP_sec, fname_ncdf, uk_agg_schema,
 												l_ukiesea_emis)
      	  
@@ -228,7 +228,7 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
 	 # dt_ncinput_summary # as above
 	 
 	 # another nc summary from file, post writing. Double checker. 
-	 dt_ncoutput_summary <- summarise_nc_file_uk(fname_ncdf, y, species, 
+	 dt_ncoutput_summary <- summarise_nc_file_uk(project, scenario, fname_ncdf, y, species, 
 	                                             naei_inv, time_dim, v_EMEP_sec)
 	 	  
 	 write_summaries_uk(y, species, naei_inv, map_yr_uk, folname,
@@ -251,10 +251,11 @@ EMEP_UKEIRE_v5.0 <- function(y, v_pollutants, time_dim = c("annual","month","yda
 } # end of function
         
 
-######################################################################################################
+###############################################################################
 #### function to collect sector data for diffuse and points, based on country and sector
-UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, time_dim, res_crs,
-                                  map_yr, naei_inv, country = c("uk", "ie")){
+UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, project, scenario, 
+                                  time_dim, res_crs, map_yr, naei_inv, 
+								  country = c("uk", "ie")){
   
   country <- match.arg(country)
   
@@ -293,18 +294,22 @@ UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, time_dim, res_crs,
   ## UK
   if(country == "uk"){
     
-	alt_checker <- nrow(dt_alt_emis[poll == species & diff_or_pt == "diff" & 
-	                    sector == dt_sec[sec == i, GNFRlong] & iso == "GB"])
+	dt_alt_sub <- dt_alt_emis[projectName == project & scenarioName == scenario & 
+	                          poll == species & diff_or_pt == "diff" & 
+	                          sector == dt_sec[sec == i, GNFRlong] & iso == "GB"]
+	
+	alt_checker <- nrow(dt_alt_sub)
 		
 	if(alt_checker > 1) stop("Alternative emissions has too many surfaces for poll/sector/iso")
 	
 	## Diffuse UK
 	if(alt_checker == 1){
  
-      fol_emis <- alt_checker[, loc]
-	  fname_emis <- alt_checker[, fname]
+      fol_emis <- dt_alt_sub[, loc]
+	  fname_emis <- dt_alt_sub[, fname]
 	  
 	  f_diff <- file.path(fol_emis, fname_emis)
+	  if(!(file.exists(f_diff))) stop("file for alternate emissions does not exist.")
 	  
       loctext_diff <- "alt_file"
  
@@ -324,21 +329,25 @@ UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, time_dim, res_crs,
 	## Points UK
 	# (this is more unlikely, but could happen, e.g. power)
 	
-	alt_checker <- nrow(dt_alt_emis[poll == species & diff_or_pt == "pt" & 
-	                    sector == dt_sec[sec == i, GNFRlong] & iso == "GB"])
+	dt_alt_sub <- dt_alt_emis[projectName == project & scenarioName == scenario & 
+	                          poll == species & diff_or_pt == "pt" & 
+	                          sector == dt_sec[sec == i, GNFRlong] & iso == "GB"]
+	
+	alt_checker <- nrow(dt_alt_sub)
 	
     if(alt_checker > 1) stop("Alternative emissions has too many surfaces for poll/sector/iso")
 	
     if(alt_checker == 1){
  
-      fol_emis <- alt_checker[, loc]
-	  fname_emis <- alt_checker[, fname]
+      fol_emis <- dt_alt_sub[, loc]
+	  fname_emis <- dt_alt_sub[, fname]
 	  
 	  ## WE NEED TO READ IN 1990+ FILE AND 1950-2000 FILE AND REMOVE THE NECESSARY EMISSIONS
 	  
 	  stop("make code to replace existing points in time series data")
 	  
 	  f_pt <- file.path(fol_emis, fname_emis)
+	  if(!(file.exists(f_pt))) stop("file for alternate emissions does not exist.")
 	  
       loctext_pt <- "alt_file"
  
@@ -356,20 +365,24 @@ UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, time_dim, res_crs,
   
   ## EIRE
   }else if(country == "ie"){
-  
-    alt_checker <- nrow(dt_alt_emis[poll == species & diff_or_pt == "diff" & 
-	                    sector == dt_sec[sec == i, GNFRlong] & iso == "IE"])
+    
+	dt_alt_sub <- dt_alt_emis[projectName == project & scenarioName == scenario & 
+	                          poll == species & diff_or_pt == "diff" & 
+	                          sector == dt_sec[sec == i, GNFRlong] & iso == "IE"]
+							  
+    alt_checker <- nrow(dt_alt_sub)
 	
     if(alt_checker > 1) stop("Alternative emissions has too many surfaces for poll/sector/iso")
 	  
     ## Diffuse Eire
 	if(alt_checker == 1){
  
-      fol_emis <- alt_checker[, loc]
-	  fname_emis <- alt_checker[, fname]
+      fol_emis <- dt_alt_sub[, loc]
+	  fname_emis <- dt_alt_sub[, fname]
 	  
 	  f_diff <- file.path(fol_emis, fname_emis)
-	  
+	  if(!(file.exists(f_diff))) stop("file for alternate emissions does not exist.")
+	   
       loctext_diff <- "alt_file"
  
     }else{
@@ -391,7 +404,7 @@ UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, time_dim, res_crs,
     f_pt <- "no_file"
 	loctext_pt <- "no_file"
   
-  }
+  } # country ifelse
   
   ### read in the data; if diff/pts are empty or don't exist, set as blank domain
   ### read diffuse data ###
@@ -648,7 +661,8 @@ UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, time_dim, res_crs,
   ### RETURN DATA ###
   
   # also make a scaling/inventory data table - no summary of masked etc. only inventory
-  dt_inv <- data.table(Area = country,
+  dt_inv <- data.table(Project = project, Scenario = scenario,
+                       Area = country,
                        mask = "all",  
 					   Pollutant = species, 
 					   data_source_diff = loctext_diff,
@@ -926,7 +940,7 @@ stack_data <- function(species, l_uk_prof, l_ie_prof, i, mask = c("uk","ie","sea
 
 ######################################################################################################
 #### function to summarise input emissions
-summarise_UKIE_emissions <- function(y, naei_inv, species, i, time_dim, 
+summarise_UKIE_emissions <- function(project, scenario, y, naei_inv, species, i, time_dim, 
                                      l_uk_inv = l_uk, l_ie_inv = l_ie, 
 									 l_s_uk = l_s_uk, l_s_ie = l_s_ie,
 									 l_s_sea = l_s_sea, l_s_ow = l_s_ow){
@@ -937,7 +951,8 @@ summarise_UKIE_emissions <- function(y, naei_inv, species, i, time_dim,
   
   ## MASK SUMMARY for UK & IE
   # basic info
-  dt_mask <- data.table(Area = c("uk","uk","uk","ie","ie","ie"), 
+  dt_mask <- data.table(Project = project, Scenario = scenario, 
+                   Area = c("uk","uk","uk","ie","ie","ie"), 
                    mask = c("terrestrial","sea","outwith","terrestrial","sea","outwith"),
                    Pollutant = species,
 				   data_source = "masked",
@@ -970,7 +985,8 @@ summarise_UKIE_emissions <- function(y, naei_inv, species, i, time_dim,
     
   ## GROUPED SUMMARIES for IE, UK, SEA, OW
   # basic info
-  dt_group <- data.table(Area = c("uk","ie","sea","ow"),                   
+  dt_group <- data.table(Project = project, Scenario = scenario, 
+                         Area = c("uk","ie","sea","ow"),                   
                          Pollutant = species,
 				         data_source = "grouped",
 	       	             emis_y = y, 
@@ -1224,7 +1240,8 @@ create_NETCDF_uk_month <- function(){
 
 ######################################################################################################
 #### function to create a netCDF and input the data
-input_data_NETCDF_uk <- function(y, species, naei_inv, map_yr_uk, map_yr_ie, time_dim, 
+input_data_NETCDF_uk <- function(project, scenario, y, species, naei_inv, 
+                                 map_yr_uk, map_yr_ie, time_dim, 
                                  v_EMEP_sec, fname_ncdf, uk_agg_schema, l_ukiesea_emis){
   
   # netCDF variables are done on ISO then sector name 
@@ -1311,7 +1328,8 @@ input_data_NETCDF_uk <- function(y, species, naei_inv, map_yr_uk, map_yr_ie, tim
 	
 	## summary of data going into netcdf ##
     # basic table
-    dt <- data.table(Area = var_iso,
+    dt <- data.table(Project = project, Scenario = scenario, 
+	                 Area = var_iso,
                      iso_code = var_code,
                      Pollutant = species, 
                      data_source = "NetCDF_input",
@@ -1449,7 +1467,7 @@ write_summaries_uk <- function(y, species, naei_inv, map_yr_uk, folname,
 
 ######################################################################################################
 #### function to read and summarise nc file fresh. Post writing. 
-summarise_nc_file_uk <- function(fname_ncdf, y, species, 
+summarise_nc_file_uk <- function(project, scenario, fname_ncdf, y, species, 
 	                             naei_inv, time_dim, v_EMEP_sec){
     
   # time dims
@@ -1495,7 +1513,8 @@ summarise_nc_file_uk <- function(fname_ncdf, y, species,
     v_secs <- paste0("sec",str_pad(v_secs, width = 2, side = "left", 0))
     
     # summarise all     
-    dt <- data.table(Area = var_iso,
+    dt <- data.table(Project = project, Scenario = scenario, 
+	                 Area = var_iso,
                      iso_code = var_code,
                      Pollutant = species, 
                      data_source = "NetCDF_output",

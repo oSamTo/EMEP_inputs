@@ -1,5 +1,7 @@
 ---
 params:
+ project: NA
+ scenario: NA
  y: NA
  dt_poll: NA
  species: NA
@@ -40,7 +42,9 @@ output:
 
 ## METADATA
 
-**Project:** NFC
+**Project:** `r params$project`
+
+**Scenario:** `r params$scenario`
 
 **Git Repo:** https://github.com/oSamTo/EMEP_inputs
 
@@ -185,17 +189,16 @@ dt <- dt[data_source_diff == "alt_file" | data_source_pt == "alt_file"]
 
 if(nrow(dt) > 0){
 
- dt[, c("Pollutant", "mask", "sec_EMEP", "sec_SNAP", "sec_long", "time_res", "scaling", "emis_t_diffmap", 
-       "emis_t_pt", "emis_t_scalar", "emis_t_spatial_scaled") := NULL]
+ dt[, c("Pollutant", "emis_y", "inv_y", "mask", "sec_EMEP", "sec_SNAP", "sec_long", "time_res", "scaling", "emis_t_scalar", "emis_t_spatial_scaled") := NULL]
 
- setnames(dt, c("emis_y", "inv_y", "sec_GNFR", 
-                "data_source_diff", "data_source_pt", 
+ setnames(dt, c("sec_GNFR", "data_source_diff", "data_source_pt", 
+                "emis_t_diffmap", "emis_t_pt",
                 "emis_t_spatial", "emis_t_spatial_inv", "replacement_t" ), 
-              c("Emis_Year", "Inv_Year", "GNFR",
-			    "source_diff", "source_pt",
+              c("GNFR", "source_diff", "source_pt",
+			    "emis_diff", "emis_pt", 
 			    "alt_emis_t", "inv_emis_t", "emis_delta_t"))
 
- dt <- dt[,c("Area", "Emis_Year", "Inv_Year", "GNFR", "source_diff", "source_pt",
+ dt <- dt[,c("Area", "GNFR", "source_diff", "source_pt", "emis_diff", "emis_pt", 
              "alt_emis_t", "inv_emis_t", "emis_delta_t")]
 
  kable(dt, align = "ccccccccc", caption = "Alternative input files", 
@@ -203,12 +206,12 @@ if(nrow(dt) > 0){
 
 }else{
 
- dt <- data.table(Area = "No files", Emis_Year = NA, Inv_Year = NA, 
+ dt <- data.table(Area = "No files",
                   GNFR = NA, source_diff = NA,
 				  source_pt = NA, alt_emis_t = NA, 
 				  emis_delta_t = NA)
  
- kable(dt, align = "ccccccccc", caption = "No alternative input files", 
+ kable(dt, align = "ccccccc", caption = "No alternative input files", 
 	  booktabs = TRUE)
 	  
 }
@@ -225,17 +228,16 @@ dt <- dt[data_source_diff == "alt_file" | data_source_pt == "alt_file"]
 
 if(nrow(dt) > 0){
 
- dt[, c("Pollutant", "mask", "sec_EMEP", "sec_SNAP", "sec_long", "time_res", "scaling", "emis_t_diffmap", 
-       "emis_t_pt", "emis_t_scalar", "emis_t_spatial_scaled") := NULL]
+ dt[, c("Pollutant", "emis_y", "inv_y", "mask", "sec_EMEP", "sec_SNAP", "sec_long", "time_res", "scaling", "emis_t_scalar", "emis_t_spatial_scaled") := NULL]
 
- setnames(dt, c("emis_y", "inv_y", "sec_GNFR", 
-                "data_source_diff", "data_source_pt", 
+ setnames(dt, c("sec_GNFR", "data_source_diff", "data_source_pt", 
+                "emis_t_diffmap", "emis_t_pt",
                 "emis_t_spatial", "emis_t_spatial_inv", "replacement_t" ), 
-              c("Emis_Year", "Inv_Year", "GNFR",
-			    "source_diff", "source_pt",
+              c("GNFR", "source_diff", "source_pt",
+			    "emis_diff", "emis_pt", 
 			    "alt_emis_t", "inv_emis_t", "emis_delta_t"))
 
- dt <- dt[,c("Area", "Emis_Year", "Inv_Year", "GNFR", "source_diff", "source_pt",
+ dt <- dt[,c("Area", "GNFR", "source_diff", "source_pt", "emis_diff", "emis_pt", 
              "alt_emis_t", "inv_emis_t", "emis_delta_t")]
 
  kable(dt, align = "ccccccccc", caption = "Alternative input files", 
@@ -243,12 +245,12 @@ if(nrow(dt) > 0){
 
 }else{
 
- dt <- data.table(Area = "No files", Emis_Year = NA, Inv_Year = NA, 
+ dt <- data.table(Area = "No files", 
                   GNFR = NA, source_diff = NA,
 				  source_pt = NA, alt_emis_t = NA, 
 				  emis_delta_t = NA)
  
- kable(dt, align = "ccccccccc", caption = "No alternative input files", 
+ kable(dt, align = "ccccccc", caption = "No alternative input files", 
 	  booktabs = TRUE)
 	  
 }
