@@ -24,3 +24,8 @@ SCOTDOM,SGS5,nox,GB,diff,C_OtherStationaryComb,SGS5nomsf_nox_DIFFUSE_inv2023_emi
 SCOTDOM,SGS5,pm25,GB,diff,C_OtherStationaryComb,SGS5nomsf_pm25_DIFFUSE_inv2023_emis_2021_GNFR_C_OtherStationaryComb_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/SCOTDOM/input
 SCOTDOM,SGS5,pmco,GB,diff,C_OtherStationaryComb,SGS5nomsf_pmco_DIFFUSE_inv2023_emis_2021_GNFR_C_OtherStationaryComb_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/SCOTDOM/input
 SCOTDOM,SGS5,sox,GB,diff,C_OtherStationaryComb,SGS5nomsf_sox_DIFFUSE_inv2023_emis_2021_GNFR_C_OtherStationaryComb_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/SCOTDOM/input
+SCOTDOM,SGS6,co,GB,diff,C_OtherStationaryComb,SGS6refrun_co_DIFFUSE_inv2023_emis_2021_GNFR_C_OtherStationaryComb_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/SCOTDOM/input
+SCOTDOM,SGS6,nox,GB,diff,C_OtherStationaryComb,SGS6refrun_nox_DIFFUSE_inv2023_emis_2021_GNFR_C_OtherStationaryComb_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/SCOTDOM/input
+SCOTDOM,SGS6,pm25,GB,diff,C_OtherStationaryComb,SGS6refrun_pm25_DIFFUSE_inv2023_emis_2021_GNFR_C_OtherStationaryComb_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/SCOTDOM/input
+SCOTDOM,SGS6,pmco,GB,diff,C_OtherStationaryComb,SGS6refrun_pmco_DIFFUSE_inv2023_emis_2021_GNFR_C_OtherStationaryComb_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/SCOTDOM/input
+SCOTDOM,SGS6,sox,GB,diff,C_OtherStationaryComb,SGS6refrun_sox_DIFFUSE_inv2023_emis_2021_GNFR_C_OtherStationaryComb_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/SCOTDOM/input

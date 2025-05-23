@@ -1,0 +1,12 @@
+snap_id,snap_name,GNFR,GNFR_letter
+1,publicpower,A_PublicPower,A
+2,domestic,C_OtherStationaryComb,C
+3,industrialcombustion,B_Industry,B
+4,industrialprocessing,B_Industry,B
+5,fugitive,D_Fugitive,D
+6,solvents,E_Solvents,E
+7,roadtransport,F_RoadTransport,F
+8,othertransport,I_Offroad,I
+9,waste,J_Waste,J
+10,agriculture,L_AgriOther,L
+11,natureother,Q_LULUCF,Q

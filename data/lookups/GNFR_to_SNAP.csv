@@ -1,0 +1,16 @@
+GNFR,GNFR_letter,snap_id
+A_PublicPower,A,1
+B_Industry,B,3
+C_OtherStationaryComb,C,2
+D_Fugitive,D,5
+E_Solvents,E,6
+F_RoadTransport,F,7
+G_Shipping,G,8
+H_Aviation,H,8
+I_Offroad,I,8
+J_Waste,J,9
+K_AgriLivestock,K,10
+L_AgriOther,L,10
+O_AviCruise,O,
+P_IntShipping,P,8
+Q_LULUCF,Q,11
