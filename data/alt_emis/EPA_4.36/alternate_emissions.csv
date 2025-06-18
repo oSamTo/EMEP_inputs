@@ -1,0 +1,6 @@
+﻿projectName,scenarioName,poll,iso,diff_or_pt,sector,fname,loc
+EPA_4.36,BASE,nh3,IE,diff,sec10,MapEire_nh3_DIFFUSE_inv2021_emis_2021_SN10_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/EPA_4.36/input
+EPA_4.36,BASE,nox,IE,diff,sec10,MapEire_nox_DIFFUSE_inv2021_emis_2021_SN10_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/EPA_4.36/input
+EPA_4.36,BASE,pm25,IE,diff,sec10,MapEire_pm25_DIFFUSE_inv2021_emis_2021_SN10_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/EPA_4.36/input
+EPA_4.36,BASE,pmco,IE,diff,sec10,MapEire_pmco_DIFFUSE_inv2021_emis_2021_SN10_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/EPA_4.36/input
+EPA_4.36,BASE,voc,IE,diff,sec10,MapEire_voc_DIFFUSE_inv2021_emis_2021_SN10_t_LL.tif,/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/EPA_4.36/input
