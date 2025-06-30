@@ -469,9 +469,10 @@ UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, project, scenario,
 	  
 	    f_alpha <- paste0("/gws/nopw/j04/ceh_generic/samtom/SPEED/SPEED_AllPoll_TOTALS_invNA_emis_1960-1970_SNAP_alpha.csv")
     
-    }
+      }
 
-    dt_alpha <- fread(f_alpha)
+      dt_alpha <- fread(f_alpha)[Pollutant == dt_poll[ceh_poll == species, invProc] & 
+                                 AREA == toupper(country)] 
 	
 	  # subset the value required. GNFR UK maps are just SNAP maps re-assigned. Remember;
 		  	  # to scale industry by SNAPs 3 & 4 together (inventory processor combines 3 & 4 to B_Industry)
@@ -481,9 +482,24 @@ UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, project, scenario,
 				  # While L_AgriOther is empty, shouldn't take the risk using SN10 > once
 			  # set secs 14 to 19 as NA, as they are not used yet, and causes double counting in summary
 
-    scaling_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] & 
-                              Year == y & AREA == toupper(country) & 
-                              SNAP == as.numeric(substr(i, 4, 5)), tot_emis_t]
+      # this is a special clause to re-create EPA 2021 run (early 2024)
+	  # to recreate those files. Should be deleted. 
+	  # It uses scaling factors based on 2021 values, cos that's the map year. 
+	  # apply that to map. Subtly different to using tabled values. 
+	  if(project == "EPA_4.36"){
+	  
+	    map_value <- global(r, sum, na.rm=T)[,1]
+			    	  
+	    alpha_value <- dt_alpha[Year == y & SNAP == as.numeric(substr(i, 4, 5)), tot_alpha]
+								
+		scaling_value <- alpha_value * map_value
+	
+	  }else{
+	 
+	    scaling_value <- dt_alpha[Year == y & SNAP == as.numeric(substr(i, 4, 5)), tot_emis_t]
+	  
+	  }
+    
  	
 	  if(length(scaling_value) == 0) scaling_value <- 0
 	  if(is.na(scaling_value)) scaling_value <- 0
@@ -524,7 +540,7 @@ UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, project, scenario,
   
   } else if (country == "ie") {
   	
-	  # the base year for Eire is 2019, from a 2021 inventory. Alpha factor needed if y != 2019. Data from EMEP/CEDS. 
+	# the base year for Eire is 2019, from a 2021 inventory. Alpha factor needed if y != 2019. Data from EMEP/CEDS. 
     # EMEP data is centred on inv-2 though, so need to re-work data to be relative to 2019
       
     ## this should mirror the EU method for 1970 - 1989 & 1990 - y, apart from I_Offroad. 
@@ -537,12 +553,42 @@ UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, project, scenario,
 		   
     if(y >= 1990){
      
-	    f_alpha <- paste0("/gws/nopw/j04/ceh_generic/inventory_processor/data/EMEP/inv",naei_inv,"/alpha/EMEP_AllPoll_TOTALS_inv",naei_inv,"_emis_1970-",naei_inv-2,"_SNAP_alpha.csv")
-      dt_alpha <- fread(f_alpha)
-	 
-  	  scaling_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] &
+	  f_alpha <- paste0("/gws/nopw/j04/ceh_generic/inventory_processor/data/EMEP/inv",naei_inv,"/alpha/EMEP_AllPoll_TOTALS_inv",naei_inv,"_emis_1970-",naei_inv-2,"_SNAP_alpha.csv")
+      dt_alpha <- fread(f_alpha)[Pollutant == dt_poll[ceh_poll == species, invProc] &
+                                 ISO2 == "IE"]	
+	  
+	  # Because Eire is made from GNFR maps, SNAP3 needs sum of SN03 & SN04
+	  # this is because when SN04 is read in, it's empty and scales to empty. 
+	  dt_alpha[SNAP == 4, SNAP := 3]
+	  dt_alpha <- dt_alpha[, .(tot_emis_t = sum(tot_emis_t, na.rm=T)), by = .(Pollutant, Year, ISO2, SNAP)]
+	   
+	  
+	  # this is a special clause to re-create EPA 2021 run (early 2024)
+	  # to recreate those files. Should be deleted. 
+	  # It uses scaling factors based on 2019 values, cos that's the map year. 
+	  if(project == "EPA_4.36"){
+	    
+		map_value <- global(r, sum, na.rm=T)[,1]
+		
+	    dt_alpha[, alpha_436 := tot_emis_t / tot_emis_t[Year == 2019], by = .(Pollutant, ISO2, SNAP)]
+	    	  
+	    alpha_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] &
+                                Year == y  & ISO2 == "IE" &
+                                SNAP == as.numeric(substr(i, 4, 5)), alpha_436]
+								
+		scaling_value <- alpha_value * map_value
+	  
+	  }else{
+	    	  
+	    scaling_value <- dt_alpha[Pollutant == dt_poll[ceh_poll == species, invProc] &
                                 Year == y  & ISO2 == "IE" &
                                 SNAP == as.numeric(substr(i, 4, 5)), tot_emis_t]
+								
+	  }
+								
+	  
+								
+	  if(length(scaling_value) > 1) scaling_value <- sum(scaling_value, na.rm=T)
    
     }else{
      
@@ -587,7 +633,7 @@ UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, project, scenario,
 	
       scalar_used <- "yes"
       
-	    replacement_value <- NA
+	  replacement_value <- NA
 
     } # ifelse for scalar needed or not. 
    
@@ -604,14 +650,14 @@ UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, project, scenario,
   # multiply by the alpha only in Eire, before 1990 (i.e. relative CEDS). Everything else goes on totals.
     
   # re-scale the mapped data
-  rs <- (r / global(r, sum, na.rm=T)$sum) * scaling_value 
+  rs <- (r / global(r, sum, na.rm=T)[,1]) * scaling_value 
   
 
   ###############
   ### MASKING ###
     
   # EMEP needs zero value, not NA, in emissions
-  rs[is.na(r)] <- 0 ; rs[is.nan(r)] <- 0 ; rs[is.infinite(r)] <- 0 
+  rs[is.na(rs)] <- 0 ; rs[is.nan(rs)] <- 0 ; rs[is.infinite(rs)] <- 0 
   
   # Mask to the EMEP input restrictions
   r_t   <- mask(rs,     r_dom_terr)                 # emissions on UK&EIRE land territory
@@ -634,18 +680,18 @@ UKIE_sector_Emissions <- function(dt_alt_emis, species, y, i, project, scenario,
                        Scenario = scenario,
                        Area = country,
                        mask = "all",  
-					             Pollutant = species, 
-					             data_source_diff = loctext_diff,
-					             data_source_pt = loctext_pt,
-					             emis_y = y, 
-					             inv_y = naei_inv, 
-					             sec_EMEP = i,
-					             sec_GNFR = dt_SNAPGNFR[snap_id == as.numeric(substr(i, 4, 5)), GNFR],
-					             sec_SNAP = as.numeric(substr(i, 4, 5)),
-					             sec_long = dt_SNAPGNFR[snap_id == as.numeric(substr(i, 4, 5)), snap_name],
-					             time_res = time_dim,
+					   Pollutant = species, 
+					   data_source_diff = loctext_diff,
+					   data_source_pt = loctext_pt,
+					   emis_y = y, 
+					   inv_y = naei_inv, 
+					   sec_EMEP = i,
+					   sec_GNFR = dt_SNAPGNFR[snap_id == as.numeric(substr(i, 4, 5)), GNFR],
+					   sec_SNAP = as.numeric(substr(i, 4, 5)),
+					   sec_long = dt_SNAPGNFR[snap_id == as.numeric(substr(i, 4, 5)), snap_name],
+					   time_res = time_dim,
                        emis_t_diffmap = global(r_diff, sum, na.rm=T)$sum, 
-					             emis_t_pt = global(r_pt, sum, na.rm=T)$sum,
+					   emis_t_pt = global(r_pt, sum, na.rm=T)$sum,
 					             emis_t_spatial = global(r, sum, na.rm=T)$sum, 
 					             emis_t_spatial_inv = inventory_table_value,
 					             replacement_t = replacement_value,
