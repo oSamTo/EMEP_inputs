@@ -11,7 +11,7 @@ require(data.table)
 
 ## EMEP model version
 # this makes the input to the model version.
-emep_version <- "v4.36" # v4.36, v4.45 , v5.0
+emep_version <- "v5.0" # v4.36, v4.45 , v5.0
 
 #######################
 ## OUTPUT QAQC FILES ##
@@ -21,16 +21,16 @@ output_QAQC <- TRUE
 ## EMISSIONS & INVENTORY YEARS ##
 
 ## vectors of emissions years and pollutants to run ##
-v_years <- c(2021) # what emissions years to process
+v_years <- c(2023) # what emissions years to process
 v_pollutants <- c("nox", "nh3", "sox", "pm25", "pmco", "co", "voc") # "nox","nh3","sox","pm25","pmco","co","voc", "cd", "cu", "ni", "pb", "zn" - CEH names, not EMEP model
 
 # UK & Eire emission years
-naei_inv <- 2023 # naei_inv  = which inventory compilation year to use
-map_yr_uk <- 2021 # map_yr_uk = what year is the NAEI spatial distribution for the data
+naei_inv <- 2025 # naei_inv  = which inventory compilation year to use
+map_yr_uk <- 2023 # map_yr_uk = what year is the NAEI spatial distribution for the data
 map_yr_ie <- 2019 # map_yr_ie = what year is the MapEire spatial distribution for the data: 2019
 
 # EMEP EU emission years
-emep_inv <- 2023 # emep_inv  = which inventory compilation year to use
+emep_inv <- 2025 # emep_inv  = which inventory compilation year to use
 #emep_map_yr <- 2021
 
 #########################
@@ -51,7 +51,7 @@ if (emep_version == "v4.36") {
 ## temporal profile schema ##
 # UK can be: "EMEP4UKv4.36", "EMEP4UKv4.45" , "EMEP4UKv5.0", "ukem_genYr", "ukem_2017:2023", "test"
 # EU can be: "EMEP4UKv4.36", "EMEP4UKv4.45" , "EMEP4UKv5.0", "test"  (EDGAR in the future)
-tp_scheme <- c("EMEP4UKv4.36")
+tp_scheme <- c("EMEP4UKv5.0")
 
 # however, reset the tp_scheme if time_dim is 'annual' - either UK or EU
 # we dont use temporal profiling for the annual total inputs
@@ -82,7 +82,7 @@ if (tp_scheme == "annual" & eu_agg_schema == "oneEU") {
 # STANDARD/NFC = paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",
 #					    emep_version,"/inv",naei_inv)
 
-output_project <- "EPA_4.36"
+output_project <- "NFC"
 v_scenarios <- "BASE" # paste0("SGS",6) # names or 'BASE'
 
 ###########################
@@ -90,10 +90,11 @@ v_scenarios <- "BASE" # paste0("SGS",6) # names or 'BASE'
 # a table to nominate file locations for different emissions - e.g. older years, different projects, and so on.
 
 dt_alt_emis <- fread(paste0(
-  "/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/data/alt_emis/",
+  "/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/data/alt_emis/",
   output_project,
   "/alternate_emissions.csv"
 ))
+
 # use empty structure when no alt emissions
 #dt_alt_emis <- data.table(projectName = character(), scenarioName = character(),
 #                          poll = character(), iso = character(),

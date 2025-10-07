@@ -48,9 +48,9 @@ output:
 
 **Git Repo:** https://github.com/oSamTo/EMEP_inputs
 
-**JASMIN dir:** /gws/nopw/j04/ceh_generic/samtom
+**JASMIN dir:** /gws/ssde/j25b/ceh_generic/samtom
 
-**Output dir:** `r gsub("/gws/nopw/j04/ceh_generic/samtom/", "", params$uk_folname)`
+**Output dir:** `r gsub("/gws/ssde/j25b/ceh_generic/samtom/", "", params$uk_folname)`
 
 **EMEP version:** `r params$emep_version`
 
@@ -90,7 +90,7 @@ code, for all sectors.
 * Emissions maps are pre-processed from 1km x 1km BNG (UK) and 1km x 1km Irish 
 Grid TM65 (Eire) into WGS84 lat lon, at 0.01$^\circ$ x 0.01$^\circ$ resolution. 
 
-  * This is done in /gws/nopw/j04/ceh_generic/inventory_processor
+  * This is done in /gws/ssde/j25b/ceh_generic/inventory_processor
 
 \newpage
 
@@ -448,9 +448,9 @@ kable(dt_wide, align = "rcccccccccccccc", caption = paste0("Monthly ", params$sp
 
 **Git Repo:** https://github.com/oSamTo/EMEP_inputs
 
-**JASMIN dir:** /gws/nopw/j04/ceh_generic/samtom/EMEP_inputs
+**JASMIN dir:** /gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs
 
-**Output dir:** `r gsub("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/", "", params$eu_folname)`
+**Output dir:** `r gsub("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/", "", params$eu_folname)`
 
 **EMEP version:** `r params$emep_version`
 
@@ -486,7 +486,7 @@ emissions take precedence outside of this mask.
 
 * Emissions data are provided in WGS84 lat lon, at 0.1$^\circ$ x 0.1$^\circ$ resolution. 
 
-  * This is done in /gws/nopw/j04/ceh_generic/inventory_processor
+  * This is done in /gws/ssde/j25b/ceh_generic/inventory_processor
 
 \newpage
 
