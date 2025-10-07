@@ -1,9 +1,0 @@
-#!/bin/bash
-#SBATCH -p short-serial
-#SBATCH --job-name=run_nc_check
-#SBATCH --array=1-7
-#SBATCH -o slurm/nc_check_%a.out
-#SBATCH -e slurm/nc_check_%a.err
-#SBATCH --mem=60G
-#SBATCH -t 22:59:00
-R CMD BATCH --no-restore --no-save "--args ${SLURM_ARRAY_TASK_ID}" R/check_nc_ip.R "slurm/console${SLURM_ARRAY_TASK_ID}_nc_check.Rout"

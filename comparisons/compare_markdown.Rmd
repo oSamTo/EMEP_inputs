@@ -16,6 +16,7 @@ params:
  uk_plot4: NA
  uk_plot5: NA
  uk_plot6: NA
+ uk_plot7: NA
 title: "EMEP4UK input files Comparison document - UK/EIRE & EU"
 author: "Sam Tomlinson"
 date: "`r Sys.Date()`"
@@ -33,7 +34,7 @@ geometry: margin=1cm
 ---
 
 ```{r setup, include = FALSE, echo = FALSE}
-knitr::opts_knit$set(root.dir = r"[/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs]")
+knitr::opts_knit$set(root.dir = r"[/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs]")
 ```
 
 # UK/EIRE INPUT FILES
@@ -42,19 +43,21 @@ Comparisons are made from File_2 perspective.
 
 ## METADATA
 
-**Project:** NFC
-
 **Git Repo:** https://github.com/oSamTo/EMEP_inputs
 
-**JASMIN dir:** /gws/nopw/j04/ceh_generic/samtom/EMEP_inputs
+**JASMIN dir:** /gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs
 
 **Output dir:** `r gsub("plots", "", params$plot_dir)`
 
 \vspace{\baselineskip}
 
+**Project_1** `r params$l_fname_1[["metadata"]][,projectName]`
+
 **Folder_1:** `r params$folname_1`
 
 **File_1:** `r params$l_fname_1[["filename"]]`
+
+**Project_2** `r params$l_fname_2[["metadata"]][,projectName]`
 
 **Folder_2:** `r params$folname_2`
 
@@ -100,7 +103,7 @@ code, for all sectors.
 
 ```{r, eval = TRUE, fig.align = "center", out.width = "0.9\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire total ",params$species," emissions annum-1.")}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot1), rel_path = FALSE)
+knitr::include_graphics(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot1), rel_path = FALSE)
 ```
 
 \vspace{\baselineskip}
@@ -169,51 +172,58 @@ kable(dt, align = "crcccc", caption = paste0("Annual emissions of ", params$spec
 
 ```{r, eval = TRUE, fig.align = "center", out.width = "0.7\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire sectoral ",params$species," emissions annum-1.")}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot6), rel_path = FALSE)
+knitr::include_graphics(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot6), rel_path = FALSE)
+```
+
+\newpage
+
+```{r, eval = TRUE, fig.align = "center", out.width = "0.7\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire dominant sectoral change (pos and neg) for ",params$species,".")}
+#| fig-pos: "h"
+knitr::include_graphics(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot7), rel_path = FALSE)
 ```
 
 \newpage
 
 ```{r, eval = TRUE, fig.align = "center", out.width = "42%", echo = FALSE, fig.show="hold", fig.cap = ""}
-knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[1]]),
-                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[2]])), rel_path = FALSE)
+knitr::include_graphics(c(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[1]]),
+                          paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[2]])), rel_path = FALSE)
 ```
 ```{r, eval = TRUE, fig.align = "center", out.width = "42%", echo = FALSE, fig.show="hold", fig.cap = ""}
-knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[3]]),
-                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[4]])), rel_path = FALSE)
-```
-
-\newpage
-
-```{r, eval = TRUE, fig.align = "center", out.width = "42%", echo = FALSE, fig.show="hold", fig.cap = ""}
-
-knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[5]]),
-                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[6]])), rel_path = FALSE)
-```
-```{r, eval = TRUE, fig.align = "center", out.width = "42%", echo = FALSE, fig.show="hold", fig.cap = ""}
-
-knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[7]]),
-                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[8]])), rel_path = FALSE)
+knitr::include_graphics(c(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[3]]),
+                          paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[4]])), rel_path = FALSE)
 ```
 
 \newpage
 
 ```{r, eval = TRUE, fig.align = "center", out.width = "42%", echo = FALSE, fig.show="hold", fig.cap = ""}
 
-knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[9]]),
-                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[10]])), rel_path = FALSE)
+knitr::include_graphics(c(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[5]]),
+                          paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[6]])), rel_path = FALSE)
 ```
 ```{r, eval = TRUE, fig.align = "center", out.width = "42%", echo = FALSE, fig.show="hold", fig.cap = ""}
 
-knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[11]]),
-                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[12]])), rel_path = FALSE)
+knitr::include_graphics(c(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[7]]),
+                          paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[8]])), rel_path = FALSE)
 ```
 
 \newpage
 
 ```{r, eval = TRUE, fig.align = "center", out.width = "42%", echo = FALSE, fig.show="hold", fig.cap = ""}
 
-knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[13]])), rel_path = FALSE)
+knitr::include_graphics(c(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[9]]),
+                          paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[10]])), rel_path = FALSE)
+```
+```{r, eval = TRUE, fig.align = "center", out.width = "42%", echo = FALSE, fig.show="hold", fig.cap = ""}
+
+knitr::include_graphics(c(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[11]]),
+                          paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[12]])), rel_path = FALSE)
+```
+
+\newpage
+
+```{r, eval = TRUE, fig.align = "center", out.width = "42%", echo = FALSE, fig.show="hold", fig.cap = ""}
+
+knitr::include_graphics(c(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot2[[13]])), rel_path = FALSE)
 
 ```
 
@@ -223,42 +233,42 @@ knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/"
 
 ```{r, eval = TRUE, fig.align = "center", out.width = "26%", echo = FALSE, fig.show="hold", fig.cap = ""}
 
-knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[1]]),
-                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[2]]),
-						  paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[3]])), rel_path = FALSE)
+knitr::include_graphics(c(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[1]]),
+                          paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[2]]),
+						  paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[3]])), rel_path = FALSE)
 ```
 
 ```{r, eval = TRUE, fig.align = "center", out.width = "26%", echo = FALSE, fig.show="hold", fig.cap = ""}
 
-knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[4]]),
-                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[5]]),
-						  paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[6]])), rel_path = FALSE)
+knitr::include_graphics(c(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[4]]),
+                          paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[5]]),
+						  paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[6]])), rel_path = FALSE)
 ```
 
 ```{r, eval = TRUE, fig.align = "center", out.width = "26%", echo = FALSE, fig.show="hold", fig.cap = ""}
 
-knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[7]]),
-                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[8]]),
-						  paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[9]])), rel_path = FALSE)
+knitr::include_graphics(c(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[7]]),
+                          paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[8]]),
+						  paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[9]])), rel_path = FALSE)
 ```
 
 \newpage
 
 ```{r, eval = TRUE, fig.align = "center", out.width = "28%", echo = FALSE, fig.show = "hold", fig.cap = ""}
 
-knitr::include_graphics(c(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[10]]),
-                          paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[11]]),
-						  paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[12]])), rel_path = FALSE)
+knitr::include_graphics(c(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[10]]),
+                          paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[11]]),
+						  paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot3[[12]])), rel_path = FALSE)
 ```
 
 ```{r, eval = TRUE, fig.align = "center", out.width = "0.8\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire total ",params$species," emissions month-1.")}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot4), rel_path = FALSE)
+knitr::include_graphics(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot4), rel_path = FALSE)
 ```
 
 \newpage
 
 ```{r, eval = TRUE, fig.align = "center", out.width = "0.9\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire sectoral ",params$species," emissions month-1.")}
 #| fig-pos: "h"
-knitr::include_graphics(paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/",params$uk_plot5), rel_path = FALSE)
+knitr::include_graphics(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot5), rel_path = FALSE)
 ```
