@@ -177,7 +177,7 @@ knitr::include_graphics(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",
 
 \newpage
 
-```{r, eval = TRUE, fig.align = "center", out.width = "0.7\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire dominant sectoral change (pos and neg) for ",params$species,".")}
+```{r, eval = TRUE, fig.align = "center", out.width = "0.85\\linewidth", echo = FALSE, fig.cap = paste0("UK/Eire dominant sectoral change (pos and neg) for ",params$species,".")}
 #| fig-pos: "h"
 knitr::include_graphics(paste0("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/",params$uk_plot7), rel_path = FALSE)
 ```

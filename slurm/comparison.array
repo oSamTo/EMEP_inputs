@@ -1,0 +1,13 @@
+#!/bin/bash
+#SBATCH --partition=standard
+#SBATCH --qos=high
+#SBATCH --cpus-per-task=10
+#SBATCH --account=ceh_generic
+#SBATCH --job-name=comparison_array
+#SBATCH -o slurm/output_comparison/comparison_arr_%a.out
+#SBATCH -e slurm/output_comparison/comparison_arr_%a.err
+#SBATCH --mem=50G
+#SBATCH --time=02:00:00
+#SBATCH --array=1-7
+
+R CMD BATCH --no-restore --no-save "--args ${SLURM_ARRAY_TASK_ID}" comparisons/run_compare.R "slurm/output_comparison/console${SLURM_ARRAY_TASK_ID}_comparison.Rout"

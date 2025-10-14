@@ -1,0 +1,12 @@
+#!/bin/bash
+#SBATCH --partition=standard
+#SBATCH --qos=high
+#SBATCH --cpus-per-task=10
+#SBATCH --account=ceh_generic
+#SBATCH --job-name=run_emep_array
+#SBATCH -o slurm/output/emep_array_%a.out
+#SBATCH -e slurm/output/emep_array_%a.err
+#SBATCH --mem=100G
+#SBATCH --time=08:00:00
+
+R CMD BATCH --no-restore --no-save "--args ${SLURM_ARRAY_TASK_ID}" run.R "slurm/output/emep_array_${SLURM_ARRAY_TASK_ID}.Rout"

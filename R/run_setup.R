@@ -21,7 +21,7 @@ output_QAQC <- TRUE
 ## EMISSIONS & INVENTORY YEARS ##
 
 ## vectors of emissions years and pollutants to run ##
-v_years <- c(2022) # what emissions years to process
+v_years <- c(2021:2023) # what emissions years to process
 v_pollutants <- c("nox", "nh3", "sox", "pm25", "pmco", "co", "voc") # "nox","nh3","sox","pm25","pmco","co","voc", "cd", "cu", "ni", "pb", "zn" - CEH names, not EMEP model
 
 # UK & Eire emission years

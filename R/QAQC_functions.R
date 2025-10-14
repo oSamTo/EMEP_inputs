@@ -302,6 +302,17 @@ create_qaqc <- function(
   #                          species, eu_folname,
   #					   emep_inv, time_dim, emep_version)
 
+  # 15. line plots of total emissions and emissions per sector, over time.
+  l_gg_p15 <- time_series_tot(
+    y,
+    species,
+    naei_inv,
+    emep_inv,
+    emep_version,
+    uk_folname,
+    map_yr_uk
+  )
+
   #############
   #### PDF ####
   #############
@@ -334,7 +345,8 @@ create_qaqc <- function(
     l_uk_maps = l_uk_maps,
     l_eu_maps = l_eu_maps,
     dt_month_uk = l_gg_p4[["table"]],
-    dt_month_eu = l_gg_p11[["table"]]
+    dt_month_eu = l_gg_p11[["table"]],
+    dt_ts_tots = l_gg_p15[["totals_table"]]
   )
 
   # render the source of the document to the default output format:
@@ -703,6 +715,7 @@ collect_eu_summaries <- function(y, species, eu_folname, emep_inv) {
 month_sector_theme <- function(sector) {
   if (sector %in% c("A_PublicPower", "F_RoadTransport")) {
     x <- theme(
+      legend.position = "none",
       plot.title = element_text(size = 20, hjust = 0.5),
       strip.text.x = element_text(size = 12),
       axis.title.x = element_blank(),
@@ -722,14 +735,24 @@ month_sector_theme <- function(sector) {
       )
   ) {
     x <- theme(
+      legend.position = "none",
       plot.title = element_text(size = 20, hjust = 0.5),
       strip.text.x = element_text(size = 12),
       axis.title.y = element_blank(),
       axis.title.x = element_blank(),
       margin(t = 2, r = 2, b = 2, l = 2, unit = "mm")
     )
-  } else if (sector %in% c("L_AgriOther", "M_Other")) {
+  } else if (sector %in% c("L_AgriOther")) {
     x <- theme(
+      legend.position = "none",
+      plot.title = element_text(size = 20, hjust = 0.5),
+      strip.text.x = element_text(size = 12),
+      axis.title.y = element_blank(),
+      margin(t = 2, r = 2, b = 2, l = 2, unit = "mm")
+    )
+  } else if (sector %in% c("M_Other")) {
+    x <- theme(
+      legend.position = "none",
       plot.title = element_text(size = 20, hjust = 0.5),
       strip.text.x = element_text(size = 12),
       axis.title.y = element_blank(),
@@ -737,6 +760,7 @@ month_sector_theme <- function(sector) {
     )
   } else if (sector == "K_AgriLivestock") {
     x <- theme(
+      legend.position = "none",
       plot.title = element_text(size = 20, hjust = 0.5),
       strip.text.x = element_text(size = 12),
       margin(t = 2, r = 2, b = 2, l = 2, unit = "mm")
@@ -2972,3 +2996,272 @@ eu_map_tot_mon <- function(
 
   return(p)
 }
+
+###############################################################################
+#### 15. function to plot time series of emissions data (line). NAEI tables.
+time_series_tot <- function(
+  y,
+  species,
+  naei_inv,
+  emep_inv,
+  emep_version,
+  uk_folname,
+  map_yr_uk
+) {
+  # inventory processor folder
+  folname_ip <- "/gws/ssde/j25b/ceh_generic/inventory_processor/data"
+
+  # earliest inventory year processed for NAEI
+  uk_earliest_inv <- 2022
+  eu_earliest_inv <- 2023
+
+  # create a list ready for all data
+  l_SEC <- list()
+  l_TOTAL <- list()
+
+  ## UK ##
+  # cycle through nominated invenotry years and plot 10 years;
+  for (y_inv in uk_earliest_inv:naei_inv) {
+    # read in the NAEI data
+    fname <- paste0(
+      folname_ip,
+      "/NAEI/inv",
+      y_inv,
+      "/totals/",
+      "NAEI_AllPoll_TOTALS_inv",
+      y_inv,
+      "_emis_1970-",
+      y_inv - 2,
+      "_GNFR_t.csv"
+    )
+
+    dt <- fread(fname)
+    # remove international shipping and aviation cruise
+    dt <- dt[!(GNFR %in% c("O_AviCruise", "P_IntShipping"))]
+    dt <- dt[GNFR != ""]
+
+    dt <- dt[Pollutant == dt_poll[ceh_poll == species, invProc]]
+    dt <- dt[Year >= (y - 9) & Year <= (y + 4)] # context for plot
+    dt[, dataYear := y_inv]
+
+    l_SEC[[paste0(y_inv, "_uk")]] <- dt
+
+    # summarise to total
+    dt_TOTAL <- dt[,
+      .(emis_t = sum(emis_t, na.rm = T)),
+      by = .(Pollutant, Year, AREA, dataYear)
+    ]
+    l_TOTAL[[paste0(y_inv, "_uk")]] <- dt_TOTAL
+  }
+
+  ## IE ##
+  # cycle through nominated invenotry years and plot 10 years;
+  for (y_inv in eu_earliest_inv:emep_inv) {
+    # read in the NAEI data
+    fname <- paste0(
+      folname_ip,
+      "/EMEP/inv",
+      y_inv,
+      "/totals/",
+      "EMEP_AllPoll_TOTALS_inv",
+      y_inv,
+      "_emis_1970-",
+      y_inv - 2,
+      "_GNFR_t.csv"
+    )
+
+    dt <- fread(fname)
+    # remove international shipping and aviation cruise
+    dt <- dt[!(GNFR %in% c("O_AviCruise", "P_IntShipping"))]
+    dt <- dt[GNFR != ""]
+
+    dt <- dt[Pollutant == dt_poll[ceh_poll == species, invProc] & ISO2 == "IE"]
+    setnames(dt, "ISO2", "AREA")
+    dt <- dt[Year >= (y - 9) & Year <= (y + 4)] # context for plot
+    dt[, dataYear := y_inv]
+
+    l_SEC[[paste0(y_inv, "_ie")]] <- dt
+
+    # summarise to total
+    dt_TOTAL <- dt[,
+      .(emis_t = sum(emis_t, na.rm = T)),
+      by = .(Pollutant, Year, AREA, dataYear)
+    ]
+    l_TOTAL[[paste0(y_inv, "_ie")]] <- dt_TOTAL
+  }
+
+  ## plot of totals ##
+  dt_plotTot <- rbindlist(l_TOTAL, use.names = T)
+
+  p_tots <- ggplot(
+    data = dt_plotTot,
+    aes(
+      x = Year,
+      y = emis_t / 1000,
+      colour = factor(dataYear),
+      group = dataYear
+    )
+  ) +
+    geom_line() +
+    geom_point() +
+    geom_vline(xintercept = y, linetype = "dashed", colour = "grey50") +
+    facet_wrap(~AREA, ncol = 1, scales = "free_y") +
+    theme_bw() +
+    labs(y = bquote(kt ~ a^-1), colour = "InvYear") +
+    theme(
+      strip.text = element_text(size = 20),
+      legend.title = element_text(size = 18),
+      legend.position = "right",
+      legend.text = element_text(size = 16),
+      axis.text.x = element_text(angle = 45, hjust = 1, size = 16),
+      axis.title.x = element_text(size = 18),
+      axis.text.y = element_text(size = 16),
+      axis.title.y = element_text(size = 18),
+      margin(t = 2, r = 2, b = 2, l = 2, unit = "mm")
+    )
+  # save
+  fname_tot <- paste0(
+    uk_folname,
+    "/plots/e",
+    y,
+    "/",
+    dt_poll[ceh_poll == species, emep_model],
+    "_UKEIRE_",
+    y,
+    "emis_",
+    map_yr_uk,
+    "map_",
+    naei_inv,
+    "inv_8a_UKTSTOTLINE.png"
+  )
+
+  ggsave(fname_tot, p_tots, width = 10, height = 7)
+
+  ## plot of sectors ##
+  # needs to be a special grid, like monthly sectoral emissions
+  # pad out missing ones.
+  dt_plot <- rbindlist(l_SEC, use.names = T)
+  dt_plot[, dataYear := factor(dataYear)]
+  setnames(dt_plot, "dataYear", "invYear")
+
+  v_sec_miss_uk <- dt_plot[
+    AREA == "UK",
+    setdiff(dt_sec$GNFRlong[1:13], unique(GNFR))
+  ]
+  v_sec_miss_ie <- dt_plot[
+    AREA == "IE",
+    setdiff(dt_sec$GNFRlong[1:13], unique(GNFR))
+  ]
+
+  # add missing secotrs with zero emissions (if they are missing)
+  if (length(v_sec_miss_uk) > 0) {
+    dt_temp <- data.table(
+      Pollutant = species,
+      Year = rep(seq(y - 9, y), length(v_sec_miss_uk)),
+      AREA = "UK",
+      GNFR = rep(v_sec_miss_uk, each = 10),
+      emis_t = 0,
+      invYear = naei_inv
+    )
+    dt_plot <- rbindlist(list(dt_plot, dt_temp), use.names = T)
+  }
+
+  if (length(v_sec_miss_ie) > 0) {
+    dt_temp <- data.table(
+      Pollutant = species,
+      Year = rep(seq(y - 9, y), length(v_sec_miss_ie)),
+      AREA = "IE",
+      GNFR = rep(v_sec_miss_ie, each = 10),
+      emis_t = 0,
+      invYear = emep_inv
+    )
+    dt_plot <- rbindlist(list(dt_plot, dt_temp), use.names = T)
+  }
+
+  l_p <- list()
+
+  for (i in dt_plot[, unique(GNFR)]) {
+    if (i == "N_Natural") {
+      next
+    }
+    g1 <- ggplot(
+      data = dt_plot[GNFR == i],
+      aes(
+        x = Year,
+        y = emis_t / 1000,
+        colour = invYear,
+        group = invYear
+      )
+    ) +
+      geom_line() +
+      geom_point() +
+      geom_vline(xintercept = y, linetype = "dashed", colour = "grey50") +
+      ggtitle(i) +
+      labs(y = bquote(kt ~ a^-1)) +
+      # scale_x_continuous(breaks = 1:12) +
+      facet_wrap(~AREA, scales = "free_y", ncol = 1) +
+      theme_bw()
+
+    if (emep_version != "v4.36") {
+      g1 <- g1 + month_sector_theme(sector = i)
+    }
+
+    l_p[[i]] <- g1
+  }
+
+  p <- l_p[[1]] +
+    l_p[[2]] +
+    l_p[[3]] +
+    l_p[[4]] +
+    l_p[[5]] +
+    l_p[[6]] +
+    l_p[[7]] +
+    l_p[[8]] +
+    l_p[[9]] +
+    l_p[[10]] +
+    l_p[[11]]
+
+  if (emep_version != "v4.36") {
+    p <- p +
+      l_p[[12]] +
+      l_p[[13]]
+  }
+
+  # take out the legend
+  if (emep_version != "v4.36") {
+    p_leg <- ggplotGrob(l_p[[2]] + theme(legend.position = "right"))$grobs
+    p_leg <- p_leg[[which(sapply(p_leg, function(x) x$name) == "guide-box")]]
+
+    p <- p + p_leg
+  }
+
+  p_secs <- p +
+    plot_spacer() +
+    plot_layout(ncol = 5)
+
+  # save
+  fname_sec <- paste0(
+    uk_folname,
+    "/plots/e",
+    y,
+    "/",
+    dt_poll[ceh_poll == species, emep_model],
+    "_UKEIRE_",
+    y,
+    "emis_",
+    map_yr_uk,
+    "map_",
+    naei_inv,
+    "inv_8b_UKTSSECLINE.png"
+  )
+
+  ggsave(fname_sec, p_secs, width = 15, height = 11)
+
+  return(list(
+    "totals" = p_tots,
+    "sectors" = p_secs,
+    "totals_table" = dt_plotTot
+  ))
+}
+
+###############################################################################

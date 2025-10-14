@@ -717,7 +717,7 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
   )
 
   p_tots <- ggplot() +
-    geom_spatraster(data = s_rc, na.rm = T) +
+    geom_spatraster(data = s_rc, na.rm = T, maxcell = 1e+06) +
     scale_fill_brewer(
       labels = v_labs,
       palette = "Spectral",
@@ -798,16 +798,19 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
 
   # subset the colours and the labels based on factors present
   v_cols <- v_cols[unique(dt_levs$ID)]
+  names(v_cols) <- unique(dt_levs$ID)
   v_labs <- v_labs[unique(dt_levs$ID)]
+  names(v_labs) <- unique(dt_levs$ID)
 
   g_diff <- ggplot() +
-    geom_spatraster(data = r_a_rc, na.rm = T) +
+    geom_spatraster(data = r_a_rc, na.rm = T, maxcell = 1e+06) +
     # scale_fill_gradient2(low = "#16abf5", mid = "white", high = "#ff514e", midpoint = 5, breaks = 1:length(v_labs), labels = v_labs)+
     #scale_fill_brewer(labels = v_labs, palette = "RdBu", direction = brew_d, na.value = "grey90")+
     scale_fill_manual(
       values = v_cols,
       labels = v_labs,
-      na.value = "transparent"
+      na.value = "transparent",
+      drop = FALSE
     ) +
     #scale_y_continuous(expand = c(0, 0)) +
     labs(fill = "rel") +
@@ -831,7 +834,7 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
   #fname <- paste0(plot_dir,"/test2.png")
   #ggsave(fname, g_diff, width = 7, height = 5)
 
-  ### Plot an absolute change map - file 2 divided by file 1.
+  ### Plot an absolute change map - file 2 minus file 1.
   r_a <- r2 - r1
   # r_a[r_a == 0] <- NA
   r_a[is.infinite(r_a)] <- NA
@@ -889,7 +892,7 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
   v_labs <- v_labs[unique(dt_levs$ID)]
 
   g_diffabs <- ggplot() +
-    geom_spatraster(data = r_a_rc, na.rm = T) +
+    geom_spatraster(data = r_a_rc, na.rm = T, maxcell = 1e+06) +
     # scale_fill_gradient2(low = "#16abf5", mid = "white", high = "#ff514e", midpoint = 5, breaks = 1:length(v_labs), labels = v_labs)+
     #scale_fill_brewer(labels = v_labs, palette = "RdBu", direction = brew_d, na.value = "grey90")+
     scale_fill_manual(
@@ -1023,7 +1026,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     )
 
     p_tots <- ggplot() +
-      geom_spatraster(data = s_rc, na.rm = T) +
+      geom_spatraster(data = s_rc, na.rm = T, maxcell = 1e+06) +
       {
         if (sum(global(s, sum, na.rm = T)[, 1]) > 0) {
           scale_fill_brewer(
@@ -1140,7 +1143,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     }
 
     g_diff <- ggplot() +
-      geom_spatraster(data = r_a_rc, na.rm = T) +
+      geom_spatraster(data = r_a_rc, na.rm = T, maxcell = 1e+06) +
       # scale_fill_gradient2(low = "#16abf5", mid = "white", high = "#ff514e", midpoint = 5, breaks = 1:length(v_labs), labels = v_labs)+
       #scale_fill_brewer(labels = v_labs, palette = "RdBu", direction = brew_d, na.value = "grey90")+
       {
@@ -1244,7 +1247,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     }
 
     g_diffabs <- ggplot() +
-      geom_spatraster(data = r_a_rc, na.rm = T) +
+      geom_spatraster(data = r_a_rc, na.rm = T, maxcell = 1e+06) +
       # scale_fill_gradient2(low = "#16abf5", mid = "white", high = "#ff514e", midpoint = 5, breaks = 1:length(v_labs), labels = v_labs)+
       #scale_fill_brewer(labels = v_labs, palette = "RdBu", direction = brew_d, na.value = "grey90")+
       {
@@ -1379,7 +1382,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     )
 
     p_tots <- ggplot() +
-      geom_spatraster(data = s_rc, na.rm = T) +
+      geom_spatraster(data = s_rc, na.rm = T, maxcell = 1e+06) +
       {
         if (sum(global(s, sum, na.rm = T)[, 1]) > 0) {
           scale_fill_brewer(
@@ -1496,7 +1499,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     }
 
     g_diff <- ggplot() +
-      geom_spatraster(data = r_a_rc, na.rm = T) +
+      geom_spatraster(data = r_a_rc, na.rm = T, maxcell = 1e+06) +
       # scale_fill_gradient2(low = "#16abf5", mid = "white", high = "#ff514e", midpoint = 5, breaks = 1:length(v_labs), labels = v_labs)+
       #scale_fill_brewer(labels = v_labs, palette = "RdBu", direction = brew_d, na.value = "grey90")+
       {
@@ -1601,7 +1604,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     }
 
     g_diffabs <- ggplot() +
-      geom_spatraster(data = r_a_rc, na.rm = T) +
+      geom_spatraster(data = r_a_rc, na.rm = T, maxcell = 1e+06) +
       # scale_fill_gradient2(low = "#16abf5", mid = "white", high = "#ff514e", midpoint = 5, breaks = 1:length(v_labs), labels = v_labs)+
       #scale_fill_brewer(labels = v_labs, palette = "RdBu", direction = brew_d, na.value = "grey90")+
       {
@@ -1834,9 +1837,9 @@ domSNAP_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     "#85c9a7",
     "#4f587c",
     "#a31890",
-    "#9c701e",
-    "#213f13",
     "#e79120",
+    "#213f13",
+    "#9c701e",
     "#f157ff",
     "#2023d8",
     "#bed7f8",
@@ -1849,7 +1852,7 @@ domSNAP_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
   names(s_plot) <- c("Max Abs Positive Change", "Max Abs Negative Change")
 
   g_change <- ggplot() +
-    geom_spatraster(data = s_plot, na.rm = T) +
+    geom_spatraster(data = s_plot, na.rm = T, maxcell = 1e+06) +
     scale_fill_manual(
       labels = names(s_diff_pos)[v_secID],
       values = v_secCols[v_secID],
@@ -1874,7 +1877,7 @@ domSNAP_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     )
 
   fname <- paste0(plot_dir, "/", pollutant, "_UKEIRE_7_UKSECCHANGE.png")
-  ggsave(fname, g_change, width = 13, height = 9, limitsize = F)
+  ggsave(fname, g_change, width = 13, height = 8, limitsize = F)
 
   return(fname)
 }

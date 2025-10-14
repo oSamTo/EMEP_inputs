@@ -1,0 +1,16 @@
+#!/bin/bash
+#SBATCH --partition=standard
+#SBATCH --qos=short
+#SBATCH --cpus-per-task=1
+#SBATCH --account=ceh_generic
+#SBATCH --job-name=init_job
+#SBATCH -o slurm/output/array_size_%a.out
+#SBATCH -e slurm/output/array_size_%a.err
+#SBATCH --mem=1G
+#SBATCH --time=01:00:00
+
+R CMD BATCH --no-restore --no-save R/array_size.R "slurm/output/array_size.Rout"
+
+f_a=R/array.size
+
+sbatch --array=1-$(cat $f_a) slurm/emep.array

@@ -132,6 +132,9 @@ EMEP_UKEIRE_v5.0 <- function(
     v_pollutants,
     folname,
     naei_inv,
+    map_yr_uk,
+    map_yr_ie,
+    tp_scheme,
     v_EMEP_sec,
     time_dim,
     uk_agg_schema
@@ -1693,6 +1696,9 @@ create_NETCDF_uk <- function(
   v_pollutants,
   folname,
   naei_inv,
+  map_yr_uk,
+  map_yr_ie,
+  tp_scheme,
   v_EMEP_sec,
   time_dim,
   uk_agg_schema
@@ -1703,6 +1709,9 @@ create_NETCDF_uk <- function(
       v_pollutants,
       folname,
       naei_inv,
+      map_yr_uk,
+      map_yr_ie,
+      tp_scheme,
       v_EMEP_sec,
       time_dim,
       eu_agg_schema
@@ -1721,6 +1730,9 @@ create_NETCDF_uk_annual <- function(
   v_pollutants,
   folname,
   naei_inv,
+  map_yr_uk,
+  map_yr_ie,
+  tp_scheme,
   v_EMEP_sec,
   time_dim,
   uk_agg_schema
@@ -1865,8 +1877,34 @@ create_NETCDF_uk_annual <- function(
   ncatt_put(nc_new, 0, "projection", "lon lat", prec = "char")
   ncatt_put(nc_new, 0, "periodicity", "yearly", prec = "char")
 
-  # 3 extras by me
+  # 6 extras by me
+  ncatt_put(nc_new, 0, "Emissions_year", as.character(y), prec = "char")
+  ncatt_put(
+    nc_new,
+    0,
+    "UK_Inventory_year",
+    as.character(naei_inv - 2),
+    prec = "char"
+  )
+  ncatt_put(
+    nc_new,
+    0,
+    "UK_Inventory_released",
+    as.character(naei_inv),
+    prec = "char"
+  )
+  ncatt_put(nc_new, 0, "UK_map_year", as.character(map_yr_uk), prec = "char")
+  ncatt_put(nc_new, 0, "IE_map_year", as.character(map_yr_ie), prec = "char")
+  ncatt_put(
+    nc_new,
+    0,
+    "Temporal_resolution",
+    as.character(time_dim),
+    prec = "char"
+  )
+
   ncatt_put(nc_new, 0, "Grid_resolution", "0.01", prec = "char")
+
   ncatt_put(
     nc_new,
     0,
