@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.10.7)  14 OCT 2025 15:37
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.10.7)  28 JAN 2026 16:06
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/qaqc/e2022/pm25_2022emis_2025inv_QAQC.tex
-(/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/qaqc/e2022/pm25_2022emis_2025inv_QAQC.tex
+**/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/qaqc/e2022/pm25_2022emis_2025inv_QAQC.tex
+(/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/qaqc/e2022/pm25_2022emis_2025inv_QAQC.tex
 LaTeX2e <2025-06-01> patch level 1
 L3 programming layer <2025-09-02>
 (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/base/article.cls
@@ -475,230 +475,230 @@ File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 [1
 
 {/home/users/sam99jas/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/home/users/sam99jas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/home/users/sam99jas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/home/users/sam99jas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png, id=21, 758.835pt x 1011.78pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png  used on input line 207.
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png, id=22, 758.835pt x 1011.78pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png  used on input line 209.
 (pdftex.def)             Requested size: 390.17094pt x 520.23112pt.
 
 
-[2 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png>]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png, id=31, 867.24pt x 433.62pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png  used on input line 254.
+[2 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png>]
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png, id=32, 867.24pt x 433.62pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png  used on input line 256.
 (pdftex.def)             Requested size: 334.4371pt x 167.2188pt.
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png, id=33, 867.24pt x 433.62pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png  used on input line 283.
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png, id=34, 867.24pt x 433.62pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png  used on input line 285.
 (pdftex.def)             Requested size: 334.4371pt x 167.2188pt.
 
 
-[3 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png> <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png>]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png, id=41, 867.24pt x 361.35pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png  used on input line 399.
+[3 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png> <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png>]
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png, id=42, 867.24pt x 361.35pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png  used on input line 401.
 (pdftex.def)             Requested size: 390.17094pt x 162.5729pt.
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 406.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 408.
 (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 
-[4 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png>]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png, id=51, 1011.78pt x 939.51pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png  used on input line 421.
+[4 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png>]
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png, id=52, 1011.78pt x 939.51pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png  used on input line 423.
 (pdftex.def)             Requested size: 418.04213pt x 388.18343pt.
 
 
-[5 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png>]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png, id=60, 722.7pt x 505.89pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png  used on input line 505.
+[5 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png>]
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png, id=61, 722.7pt x 505.89pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png  used on input line 509.
 (pdftex.def)             Requested size: 334.4371pt x 234.10939pt.
 
 
-[6 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png>]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png, id=69, 939.51pt x 867.24pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png  used on input line 616.
+[6 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png>]
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png, id=70, 939.51pt x 867.24pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png  used on input line 620.
 (pdftex.def)             Requested size: 473.78448pt x 437.33742pt.
 
 
-[7 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png>]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png, id=77, 1300.86pt x 867.24pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png  used on input line 635.
+[7 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png>]
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png, id=78, 1300.86pt x 867.24pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png  used on input line 639.
 (pdftex.def)             Requested size: 445.9133pt x 297.26611pt.
 
-Overfull \hbox (0.14848pt too wide) in alignment at lines 662--697
+Overfull \hbox (0.14848pt too wide) in alignment at lines 666--701
  [] [] [] [] [] [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (0.14848pt too wide) in alignment at lines 697--731
+Overfull \hbox (0.14848pt too wide) in alignment at lines 701--735
  [] [] [] [] [] [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (0.14848pt too wide) in alignment at lines 731--733
+Overfull \hbox (0.14848pt too wide) in alignment at lines 735--737
  [] [] [] [] [] [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (31.9425pt too wide) in paragraph at lines 738--738
+Overfull \hbox (31.9425pt too wide) in paragraph at lines 742--742
  []|\T1/lmr/m/n/10 C_OtherStationaryComb|
  []
 
 
-Overfull \hbox (0.14848pt too wide) in alignment at lines 733--762
+Overfull \hbox (0.14848pt too wide) in alignment at lines 737--766
  [] [] [] [] [] [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (0.14848pt too wide) in alignment at lines 781--816
+Overfull \hbox (0.14848pt too wide) in alignment at lines 785--820
  [] [] [] [] [] [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (0.14848pt too wide) in alignment at lines 816--850
+Overfull \hbox (0.14848pt too wide) in alignment at lines 820--854
  [] [] [] [] [] [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (0.14848pt too wide) in alignment at lines 850--852
+Overfull \hbox (0.14848pt too wide) in alignment at lines 854--856
  [] [] [] [] [] [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (31.9425pt too wide) in paragraph at lines 857--857
+Overfull \hbox (31.9425pt too wide) in paragraph at lines 861--861
  []|\T1/lmr/m/n/10 C_OtherStationaryComb|
  []
 
 
-Overfull \hbox (0.14848pt too wide) in alignment at lines 852--881
+Overfull \hbox (0.14848pt too wide) in alignment at lines 856--885
  [] [] [] [] [] [] [] [] [] [] [] [] [] [] [] 
  []
 
 
 
-[8 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png>]
+[8 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png>]
 
 [9]
 
 [10]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png, id=101, 975.645pt x 722.7pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png  used on input line 992.
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png, id=102, 975.645pt x 722.7pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png  used on input line 996.
 (pdftex.def)             Requested size: 501.64716pt x 371.59366pt.
 
 
-[11 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png>]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_9_EUINVBAR.png, id=110, 505.89pt x 505.89pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_9_EUINVBAR.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_9_EUINVBAR.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_9_EUINVBAR.png  used on input line 1032.
+[11 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png>]
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_9_EUINVBAR.png, id=111, 505.89pt x 505.89pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_9_EUINVBAR.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_9_EUINVBAR.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_9_EUINVBAR.png  used on input line 1036.
 (pdftex.def)             Requested size: 195.08972pt x 195.0886pt.
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_10_EUNCBAR.png, id=112, 722.7pt x 433.62pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_10_EUNCBAR.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_10_EUNCBAR.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_10_EUNCBAR.png  used on input line 1066.
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_10_EUNCBAR.png, id=113, 722.7pt x 433.62pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_10_EUNCBAR.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_10_EUNCBAR.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_10_EUNCBAR.png  used on input line 1070.
 (pdftex.def)             Requested size: 334.4371pt x 200.6652pt.
 
 
-[12 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_9_EUINVBAR.png> <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_10_EUNCBAR.png>]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png, id=121, 1011.78pt x 722.7pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png  used on input line 1085.
+[12 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_9_EUINVBAR.png> <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_10_EUNCBAR.png>]
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png, id=122, 1011.78pt x 722.7pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png  used on input line 1089.
 (pdftex.def)             Requested size: 473.78448pt x 338.42293pt.
 
 
-[13 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png>]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png, id=131, 650.43pt x 867.24pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png  used on input line 1185.
+[13 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png>]
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png, id=132, 650.43pt x 867.24pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png  used on input line 1189.
 (pdftex.def)             Requested size: 334.4371pt x 445.92563pt.
 
-Overfull \hbox (4.09464pt too wide) in paragraph at lines 1289--1289
+Overfull \hbox (4.09464pt too wide) in paragraph at lines 1293--1293
  []|\T1/lmr/m/n/10 NOS|
  []
 
 
-Overfull \hbox (3.39981pt too wide) in paragraph at lines 1291--1291
+Overfull \hbox (3.39981pt too wide) in paragraph at lines 1295--1295
  []|\T1/lmr/m/n/10 ATL|
  []
 
 
 
-[14 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png>]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png, id=140, 939.51pt x 578.16pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png  used on input line 1307.
+[14 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png>]
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png, id=141, 939.51pt x 578.16pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png  used on input line 1311.
 (pdftex.def)             Requested size: 390.17094pt x 240.09955pt.
 
-Overfull \hbox (0.58722pt too wide) in paragraph at lines 1335--1336
+Overfull \hbox (0.58722pt too wide) in paragraph at lines 1339--1340
  []\T1/lmr/m/n/10 ISO 
  []
 
 
-Overfull \hbox (0.58722pt too wide) in paragraph at lines 1369--1370
+Overfull \hbox (0.58722pt too wide) in paragraph at lines 1373--1374
  []\T1/lmr/m/n/10 ISO 
  []
 
 
-Overfull \hbox (39.99933pt too wide) in paragraph at lines 1405--1405
+Overfull \hbox (39.99933pt too wide) in paragraph at lines 1409--1409
  []|\T1/lmr/m/n/10 C_OtherStationaryComb|
  []
 
 
-Overfull \hbox (1.6109pt too wide) in paragraph at lines 1406--1407
+Overfull \hbox (1.6109pt too wide) in paragraph at lines 1410--1411
  []|\T1/lmr/m/n/10 1915.0| 
  []
 
 
-Overfull \hbox (8.38829pt too wide) in paragraph at lines 1411--1411
+Overfull \hbox (8.38829pt too wide) in paragraph at lines 1415--1415
  []|\T1/lmr/m/n/10 F_RoadTransport|
  []
 
 
-Overfull \hbox (3.5004pt too wide) in paragraph at lines 1421--1421
+Overfull \hbox (3.5004pt too wide) in paragraph at lines 1425--1425
  []|\T1/lmr/m/n/10 K_AgriLivestock|
  []
 
 
-Overfull \hbox (1.6109pt too wide) in paragraph at lines 1428--1429
+Overfull \hbox (1.6109pt too wide) in paragraph at lines 1432--1433
  []|\T1/lmr/m/n/10 3911.8| 
  []
 
 
 
-[15 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png>]
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png, id=150, 722.7pt x 505.89pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png  used on input line 1441.
+[15 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/pm25_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png>]
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png, id=151, 722.7pt x 505.89pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png  used on input line 1445.
 (pdftex.def)             Requested size: 445.9133pt x 312.1433pt.
-<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png, id=151, 1084.05pt x 794.97pt>
-File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png Graphic file (type png)
-<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png>
-Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png  used on input line 1614.
+<../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png, id=152, 1084.05pt x 794.97pt>
+File: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png Graphic file (type png)
+<use ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png>
+Package pdftex.def Info: ../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png  used on input line 1618.
 (pdftex.def)             Requested size: 445.9133pt x 327.00728pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
 
-[16 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png>] [17 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png>]
+[16 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png>] [17 <../outputs/HCL/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/pm25_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png>]
 
 [18] (./pm25_2022emis_2025inv_QAQC.aux)
  ***********
@@ -709,16 +709,16 @@ L3 programming layer <2025-09-02>
 Here is how much of TeX's memory you used:
  11844 strings out of 469729
  203680 string characters out of 5476492
- 661133 words of memory out of 5000000
+ 661127 words of memory out of 5000000
  40017 multiletter control sequences out of 15000+600000
  677448 words of font info for 82 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  89i,7n,93p,1046b,595s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on pm25_2022emis_2025inv_QAQC.pdf (18 pages, 11900283 bytes).
+Output written on pm25_2022emis_2025inv_QAQC.pdf (18 pages, 11934913 bytes).
 PDF statistics:
- 311 PDF objects out of 1000 (max. 8388607)
- 254 compressed objects within 3 object streams
+ 312 PDF objects out of 1000 (max. 8388607)
+ 255 compressed objects within 3 object streams
  78 named destinations out of 1000 (max. 500000)
  289 words of extra memory for PDF output out of 10000 (max. 10000000)
 

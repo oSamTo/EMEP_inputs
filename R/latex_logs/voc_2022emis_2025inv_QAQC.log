@@ -1,0 +1,854 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.10.7)  14 OCT 2025 15:49
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/qaqc/e2022/voc_2022emis_2025inv_QAQC.tex
+(/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/qaqc/e2022/voc_2022emis_2025inv_QAQC.tex
+LaTeX2e <2025-06-01> patch level 1
+L3 programming layer <2025-09-02>
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count275
+\c@section=\count276
+\c@subsection=\count277
+\c@subsubsection=\count278
+\c@paragraph=\count279
+\c@subparagraph=\count280
+\c@figure=\count281
+\c@table=\count282
+\abovecaptionskip=\skip49
+\belowcaptionskip=\skip50
+\bibindent=\dimen148
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2024/09/29 v3.02 LaTeX color extensions (UK)
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: pdftex.def on input line 274.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2025/09/29 v1.2d Graphics/color driver for pdftex
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/graphics/mathcolor.ltx)
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1349.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1353.
+Package xcolor Info: Model `RGB' extended on input line 1365.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1367.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1368.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1370.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1371.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1372.
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2020/01/02 v5.9 Page Geometry
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
+\KV@toks@=\toks17
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/iftex/ifvtex.sty
+Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/iftex/iftex.sty
+Package: iftex 2024/12/12 v1.0g TeX engine tests
+))
+\Gm@cnth=\count283
+\Gm@cntv=\count284
+\c@Gm@tempcnt=\count285
+\Gm@bindingoffset=\dimen149
+\Gm@wd@mp=\dimen150
+\Gm@odd@mp=\dimen151
+\Gm@even@mp=\dimen152
+\Gm@layoutwidth=\dimen153
+\Gm@layoutheight=\dimen154
+\Gm@layouthoffset=\dimen155
+\Gm@layoutvoffset=\dimen156
+\Gm@dimlist=\toks18
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2025/06/16 v2.17y AMS math features
+\@mathmargin=\skip51
+For additional information on amsmath, use the `?' option.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2024/11/17 v2.01 AMS text
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks19
+\ex@=\dimen157
+)) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen158
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2022/04/08 v2.04 operator names
+)
+\inf@bad=\count286
+LaTeX Info: Redefining \frac on input line 233.
+\uproot@=\count287
+\leftroot@=\count288
+LaTeX Info: Redefining \overline on input line 398.
+LaTeX Info: Redefining \colon on input line 409.
+\classnum@=\count289
+\DOTSCASE@=\count290
+LaTeX Info: Redefining \ldots on input line 495.
+LaTeX Info: Redefining \dots on input line 498.
+LaTeX Info: Redefining \cdots on input line 619.
+\Mathstrutbox@=\box53
+\strutbox@=\box54
+LaTeX Info: Redefining \big on input line 721.
+LaTeX Info: Redefining \Big on input line 722.
+LaTeX Info: Redefining \bigg on input line 723.
+LaTeX Info: Redefining \Bigg on input line 724.
+\big@size=\dimen159
+LaTeX Font Info:    Redeclaring font encoding OML on input line 742.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 743.
+\macc@depth=\count291
+LaTeX Info: Redefining \bmod on input line 904.
+LaTeX Info: Redefining \pmod on input line 909.
+LaTeX Info: Redefining \smash on input line 939.
+LaTeX Info: Redefining \relbar on input line 969.
+LaTeX Info: Redefining \Relbar on input line 970.
+\c@MaxMatrixCols=\count292
+\dotsspace@=\muskip17
+\c@parentequation=\count293
+\dspbrk@lvl=\count294
+\tag@help=\toks20
+\row@=\count295
+\column@=\count296
+\maxfields@=\count297
+\andhelp@=\toks21
+\eqnshift@=\dimen160
+\alignsep@=\dimen161
+\tagshift@=\dimen162
+\tagwidth@=\dimen163
+\totwidth@=\dimen164
+\lineht@=\dimen165
+\@envbody=\toks22
+\multlinegap=\skip52
+\multlinetaggap=\skip53
+\mathdisplay@stack=\toks23
+LaTeX Info: Redefining \[ on input line 2949.
+LaTeX Info: Redefining \] on input line 2950.
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+)) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/base/fontenc.sty
+Package: fontenc 2024/12/21 v2.1c Standard LaTeX package
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2024/02/08 v1.3d Input encoding file
+\inpenc@prehook=\toks24
+\inpenc@posthook=\toks25
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/base/textcomp.sty
+Package: textcomp 2024/04/24 v2.1b Standard LaTeX package
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/lm/lmodern.sty
+Package: lmodern 2015/05/01 v1.6.1 Latin Modern Fonts
+LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
+(Font)                  OT1/cmr/m/n --> OT1/lmr/m/n on input line 22.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `normal'
+(Font)                  OML/cmm/m/it --> OML/lmm/m/it on input line 23.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `normal'
+(Font)                  OMS/cmsy/m/n --> OMS/lmsy/m/n on input line 24.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `normal'
+(Font)                  OMX/cmex/m/n --> OMX/lmex/m/n on input line 25.
+LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
+(Font)                  OT1/cmr/bx/n --> OT1/lmr/bx/n on input line 26.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `bold'
+(Font)                  OML/cmm/b/it --> OML/lmm/b/it on input line 27.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `bold'
+(Font)                  OMS/cmsy/b/n --> OMS/lmsy/b/n on input line 28.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `bold'
+(Font)                  OMX/cmex/m/n --> OMX/lmex/m/n on input line 29.
+LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
+(Font)                  OT1/cmr/bx/n --> OT1/lmr/bx/n on input line 31.
+LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
+(Font)                  OT1/cmss/m/n --> OT1/lmss/m/n on input line 32.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
+(Font)                  OT1/cmr/m/it --> OT1/lmr/m/it on input line 33.
+LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
+(Font)                  OT1/cmtt/m/n --> OT1/lmtt/m/n on input line 34.
+LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `bold'
+(Font)                  OT1/cmr/bx/n --> OT1/lmr/bx/n on input line 35.
+LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
+(Font)                  OT1/cmss/bx/n --> OT1/lmss/bx/n on input line 36.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
+(Font)                  OT1/cmr/bx/it --> OT1/lmr/bx/it on input line 37.
+LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
+(Font)                  OT1/cmtt/m/n --> OT1/lmtt/m/n on input line 38.
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/upquote/upquote.sty
+Package: upquote 2012/04/19 v1.3 upright-quote and grave-accent glyphs in verbatim
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/tools/longtable.sty
+Package: longtable 2024-12-18 v4.23 Multi-page Table package (DPC)
+\LTleft=\skip54
+\LTright=\skip55
+\LTpre=\skip56
+\LTpost=\skip57
+\LTchunksize=\count298
+\LTcapwidth=\dimen166
+\LT@head=\box55
+\LT@firsthead=\box56
+\LT@foot=\box57
+\LT@lastfoot=\box58
+\LT@gbox=\box59
+\LT@cols=\count299
+\LT@rows=\count300
+\c@LT@tables=\count301
+\c@LT@chunks=\count302
+\LT@p@ftn=\toks26
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/booktabs/booktabs.sty
+Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
+\heavyrulewidth=\dimen167
+\lightrulewidth=\dimen168
+\cmidrulewidth=\dimen169
+\belowrulesep=\dimen170
+\belowbottomsep=\dimen171
+\aboverulesep=\dimen172
+\abovetopsep=\dimen173
+\cmidrulesep=\dimen174
+\cmidrulekern=\dimen175
+\defaultaddspace=\dimen176
+\@cmidla=\count303
+\@cmidlb=\count304
+\@aboverulesep=\dimen177
+\@belowrulesep=\dimen178
+\@thisruleclass=\count305
+\@lastruleclass=\count306
+\@thisrulewidth=\dimen179
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/tools/array.sty
+Package: array 2025/06/08 v2.6j Tabular extension package (FMi)
+\col@sep=\dimen180
+\ar@mcellbox=\box60
+\extrarowheight=\dimen181
+\NC@list=\toks27
+\extratabsurround=\skip58
+\backup@length=\skip59
+\ar@cellbox=\box61
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/tools/calc.sty
+Package: calc 2025/03/01 v4.3b Infix arithmetic (KKT,FJ)
+\calc@Acount=\count307
+\calc@Bcount=\count308
+\calc@Adimen=\dimen182
+\calc@Bdimen=\dimen183
+\calc@Askip=\skip60
+\calc@Bskip=\skip61
+LaTeX Info: Redefining \setlength on input line 86.
+LaTeX Info: Redefining \addtolength on input line 87.
+\calc@Ccount=\count309
+\calc@Cskip=\skip62
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/etoolbox/etoolbox.sty
+Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count310
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/mdwtools/footnote.sty
+Package: footnote 1997/01/28 1.13 Save footnotes around boxes
+\fn@notes=\box62
+\fn@width=\dimen184
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2024/12/31 v1.2e Enhanced LaTeX Graphics (DPC,SPQR)
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2024/08/06 v1.4g Standard LaTeX Graphics (DPC,SPQR)
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 106.
+)
+\Gin@req@height=\dimen185
+\Gin@req@width=\dimen186
+)
+\pandoc@box=\box63
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/threeparttable/threeparttable.sty
+Package: threeparttable 2003/06/13  v 3.0
+\@tempboxb=\box64
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/bookmark/bookmark.sty
+Package: bookmark 2023-12-10 v1.31 PDF bookmarks (HO)
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2025-07-12 v7.01o Hypertext links for LaTeX
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
+Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
+Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
+Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO)
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/infwarerr/infwarerr.sty
+Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
+)
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/hycolor/hycolor.sty
+Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/hyperref/nameref.sty
+Package: nameref 2025-06-21 v2.57 Cross-referencing by name of section
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/refcount/refcount.sty
+Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
+))
+\c@section@level=\count311
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/stringenc/stringenc.sty
+Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO)
+)
+\@linkdim=\dimen187
+\Hy@linkcounter=\count312
+\Hy@pagecounter=\count313
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2025-07-12 v7.01o Hyperref: PDFDocEncoding definition (HO)
+Now handling font encoding PD1 ...
+... no UTF-8 mapping file for font encoding PD1
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/intcalc/intcalc.sty
+Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
+)
+\Hy@SavedSpaceFactor=\count314
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/hyperref/puenc.def
+File: puenc.def 2025-07-12 v7.01o Hyperref: PDF Unicode definition (HO)
+Now handling font encoding PU ...
+... no UTF-8 mapping file for font encoding PU
+)
+Package hyperref Info: Option `unicode' set `true' on input line 4066.
+Package hyperref Info: Hyper figures OFF on input line 4195.
+Package hyperref Info: Link nesting OFF on input line 4200.
+Package hyperref Info: Hyper index ON on input line 4203.
+Package hyperref Info: Plain pages OFF on input line 4210.
+Package hyperref Info: Backreferencing OFF on input line 4215.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4462.
+\c@Hy@tempcnt=\count315
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip18
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 4801.
+\XeTeXLinkMargin=\dimen188
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/bitset/bitset.sty
+Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
+Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
+))
+\Fld@menulength=\count316
+\Field@Width=\dimen189
+\Fld@charsize=\dimen190
+Package hyperref Info: Hyper figures OFF on input line 6078.
+Package hyperref Info: Link nesting OFF on input line 6083.
+Package hyperref Info: Hyper index ON on input line 6086.
+Package hyperref Info: backreferencing OFF on input line 6093.
+Package hyperref Info: Link coloring OFF on input line 6098.
+Package hyperref Info: Link coloring with OCG OFF on input line 6103.
+Package hyperref Info: PDF/A mode OFF on input line 6108.
+\Hy@abspage=\count317
+\c@Item=\count318
+\c@Hfootnote=\count319
+)
+Package hyperref Info: Driver (autodetected): hpdftex.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2025-07-12 v7.01o Hyperref driver for pdfTeX
+\Fld@listcount=\count320
+\c@bookmark@seq@number=\count321
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+Package: rerunfilecheck 2025-06-21 v1.11 Rerun checks for auxiliary files (HO)
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
+Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
+)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 284.
+)
+\Hy@SectionHShift=\skip63
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/bookmark/bkm-pdftex.def
+File: bkm-pdftex.def 2023-12-10 v1.31 bookmark driver for pdfTeX and luaTeX (HO)
+\BKM@id=\count322
+))
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 84.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmr.fd
+File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) (/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
+File: l3backend-pdftex.def 2025-06-09 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count323
+) (./voc_2022emis_2025inv_QAQC.aux)
+\openout1 = `voc_2022emis_2025inv_QAQC.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
+))
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: <default>
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(28.45274pt, 557.38951pt, 28.45274pt)
+* v-part:(T,H,B)=(28.45274pt, 738.0645pt, 28.45274pt)
+* \paperwidth=614.295pt
+* \paperheight=794.96999pt
+* \textwidth=557.38951pt
+* \textheight=738.0645pt
+* \oddsidemargin=-43.81725pt
+* \evensidemargin=-43.81725pt
+* \topmargin=-80.81725pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=10.0pt
+* \footskip=30.0pt
+* \marginparwidth=65.0pt
+* \marginparsep=11.0pt
+* \columnsep=10.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+Package hyperref Info: Link coloring OFF on input line 84.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 86.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
+File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 86.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
+File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 86.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
+File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 86.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
+File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <12> on input line 86.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <8> on input line 86.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <6> on input line 86.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 86.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 86.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <10> on input line 95.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <7> on input line 95.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 95.
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 172.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
+File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+
+[1
+
+{/home/users/sam99jas/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/home/users/sam99jas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/home/users/sam99jas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/home/users/sam99jas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png, id=21, 758.835pt x 1011.78pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png  used on input line 207.
+(pdftex.def)             Requested size: 390.17094pt x 520.23112pt.
+
+
+[2 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_1_UKTOTMAP.png>]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png, id=31, 867.24pt x 433.62pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png  used on input line 254.
+(pdftex.def)             Requested size: 334.4371pt x 167.2188pt.
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png, id=33, 867.24pt x 433.62pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png  used on input line 283.
+(pdftex.def)             Requested size: 334.4371pt x 167.2188pt.
+
+
+[3 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_2_UKINVBAR.png> <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_3_UKNCBAR.png>]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png, id=41, 867.24pt x 361.35pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png  used on input line 399.
+(pdftex.def)             Requested size: 390.17094pt x 162.5729pt.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 406.
+(/home/users/sam99jas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+
+[4 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_3b_UKALTTOTBAR.png>]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png, id=51, 1011.78pt x 939.51pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png  used on input line 421.
+(pdftex.def)             Requested size: 418.04213pt x 388.18343pt.
+
+
+[5 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_6_UKANNSECMAP.png>]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png, id=60, 722.7pt x 505.89pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png  used on input line 505.
+(pdftex.def)             Requested size: 334.4371pt x 234.10939pt.
+
+
+[6 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_4_UKMONTOTLINE.png>]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png, id=69, 939.51pt x 867.24pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png  used on input line 616.
+(pdftex.def)             Requested size: 473.78448pt x 437.33742pt.
+
+
+[7 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_7_UKMONTOTMAP.png>]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png, id=77, 1300.86pt x 867.24pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png  used on input line 635.
+(pdftex.def)             Requested size: 445.9133pt x 297.26611pt.
+
+Overfull \hbox (1.39052pt too wide) in paragraph at lines 668--669
+ []\T1/lmr/m/n/10 Area 
+ []
+
+
+Overfull \hbox (1.39052pt too wide) in paragraph at lines 702--703
+ []\T1/lmr/m/n/10 Area 
+ []
+
+
+Overfull \hbox (1.80698pt too wide) in paragraph at lines 737--738
+ []|\T1/lmr/m/n/10 152.39| 
+ []
+
+
+Overfull \hbox (40.6232pt too wide) in paragraph at lines 738--738
+ []|\T1/lmr/m/n/10 C_OtherStationaryComb|
+ []
+
+
+Overfull \hbox (1.80698pt too wide) in paragraph at lines 743--744
+ []|\T1/lmr/m/n/10 290.86| 
+ []
+
+
+Overfull \hbox (9.01216pt too wide) in paragraph at lines 744--744
+ []|\T1/lmr/m/n/10 F_RoadTransport|
+ []
+
+
+Overfull \hbox (4.12427pt too wide) in paragraph at lines 754--754
+ []|\T1/lmr/m/n/10 K_AgriLivestock|
+ []
+
+
+Overfull \hbox (1.80698pt too wide) in paragraph at lines 755--756
+ []|\T1/lmr/m/n/10 131.89| 
+ []
+
+
+Overfull \hbox (1.80698pt too wide) in paragraph at lines 761--762
+ []|\T1/lmr/m/n/10 832.32| 
+ []
+
+
+Overfull \hbox (35.5253pt too wide) in paragraph at lines 857--857
+ []|\T1/lmr/m/n/10 C_OtherStationaryComb|
+ []
+
+
+Overfull \hbox (3.91426pt too wide) in paragraph at lines 863--863
+ []|\T1/lmr/m/n/10 F_RoadTransport|
+ []
+
+
+
+[8 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_5_UKMONSECLINE.png>]
+
+[9]
+
+[10]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png, id=101, 975.645pt x 722.7pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png  used on input line 992.
+(pdftex.def)             Requested size: 501.64716pt x 371.59366pt.
+
+
+[11 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_8_EUTOTMAP.png>]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_9_EUINVBAR.png, id=110, 505.89pt x 505.89pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_9_EUINVBAR.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_9_EUINVBAR.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_9_EUINVBAR.png  used on input line 1032.
+(pdftex.def)             Requested size: 195.08972pt x 195.0886pt.
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_10_EUNCBAR.png, id=112, 722.7pt x 433.62pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_10_EUNCBAR.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_10_EUNCBAR.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_10_EUNCBAR.png  used on input line 1066.
+(pdftex.def)             Requested size: 334.4371pt x 200.6652pt.
+
+
+[12 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_9_EUINVBAR.png> <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_10_EUNCBAR.png>]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png, id=121, 1011.78pt x 722.7pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png  used on input line 1085.
+(pdftex.def)             Requested size: 473.78448pt x 338.42293pt.
+
+
+[13 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_13_EUANNSECMAP.png>]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png, id=131, 650.43pt x 867.24pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png  used on input line 1188.
+(pdftex.def)             Requested size: 334.4371pt x 445.92563pt.
+
+Overfull \hbox (2.21454pt too wide) in paragraph at lines 1216--1217
+ []\T1/lmr/m/n/10 ISO
+ []
+
+
+Overfull \hbox (2.21454pt too wide) in paragraph at lines 1248--1249
+ []\T1/lmr/m/n/10 ISO
+ []
+
+
+Overfull \hbox (6.10355pt too wide) in paragraph at lines 1292--1292
+ []|\T1/lmr/m/n/10 NOS|
+ []
+
+
+Overfull \hbox (5.40872pt too wide) in paragraph at lines 1294--1294
+ []|\T1/lmr/m/n/10 ATL|
+ []
+
+
+
+[14 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_11_EUMONTOTLINE.png>]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png, id=140, 939.51pt x 578.16pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png  used on input line 1310.
+(pdftex.def)             Requested size: 390.17094pt x 240.09955pt.
+
+Overfull \hbox (2.18552pt too wide) in paragraph at lines 1338--1339
+ []\T1/lmr/m/n/10 ISO 
+ []
+
+
+Overfull \hbox (2.18552pt too wide) in paragraph at lines 1372--1373
+ []\T1/lmr/m/n/10 ISO 
+ []
+
+
+Overfull \hbox (4.55971pt too wide) in paragraph at lines 1404--1404
+ []|\T1/lmr/m/n/10 A_PublicPower|
+ []
+
+
+Overfull \hbox (1.21875pt too wide) in paragraph at lines 1407--1408
+ []|\T1/lmr/m/n/10 1614.8| 
+ []
+
+
+Overfull \hbox (47.08768pt too wide) in paragraph at lines 1408--1408
+ []|\T1/lmr/m/n/10 C_OtherStationaryComb|
+ []
+
+
+Overfull \hbox (1.21875pt too wide) in paragraph at lines 1409--1410
+ []|\T1/lmr/m/n/10 2586.2| 
+ []
+
+
+Overfull \hbox (1.21875pt too wide) in paragraph at lines 1411--1412
+ []|\T1/lmr/m/n/10 3373.1| 
+ []
+
+
+Overfull \hbox (1.21875pt too wide) in paragraph at lines 1413--1414
+ []|\T1/lmr/m/n/10 4569.1| 
+ []
+
+
+Overfull \hbox (15.47664pt too wide) in paragraph at lines 1414--1414
+ []|\T1/lmr/m/n/10 F_RoadTransport|
+ []
+
+
+Overfull \hbox (1.21875pt too wide) in paragraph at lines 1415--1416
+ []|\T1/lmr/m/n/10 2986.2| 
+ []
+
+
+Overfull \hbox (10.58875pt too wide) in paragraph at lines 1424--1424
+ []|\T1/lmr/m/n/10 K_AgriLivestock|
+ []
+
+
+Overfull \hbox (1.21875pt too wide) in paragraph at lines 1425--1426
+ []|\T1/lmr/m/n/10 2491.6| 
+ []
+
+
+Overfull \hbox (1.21875pt too wide) in paragraph at lines 1427--1428
+ []|\T1/lmr/m/n/10 1444.1| 
+ []
+
+
+Overfull \hbox (4.18362pt too wide) in paragraph at lines 1430--1430
+ []|\T1/lmr/m/n/10 1507.5| 
+ []
+
+
+Overfull \hbox (4.18362pt too wide) in paragraph at lines 1430--1430
+ []|\T1/lmr/m/n/10 1607.2| 
+ []
+
+
+Overfull \hbox (4.18362pt too wide) in paragraph at lines 1430--1430
+ []|\T1/lmr/m/n/10 2086.1| 
+ []
+
+
+Overfull \hbox (4.18362pt too wide) in paragraph at lines 1430--1430
+ []|\T1/lmr/m/n/10 2226.1| 
+ []
+
+
+Overfull \hbox (4.18362pt too wide) in paragraph at lines 1430--1430
+ []|\T1/lmr/m/n/10 1821.9| 
+ []
+
+
+Overfull \hbox (4.18362pt too wide) in paragraph at lines 1430--1430
+ []|\T1/lmr/m/n/10 1676.1| 
+ []
+
+
+Overfull \hbox (4.18362pt too wide) in paragraph at lines 1430--1431
+ []|\T1/lmr/m/n/10 1438.5| 
+ []
+
+
+Overfull \hbox (4.18362pt too wide) in paragraph at lines 1431--1431
+ []|\T1/lmr/m/n/10 1354.4| 
+ []
+
+
+Overfull \hbox (4.18362pt too wide) in paragraph at lines 1431--1431
+ []|\T1/lmr/m/n/10 1418.4| 
+ []
+
+
+Overfull \hbox (4.18362pt too wide) in paragraph at lines 1431--1431
+ []|\T1/lmr/m/n/10 1570.2| 
+ []
+
+
+Overfull \hbox (4.18362pt too wide) in paragraph at lines 1431--1431
+ []|\T1/lmr/m/n/10 1632.8| 
+ []
+
+
+Overfull \hbox (4.18362pt too wide) in paragraph at lines 1431--1431
+ []|\T1/lmr/m/n/10 1529.9| 
+ []
+
+
+Overfull \hbox (6.21875pt too wide) in paragraph at lines 1431--1432
+ []|\T1/lmr/m/n/10 19869.1| 
+ []
+
+
+
+[15 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO/plots/e2022/voc_EU_2022emis_2022map_2025inv_12_EUMONSECLINE.png>]
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png, id=150, 722.7pt x 505.89pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png  used on input line 1444.
+(pdftex.def)             Requested size: 445.9133pt x 312.1433pt.
+
+Overfull \hbox (3.55978pt too wide) in paragraph at lines 1468--1469
+ []\T1/lmr/m/n/10 AREA
+ []
+
+
+Overfull \hbox (3.55978pt too wide) in paragraph at lines 1496--1497
+ []\T1/lmr/m/n/10 AREA
+ []
+
+
+Overfull \hbox (3.55978pt too wide) in paragraph at lines 1551--1552
+ []\T1/lmr/m/n/10 AREA
+ []
+
+
+Overfull \hbox (3.55978pt too wide) in paragraph at lines 1579--1580
+ []\T1/lmr/m/n/10 AREA
+ []
+
+<../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png, id=151, 1084.05pt x 794.97pt>
+File: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png Graphic file (type png)
+<use ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png>
+Package pdftex.def Info: ../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png  used on input line 1617.
+(pdftex.def)             Requested size: 445.9133pt x 327.00728pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[16 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_8a_UKTSTOTLINE.png>] [17 <../outputs/NFC/BASE/EMEP4UKv5.0/inv2025/UKEIRE/annual/TPannual_allISO/plots/e2022/voc_UKEIRE_2022emis_2023map_2025inv_8b_UKTSSECLINE.png>]
+
+[18] (./voc_2022emis_2025inv_QAQC.aux)
+ ***********
+LaTeX2e <2025-06-01> patch level 1
+L3 programming layer <2025-09-02>
+ ***********
+ ) 
+Here is how much of TeX's memory you used:
+ 11844 strings out of 469729
+ 203492 string characters out of 5476492
+ 661177 words of memory out of 5000000
+ 40017 multiletter control sequences out of 15000+600000
+ 677448 words of font info for 82 fonts, out of 8000000 for 9000
+ 14 hyphenation exceptions out of 8191
+ 89i,7n,93p,1045b,595s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></home/users/sam99jas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
+Output written on voc_2022emis_2025inv_QAQC.pdf (18 pages, 12241401 bytes).
+PDF statistics:
+ 311 PDF objects out of 1000 (max. 8388607)
+ 254 compressed objects within 3 object streams
+ 78 named destinations out of 1000 (max. 500000)
+ 289 words of extra memory for PDF output out of 10000 (max. 10000000)
+

@@ -61,11 +61,11 @@ EMEP_EU_v5.0 <- function(
     ######################################################################################
     if (
       !(species %in%
-        c("nox", "sox", "nh3", "co", "voc", "pm25", "pm10", "pmco"))
+        c("nox", "sox", "nh3", "co", "voc", "pm25", "pm10", "pmco", "hcl"))
     ) {
       stop(
         "Species must be in: 
-                                            AP:    co, nh3, nox, sox, voc
+                                            AP:    co, nh3, nox, sox, voc, hcl
                                             PM:    pm25, pm10, pmco"
       )
     }
@@ -78,11 +78,22 @@ EMEP_EU_v5.0 <- function(
     # this is because we need a variable *per country* per sector - the netcdf does not have country IDs
 
     # There is no *alternative* emissions source, only the processed EMEP data (yet!)
-    emis_loc <- paste0(
-      "/gws/ssde/j25b/ceh_generic/inventory_processor/data/EMEP/inv",
-      emep_inv,
-      "/maps/csv"
-    )
+    fol_emis <- "/gws/ssde/j25b/ceh_generic/inventory_processor/data"
+
+    # hcl comes from Zhang inventory
+    if (species == "hcl") {
+      emis_loc <- paste0(
+        fol_emis,
+        "/Zhang/inv2022/maps/tif"
+      )
+    } else {
+      emis_loc <- paste0(
+        fol_emis,
+        "/EMEP/inv",
+        emep_inv,
+        "/maps/csv"
+      )
+    }
 
     # set up blank stack ready for data of different countries
     l_eu_emis <- list()
@@ -134,7 +145,7 @@ EMEP_EU_v5.0 <- function(
 
       # bring in all emissions into stacks
       l_eu <- EMEP_sector_Emissions(
-        fname = l_EMEP_file[[1]],
+        fname_data = l_EMEP_file[[1]],
         i,
         y,
         species,
@@ -291,56 +302,103 @@ summarise_EMEP_file <- function(
   #! Scaling by reported timeline DITCHED. too many errors/artefacts/oddities.
 
   # if the year is earlier than 1990, use 1990 here;
+  # needs to be if-else for hcl as we need to convert to a csv
 
-  if (y >= 1990) {
+  if (species == "hcl") {
+    # Zhang hcl data
+    file_y <- ifelse(y < 1990, 1990, ifelse(y > 2014, 2014, y))
+
     f_diff <- paste0(
       emis_loc,
       "/",
-      y,
+      file_y,
+      "/Zhang_tcl_DIFFUSE_inv2022_emis_",
+      file_y,
+      "/GNFR/Zhang_tcl_DIFFUSE_inv2022_emis_",
+      file_y,
+      "_GNFR_",
+      dt_sec[sec == i, GNFRlong],
+      "_t_LL.tif"
+    )
+
+    if (file.exists(f_diff)) {
+      # get raster
+      r_emis <- crop(extend(rast(f_diff), r_dom_EU), r_dom_EU)
+
+      # stack with iso codes
+      s <- c(r_iso, r_emis)
+      names(s) <- c("ISO_num", "emis_t") # rename here due to dynamic name of emission raster
+
+      # convert to data table and attach iso names
+      dt_emis <- as.data.table(s, xy = TRUE)
+      dt_emis <- dt_iso[dt_emis, on = "ISO_num"]
+      setnames(dt_emis, c("ISO_char", "x", "y"), c("ISO2", "Lon", "Lat"))
+
+      # format and subset
+      dt_emis[, c("Year", "Pollutant", "GNFR") := list(y, species, i)]
+
+      dt_emis <- dt_emis[!is.na(ISO2)]
+
+      dt_emis <- dt_emis[, c(
+        "ISO2",
+        "Year",
+        "GNFR",
+        "Pollutant",
+        "Lon",
+        "Lat",
+        "emis_t"
+      )]
+    } else {
+      # empty table if file doesn't exist
+      dt_emis <- data.table(
+        ISO2 = character(),
+        Year = numeric(),
+        GNFR = character(),
+        Pollutant = character(),
+        Lon = numeric(),
+        Lat = numeric(),
+        emis_t = numeric()
+      )
+    }
+
+    data_y <- copy(file_y)
+  } else {
+    # normal EMEP data
+    file_y <- ifelse(y < 1990, 1990, y)
+
+    f_diff <- paste0(
+      emis_loc,
+      "/",
+      file_y,
       "/EMEP_",
       dt_poll[emep_model == species, invProc],
       "_DIFFUSE_inv",
       emep_inv,
       "_emis_",
-      y,
+      file_y,
       "/GNFR/EMEP_",
       dt_poll[emep_model == species, invProc],
       "_DIFFUSE_inv",
       emep_inv,
       "_emis_",
-      y,
+      file_y,
       "_GNFR_",
       dt_sec[sec == i, GNFRlong],
       "_t_LL.csv"
     )
-  } else {
-    f_diff <- paste0(
-      emis_loc,
-      "/1990/EMEP_",
-      dt_poll[emep_model == species, invProc],
-      "_DIFFUSE_inv",
-      emep_inv,
-      "_emis_1990/GNFR/EMEP_",
-      dt_poll[emep_model == species, invProc],
-      "_DIFFUSE_inv",
-      emep_inv,
-      "_emis_1990_GNFR_",
-      dt_sec[sec == i, GNFRlong],
-      "_t_LL.csv"
-    )
+
+    dt_emis <- fread(f_diff)
+
+    data_y <- copy(file_y)
   }
 
-  dt_emis <- fread(f_diff)
-
-  emep_y <- ifelse(y >= 1990, y, 1990)
-
   if (nrow(dt_emis) != 0) {
-    dt_emis[, EMEP_data := emep_y]
+    dt_emis[, year_of_data := data_y]
     dt_emis[ISO2 == "KZT", ISO2 := "KZ"] # reset KZT iso to KZ, (pre-2024 inventory)
 
     dt_tot <- dt_emis[,
       .(emis_t = sum(emis_t, na.rm = T)),
-      by = .(ISO2, Year, EMEP_data, GNFR, Pollutant)
+      by = .(ISO2, Year, year_of_data, GNFR, Pollutant)
     ]
 
     dt_tot[,
@@ -357,7 +415,11 @@ summarise_EMEP_file <- function(
         dt_sec[sec == i, EMEP_sec],
         i,
         dt_sec[sec == i, name],
-        "EMEP_unprocessed"
+        if (species == "hcl") {
+          "Zhang_tif"
+        } else {
+          "EMEP_unprocessed"
+        }
       )
     ]
 
@@ -368,7 +430,7 @@ summarise_EMEP_file <- function(
     dt_tot <- data.table(
       ISO = NA,
       Year = y,
-      EMEP_data = emep_y,
+      year_of_data = data_y,
       GNFR = dt_sec[sec == i, GNFRlong],
       Pollutant = species,
       emis_t = 0,
@@ -377,7 +439,11 @@ summarise_EMEP_file <- function(
       EMEP_Sector = dt_sec[sec == i, str_pad(EMEP_sec, 2, "0", side = "left")],
       sec_long = i,
       long_name = dt_sec[sec == i, name],
-      Data_source = "EMEP_unprocessed"
+      Data_source = if (species == "hcl") {
+        "Zhang_tif"
+      } else {
+        "EMEP_unprocessed"
+      }
     )
   }
 
@@ -390,13 +456,14 @@ summarise_EMEP_file <- function(
     )
   }
 
-  return(list(f_diff, dt_tot))
+  return(list(dt_emis, dt_tot))
 }
 
 ######################################################################################################
 #### function to collect EMEP sector data, per country, for diffuse emissions
-EMEP_sector_Emissions <- function(fname, i, y, species, r_uk_EU_ext) {
-  dt_emis <- fread(fname)
+EMEP_sector_Emissions <- function(fname_data, i, y, species, r_uk_EU_ext) {
+  # swapped to using actual data, not the filename
+  dt_emis <- copy(fname_data)
   dt_emis[ISO2 == "KZT", ISO2 := "KZ"] # reset KZT iso to KZ, (pre-2024 inventory)
 
   # stop check for ISO names
@@ -1021,6 +1088,14 @@ create_NETCDF_eu_annual <- function(
   }
 
   #ncatt_put(nc_new, 0, "NCO","netCDF Operators version 4.9.8 (Homepage = http://nco.sf.net, Code = http://github.com/nco/nco)", prec = "char")
+
+  ncatt_put(
+    nc_new,
+    0,
+    "non-UK HCl",
+    "doi.org/10.1021/acs.est.1c05634",
+    prec = "char"
+  )
 
   #close connection
   nc_close(nc_new)

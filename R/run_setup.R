@@ -21,8 +21,10 @@ output_QAQC <- TRUE
 ## EMISSIONS & INVENTORY YEARS ##
 
 ## vectors of emissions years and pollutants to run ##
-v_years <- c(2021:2023) # what emissions years to process
-v_pollutants <- c("nox", "nh3", "sox", "pm25", "pmco", "co", "voc") # "nox","nh3","sox","pm25","pmco","co","voc", "cd", "cu", "ni", "pb", "zn" - CEH names, not EMEP model
+v_years <- c(2009, 2022) # what emissions years to process
+v_pollutants <- c("nox", "nh3", "sox", "pm25", "pmco", "co", "voc", "hcl")
+# "nox","nh3","sox","pm25","pmco","co","voc", "hcl",
+# "cd", "cu", "ni", "pb", "zn" - CEH names, not EMEP model
 
 # UK & Eire emission years
 naei_inv <- 2025 # naei_inv  = which inventory compilation year to use
@@ -32,6 +34,9 @@ map_yr_ie <- 2019 # map_yr_ie = what year is the MapEire spatial distribution fo
 # EMEP EU emission years
 emep_inv <- 2025 # emep_inv  = which inventory compilation year to use
 #emep_map_yr <- 2021
+
+# Zhang et al (2022) years
+zhang_inv <- 2022 # always 2022. Made in 2022. Map comes from emissions year.
 
 #########################
 ## TEMPORAL PARAMETERS ##
@@ -79,15 +84,16 @@ if (tp_scheme == "annual" & eu_agg_schema == "oneEU") {
 ## OUTPUT LOCATIONS ##
 
 ## choose output directory for the EMEP input files
-# STANDARD/NFC = paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK",
+# STANDARD/NFC = paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK", # nolint
 #					    emep_version,"/inv",naei_inv)
 
-output_project <- "NFC"
+output_project <- "HCL"
 v_scenarios <- "BASE" # paste0("SGS",6) # names or 'BASE'
 
 ###########################
 ## ALTERNATIVE EMISSIONS ##
-# a table to nominate file locations for different emissions - e.g. older years, different projects, and so on.
+# a table to nominate file locations for different emissions ;
+# e.g. older years, different projects, and so on.
 
 dt_alt_emis <- fread(paste0(
   "/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/data/alt_emis/",

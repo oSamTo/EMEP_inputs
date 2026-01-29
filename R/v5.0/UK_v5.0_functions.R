@@ -151,11 +151,11 @@ EMEP_UKEIRE_v5.0 <- function(
     ######################################################################################
     if (
       !(species %in%
-        c("nox", "sox", "nh3", "co", "voc", "pm25", "pm10", "pmco"))
+        c("nox", "sox", "nh3", "co", "voc", "pm25", "pm10", "pmco", "hcl"))
     ) {
       stop(
         "Species must be in: 
-                                            AP:    co, nh3, nox, sox, voc
+                                            AP:    co, nh3, nox, sox, voc, hcl
                                             PM:    pm25, pm10, pmco"
       )
     }
@@ -485,6 +485,10 @@ UKIE_sector_Emissions <- function(
   # if not present, use the default location;
   # "/gws/nopw/j04/ceh_generic/inventory_processor/data"
 
+  ## HCl:
+  # If UK, it comes from NAEI inventory data as normal.
+  # If Eire, it comes from alternative emissions - Zhang et al (2022) data.
+
   # read both points files, easier to subset.
   ## UK
   if (country == "uk") {
@@ -627,19 +631,38 @@ UKIE_sector_Emissions <- function(
     } else {
       fol_emis <- "/gws/ssde/j25b/ceh_generic/inventory_processor/data"
 
-      # diffuse filename - Eire inventory is currently set to 2021 with 2019 maps
-      f_diff <- paste0(
-        fol_emis,
-        "/MapEire/inv2021/maps/tif/MapEire_",
-        dt_poll[ceh_poll == species, invProc],
-        "_DIFFUSE_inv2021_emis_2019/GNFR/MapEire_",
-        dt_poll[ceh_poll == species, invProc],
-        "_DIFFUSE_inv2021_emis_2019_GNFR_",
-        dt_sec[sec == i, GNFRlong],
-        "_t_LL.tif"
-      )
+      # if it's HCl, we need to use Zhang data filenames
 
-      loctext_diff <- "inventory"
+      if (species == "hcl") {
+        file_y <- ifelse(y < 1990, 1990, ifelse(y > 2014, 2014, y))
+
+        f_diff <- paste0(
+          fol_emis,
+          "/Zhang/inv2022/maps/tif/",
+          file_y,
+          "/Zhang_tcl_DIFFUSE_inv2022_emis_",
+          file_y,
+          "/GNFR/Zhang_tcl_DIFFUSE_inv2022_emis_",
+          file_y,
+          "_GNFR_",
+          dt_sec[sec == i, GNFRlong],
+          "_t_LL.tif"
+        )
+        loctext_diff <- "zhang_glob"
+      } else {
+        # diffuse filename - Eire inventory is currently set to 2021 with 2019 maps
+        f_diff <- paste0(
+          fol_emis,
+          "/MapEire/inv2021/maps/tif/MapEire_",
+          dt_poll[ceh_poll == species, invProc],
+          "_DIFFUSE_inv2021_emis_2019/GNFR/MapEire_",
+          dt_poll[ceh_poll == species, invProc],
+          "_DIFFUSE_inv2021_emis_2019_GNFR_",
+          dt_sec[sec == i, GNFRlong],
+          "_t_LL.tif"
+        )
+        loctext_diff <- "inventory"
+      }
     }
 
     ## Points Eire
@@ -652,7 +675,14 @@ UKIE_sector_Emissions <- function(
   ### read in the data; if diff/pts are empty or don't exist, set as blank domain
   ### read diffuse data ###
   if (file.exists(f_diff)) {
-    r_diff <- crop(extend(rast(f_diff), r_dom_UKIE), r_dom_UKIE)
+    r_diff <- rast(f_diff)
+    if (species == "hcl" & country == "ie") {
+      r_diff <- disagg(r_diff, 10)
+      r_diff <- r_diff / 100
+      r_diff <- crop(extend(r_diff, r_dom_UKIE), r_dom_UKIE)
+    } else {
+      r_diff <- crop(extend(r_diff, r_dom_UKIE), r_dom_UKIE)
+    }
   } else {
     r_diff <- r_dom_UKIE
   } # end of read diffuse
@@ -830,62 +860,67 @@ UKIE_sector_Emissions <- function(
     #				Aviation: use the global CEDS value (alpha)
     #				ANY other: use ISO alpha
 
-    if (y >= 1990) {
-      f_alpha <- paste0(
-        "/gws/ssde/j25b/ceh_generic/inventory_processor/data/EMEP/inv",
-        naei_inv,
-        "/alpha/EMEP_AllPoll_TOTALS_inv",
-        naei_inv,
-        "_emis_1970-",
-        naei_inv - 2,
-        "_GNFR_alpha.csv"
-      )
-      dt_alpha <- fread(f_alpha)
-
-      scaling_value <- dt_alpha[
-        Pollutant == dt_poll[ceh_poll == species, invProc] &
-          Year == y &
-          ISO2 == "IE" &
-          GNFR == dt_sec[sec == i, GNFRlong],
-        tot_emis_t
-      ]
+    if (species == "hcl") {
+      # HCl is not in MapEire, so we don't use scalars, just Zhang data as is.
+      scaling_value <- global(r, sum, na.rm = T)$sum
     } else {
-      # if before 1990, find the 1990 EMEP value and scale by EMEP scalar, apply to 2019 map
-      dt_ceds_alpha <- fread(paste0(
-        "/gws/ssde/j25b/ceh_generic/samtom/SPEED/CEDS_for_EMEP/",
-        dt_poll[ceh_poll == species, SPEED],
-        "_CEDS_1950_1990_ISO_GNFR_kt.csv"
-      ))
-      dt_emep_alpha <- fread(paste0(
-        "/gws/ssde/j25b/ceh_generic/inventory_processor/data/EMEP/inv",
-        naei_inv,
-        "/alpha/EMEP_AllPoll_TOTALS_inv",
-        naei_inv,
-        "_emis_1970-",
-        naei_inv - 2,
-        "_GNFR_alpha.csv"
-      ))
+      if (y >= 1990) {
+        f_alpha <- paste0(
+          "/gws/ssde/j25b/ceh_generic/inventory_processor/data/EMEP/inv",
+          naei_inv,
+          "/alpha/EMEP_AllPoll_TOTALS_inv",
+          naei_inv,
+          "_emis_1970-",
+          naei_inv - 2,
+          "_GNFR_alpha.csv"
+        )
+        dt_alpha <- fread(f_alpha)
 
-      if (i == "sec08") {
-        emep_alpha <- dt_ceds_alpha[
-          Year == y & ISO2 == "XX" & GNFR == dt_sec[sec == i, GNFRlong],
-          alpha
+        scaling_value <- dt_alpha[
+          Pollutant == dt_poll[ceh_poll == species, invProc] &
+            Year == y &
+            ISO2 == "IE" &
+            GNFR == dt_sec[sec == i, GNFRlong],
+          tot_emis_t
         ]
       } else {
-        emep_alpha <- dt_ceds_alpha[
-          Year == y & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong],
-          alpha
-        ]
-      }
+        # if before 1990, find the 1990 EMEP value and scale by EMEP scalar, apply to 2019 map
+        dt_ceds_alpha <- fread(paste0(
+          "/gws/ssde/j25b/ceh_generic/samtom/SPEED/CEDS_for_EMEP/",
+          dt_poll[ceh_poll == species, SPEED],
+          "_CEDS_1950_1990_ISO_GNFR_kt.csv"
+        ))
+        dt_emep_alpha <- fread(paste0(
+          "/gws/ssde/j25b/ceh_generic/inventory_processor/data/EMEP/inv",
+          naei_inv,
+          "/alpha/EMEP_AllPoll_TOTALS_inv",
+          naei_inv,
+          "_emis_1970-",
+          naei_inv - 2,
+          "_GNFR_alpha.csv"
+        ))
 
-      emep90_t <- dt_emep_alpha[
-        Pollutant == dt_poll[ceh_poll == species, SPEED] &
-          Year == 1990 &
-          ISO2 == "IE" &
-          GNFR == dt_sec[sec == i, GNFRlong],
-        tot_emis_t
-      ]
-      scaling_value <- (emep_alpha * emep90_t)
+        if (i == "sec08") {
+          emep_alpha <- dt_ceds_alpha[
+            Year == y & ISO2 == "XX" & GNFR == dt_sec[sec == i, GNFRlong],
+            alpha
+          ]
+        } else {
+          emep_alpha <- dt_ceds_alpha[
+            Year == y & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong],
+            alpha
+          ]
+        }
+
+        emep90_t <- dt_emep_alpha[
+          Pollutant == dt_poll[ceh_poll == species, SPEED] &
+            Year == 1990 &
+            ISO2 == "IE" &
+            GNFR == dt_sec[sec == i, GNFRlong],
+          tot_emis_t
+        ]
+        scaling_value <- (emep_alpha * emep90_t)
+      }
     }
 
     if (length(scaling_value) == 0) {
@@ -911,6 +946,10 @@ UKIE_sector_Emissions <- function(
       replacement_value <- scaling_value - inventory_table_value
       # if the data are NOT alternative emissions, use scalars
       # points are always 'no_file' for Ireland
+    } else if (loctext_diff == "zhang") {
+      scalar_used <- "no"
+
+      replacement_value <- NA
     } else {
       scalar_used <- "yes"
 
@@ -932,6 +971,10 @@ UKIE_sector_Emissions <- function(
   ###############
   ### MASKING ###
 
+  # if the species is HCl, the Zhang data will need masking down to just Eire
+  if (species == "hcl" & country == "ie") {
+    rs <- mask(rs, sf_ie)
+  }
   # EMEP needs zero value, not NA, in emissions
   rs[is.na(r)] <- 0
   rs[is.nan(r)] <- 0
@@ -1931,6 +1974,13 @@ create_NETCDF_uk_annual <- function(
   }
 
   #ncatt_put(nc_new, 0, "NCO","netCDF Operators version 4.9.8 (Homepage = http://nco.sf.net, Code = http://github.com/nco/nco)", prec = "char")
+  ncatt_put(
+    nc_new,
+    0,
+    "non-UK HCl",
+    "doi.org/10.1021/acs.est.1c05634",
+    prec = "char"
+  )
 
   #close connection
   nc_close(nc_new)

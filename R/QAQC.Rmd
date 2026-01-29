@@ -63,14 +63,38 @@ Input files processed to 0.01$^\circ$ x 0.01$^\circ$ resolution, in WGS84.
 
 ```{r, message = FALSE, echo = FALSE}
 
+eire_inv <- if(params$species == "hcl")	{
+	          if(params$y > 2014) {2014} else {params$y}
+	        } else {
+		      params$emep_inv
+		    }
+
+eire_sec <- if(params$species == "hcl")	{
+	          "zhang_2022"
+	        } else {
+		      "GNFR"
+		    }
+
+eire_res <- if(params$species == "hcl")	{
+	          "0.1_deg"
+	        } else {
+		      "1km"
+		    }
+
+eire_crs <- if(params$species == "hcl")	{
+	          "LL"
+	        } else {
+		      "TM65"
+		    }
+
 dt <- data.table(Area = c("UK", "Eire", "SEA"),
                  Species = params$species,
-                 Inv_Year = c(params$naei_inv, params$emep_inv, "as above"),
+                 Inv_Year = c(params$naei_inv, eire_inv, "as above"),
 				 Emis_Year = c(params$y, params$y, "as above"),
 				 temp_res = c("annual", "annual", "N/A"),
-				 orig_sec = c("SNAP", "GNFR", "N/A"),
-				 orig_res = c("1km", "1km", "N/A"),
-				 orig_crs = c("BNG", "TM65", "N/A"))
+				 orig_sec = c("SNAP", eire_sec, "N/A"),
+				 orig_res = c("1km", eire_res, "N/A"),
+				 orig_crs = c("BNG", eire_crs, "N/A"))
 
 kable(dt, align = "cccccccc", caption = "Metadata of inputs", 
 	  booktabs = TRUE)
@@ -90,6 +114,8 @@ code, for all sectors.
 
 * Emissions maps are pre-processed from 1km x 1km BNG (UK) and 1km x 1km Irish 
 Grid TM65 (Eire) into WGS84 lat lon, at 0.01$^\circ$ x 0.01$^\circ$ resolution. 
+
+  * HCl data for Eire/EU is taken from Zhang et al. (2022) - https://doi.org/10.5194/essd-14-5297-2022
 
   * This is done in /gws/ssde/j25b/ceh_generic/inventory_processor
 
@@ -353,6 +379,8 @@ kable(dt_all, align = "rcccccc", caption = paste0(params$species," emissions (kt
 ### UK and Eire temporal schema: `r params$time_dim`
 
 Source: `r if(params$time_dim == "annual"){paste0("EMEP ", params$emep_version, " schema: data/temporal/EMEP4UK",params$emep_version,"/")}else{paste0("UKEM ", params$tp_scheme, " schema: /gws/nopw/j04/ukem/test/sam/ukem_pro/output/")}`
+
+If pollutant is HCl, monthly schema is as per NOx.
 
 ```{r, eval=TRUE, fig.align="center", out.width = "0.6\\linewidth", echo = FALSE, fig.cap = paste0("Emissions of ",params$species," month-1"), label = "fig-montot"}
 #| fig-pos: "h"

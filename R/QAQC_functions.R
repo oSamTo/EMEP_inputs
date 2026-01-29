@@ -1488,6 +1488,15 @@ uk_lin_tot_mon <- function(
       dt_poll[ceh_poll == species, emep_model]
     )
 
+    # if HCl, use the nox timings for QAQC purposes
+    if (species == "hcl") {
+      folname_prof <- paste0(
+        "data/temporal/EMEP4UK",
+        emep_version,
+        "/MonthlyFacs.nox"
+      )
+    }
+
     if (emep_version == "v4.36") {
       folname_prof <- gsub("MonthlyFacs.", "MonthlyFac.", folname_prof)
     }
@@ -2138,8 +2147,8 @@ eu_map_tot_ann <- function(
 
   # plot and save
   p <- ggplot() +
-    geom_spatraster(data = r_eu_rc, na.rm = T) +
-    geom_spatraster(data = r_uk_rc, na.rm = T, alpha = 0.6) +
+    geom_spatraster(data = r_eu_rc, na.rm = T, maxcell = 1e6) +
+    geom_spatraster(data = r_uk_rc, na.rm = T, alpha = 0.6, maxcell = 1e6) +
     scale_fill_brewer(
       labels = v_labs,
       palette = "Spectral",
@@ -2200,7 +2209,7 @@ eu_bar_inv_ann <- function(
   dt_inv <- fread(fname_inv)
   setnames(
     dt_inv,
-    c("Data_source", "Year", "EMEP_data"),
+    c("Data_source", "Year", "year_of_data"),
     c("data_source", "emis_y", "inv_y")
   )
 
@@ -2473,6 +2482,15 @@ eu_lin_tot_mon <- function(
       "/MonthlyFacs.",
       dt_poll[ceh_poll == species, emep_model]
     )
+
+    # if HCl, use the nox timings for QAQC purposes
+    if (species == "hcl") {
+      folname_prof <- paste0(
+        "data/temporal/EMEP4UK",
+        emep_version,
+        "/MonthlyFacs.nox"
+      )
+    }
 
     if (emep_version == "v4.36") {
       folname_prof <- gsub("MonthlyFacs.", "MonthlyFac.", folname_prof)
