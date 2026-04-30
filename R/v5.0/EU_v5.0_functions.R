@@ -2,10 +2,12 @@
 #### FUNCTIONS FOR CREATION OF EMEP - EU INPUT FILES ####
 #########################################################
 
-######################################################################################################
-#### function to take EMEP emissions, make ready to EMEP format and create netCDFs for EU
+#########################################################
+#### function to take EMEP emissions, make ready to  ####
+####     EMEP format and create netCDFs for EU       ####
 
 EMEP_EU_v5.0 <- function(
+  data_source,
   y,
   v_pollutants,
   time_dim = c("annual", "month", "yday"),
@@ -43,11 +45,22 @@ EMEP_EU_v5.0 <- function(
   # Make a new UK mask to the EMEP input restrictions - need this for processing
   r_uk_EU_ext <- aggregate(extend(r_dom_terr_10km, ext(r_dom_EU)), fact = 10) # converts UK territory+10km mask to EU size
 
-  res_crs <- "0.1_LL" # not currently used.
+  ## ISO information - summaries, look-ups, EMEP territory names etc.
+  # lookup file for EMEP country names - taken from EMEPv5.0 file
+  dt_iso <- readRDS("data/lookups/dt_iso_EU.rds")
+  dt_iso <- dt_iso[!is.na(ISO_char)]
+
+  # ISO raster (0.1 degree)
+  r_iso <- terra::rast("data/spatial/iso_map_EU.tif") # use to summarise data
+  r_iso <- terra::crop(terra::extend(r_iso, r_dom_EU), r_dom_EU)
+  # Alter Kazakhstan from code 92 --> 53
+  r_iso[r_iso == 92] <- 53
+  # codes 57 (Malta) & 62 (Monaco) are not in the ISO raster (too small)
 
   ####################################################
   #### CREATE THE NETCDF FILE TO PUT EMISSIONS IN
   fname_ncdf <- create_NETCDF_eu(
+    data_source,
     y,
     v_pollutants,
     folname,
@@ -162,7 +175,7 @@ EMEP_EU_v5.0 <- function(
       l_eu_prof <- split_EU_annual(
         species = species,
         time_dim,
-        eu_tp_scheme,
+        tp_scheme,
         l_annual = l_eu,
         i = i
       )
@@ -647,7 +660,7 @@ ISO_sector_raster <- function(iso, dt_emis, i, species, y, UKmask) {
 split_EU_annual <- function(
   species,
   time_dim = c("annual", "month"),
-  eu_tp_scheme,
+  tp_scheme,
   l_annual,
   i
 ) {
@@ -668,12 +681,12 @@ split_EU_annual <- function(
     ## Use the nominated temporal schema to split the data to monthly layers
 
     # NOT INCORPORATED:
-    ## If the eu_tp_scheme = "pre_TEMREG";
+    ## If the tp_scheme = "pre_TEMREG";
     # this is EMEP4UK temporal data as of July 2023. Monthly splits, for 5 SNAPs, per ISO
     ## Option to change this to use EDGAR
     # we could use the EDGAR generated regional profiles.
 
-    if (eu_tp_scheme %in% c("EMEP4UKv4.45", "EMEP4UKv5.0")) {
+    if (tp_scheme %in% c("EMEP4UKv4.45", "EMEP4UKv5.0")) {
       # If the tp_scheme = version of EMEP4UK (e.g. 'EMEP4UKv4.45'); use EMEP defaults of that version
       # read in timing file for legacy temporal splits (subset to Eire or UK - SEA needs to match parent country)
       dt_timing <- fread(paste0(
@@ -810,7 +823,7 @@ summarise_EU_emissions <- function(y, species, i, l_s, time_dim) {
 reshape_EU <- function(
   y,
   species,
-  eu_agg_schema = c("allISO", "oneEU"),
+  eu_agg_schema = c("allISO", "oneGRID"),
   time_dim,
   l_eu_emis
 ) {
@@ -832,7 +845,7 @@ reshape_EU <- function(
     # b) we can have time disaggregated stacks per sector.
 
     return(l_reshaped)
-  } else if (eu_agg_schema == "oneEU") {
+  } else if (eu_agg_schema == "oneGRID") {
     # this schema aggregates all the data into one EU surface, per sector per time step.
     # this heavily reduces the variables to read (from ISO level)
     # but retains the separation by sector
@@ -874,6 +887,7 @@ sumMonths <- function(s, n_time) {
 ######################################################################################################
 #### function to create a netCDF and input the data - simple routine chooser
 create_NETCDF_eu <- function(
+  data_source,
   y,
   v_pollutants,
   folname,
@@ -884,6 +898,7 @@ create_NETCDF_eu <- function(
 ) {
   if (time_dim == "annual") {
     fname <- create_NETCDF_eu_annual(
+      data_source,
       y,
       v_pollutants,
       folname,
@@ -902,6 +917,7 @@ create_NETCDF_eu <- function(
 ######################################################################################################
 #### function to create a netCDF and input the data - this is the ANNUAL/MONTHLY input (EMEPv5.0)
 create_NETCDF_eu_annual <- function(
+  data_source,
   y,
   v_pollutants,
   folname,
@@ -941,14 +957,17 @@ create_NETCDF_eu_annual <- function(
     0.1
   ))
   n_lon <- length(v_lon)
+
   v_lat <- as.array(seq(
     ymin(r_dom_EU) + 0.1 / 2,
     ymax(r_dom_EU) - 0.1 / 2,
     0.1
   ))
   n_lat <- length(v_lat)
+
   v_sector <- v_EMEP_sec
   n_sector <- length(v_sector)
+
   v_time <- 1 # this has to be 1 for this annual function.
   n_time <- length(v_time)
 
@@ -995,7 +1014,7 @@ create_NETCDF_eu_annual <- function(
   #  l_dim_var <- list(ncdim_lon, ncdim_lat, ncdim_sec, ncdim_tim)
 
   # Create names and variables for all pollutants_ISOs SEPARATELY
-  if (eu_agg_schema == "oneEU") {
+  if (eu_agg_schema == "oneGRID") {
     v_vars <- unlist(lapply(v_pollutants, function(x) paste0(x, "_EUR")))
   } else if (eu_agg_schema == "allISO") {
     v_iso_emep <- sort(dt_iso[, ISO_char])
@@ -1077,6 +1096,10 @@ create_NETCDF_eu_annual <- function(
     prec = "char"
   )
 
+  # emissions data source
+  ncatt_put(nc_new, 0, "EMISSIONS_SOURCE", data_source, prec = "char")
+  ncatt_put(nc_new, 0, "EMISSIONS_VERSION", emep_inv, prec = "char")
+
   # sectors - this might have to change if the amount of sectors input changes
   ncatt_put(nc_new, 0, "SECTORS_NAME", "GNFR", prec = "char")
 
@@ -1089,13 +1112,15 @@ create_NETCDF_eu_annual <- function(
 
   #ncatt_put(nc_new, 0, "NCO","netCDF Operators version 4.9.8 (Homepage = http://nco.sf.net, Code = http://github.com/nco/nco)", prec = "char")
 
-  ncatt_put(
-    nc_new,
-    0,
-    "non-UK HCl",
-    "doi.org/10.1021/acs.est.1c05634",
-    prec = "char"
-  )
+  if ("hcl" %in% v_pollutants) {
+    ncatt_put(
+      nc_new,
+      0,
+      "non-UK HCl",
+      "doi.org/10.1021/acs.est.1c05634",
+      prec = "char"
+    )
+  }
 
   #close connection
   nc_close(nc_new)
@@ -1142,7 +1167,7 @@ input_data_NETCDF_eu <- function(
 
   # create the vector of variables (needs to match ncdf created above, or it wil fail).
   # pollutant_iso only, not the total summary variable.
-  if (eu_agg_schema == "oneEU") {
+  if (eu_agg_schema == "oneGRID") {
     v_vars <- unlist(lapply(species, function(x) paste0(x, "_EUR")))
   } else if (eu_agg_schema == "allISO") {
     v_iso_emep <- sort(dt_iso[, ISO_char])
@@ -1167,7 +1192,7 @@ input_data_NETCDF_eu <- function(
     if (eu_agg_schema == "allISO") {
       var_code <- dt_iso[ISO_char == var_iso, ISO_num]
     }
-    if (eu_agg_schema == "oneEU") {
+    if (eu_agg_schema == "oneGRID") {
       var_code <- 64
     }
     mol_weight <- get_mol_weight(species)
@@ -1427,7 +1452,7 @@ summarise_nc_file_eu <- function(
     if (v == species) {
       var_code <- 0
     }
-    if (eu_agg_schema == "oneEU") {
+    if (eu_agg_schema == "oneGRID") {
       var_code <- 64
     }
 

@@ -31,9 +31,11 @@ lapply(packs, require, character.only = TRUE)
 
 ###############################################################################
 options(datatable.showProgress = FALSE)
+terraOptions(progress = 0)
 
 source(paste0("R/", emep_version, "/UK_", emep_version, "_functions.R"))
 source(paste0("R/", emep_version, "/EU_", emep_version, "_functions.R"))
+source(paste0("R/", emep_version, "/GLOBAL_", emep_version, "_functions.R"))
 source("R/QAQC_functions.R")
 
 ###########################################################
@@ -87,7 +89,18 @@ r_dom_EU <<- rast(
   vals = NA
 )
 
-# shape for plotting.
+# Global domain
+r_dom_glob <<- rast(
+  xmin = -180,
+  xmax = 180,
+  ymin = -90,
+  ymax = 90,
+  res = 0.1,
+  crs = "epsg:4326",
+  vals = NA
+)
+
+# shapefiles for plotting.
 # disable some spherical geometry in sf() that causes plot issues
 suppressWarnings(sf::sf_use_s2(FALSE))
 
@@ -98,9 +111,15 @@ sf_uk <<- st_crop(sf_world, ext(r_dom_ukplot))
 sf_eu <<- st_crop(sf_world, ext(r_dom_EU))
 sf_ie <<- sf_uk[sf_uk$NAME == "Ireland", ]
 
+# a specific HTAP shapefile;
+sf_htap <<- st_read("data/spatial/world/global_iso_htap.shp")
+st_crs(sf_htap) <- "epsg:4326"
+sf_htap <- st_make_valid(sf_htap)
+
 # reinstate spherical geometry in sf()
 suppressWarnings(sf::sf_use_s2(TRUE))
 
+## FOR THE UK & EU FILES:
 # the emissions need to be masked to terrestrial cells (plus some coastal cells)
 # Massimo wants EMEP emissions data on the sea
 # the mask is in 0.1 degree, disaggregate to 0.01 so masking can be done
@@ -115,6 +134,7 @@ r_dom_terr_10km <<- crop(
 )
 r_dom_terr <<- rast("data/spatial/terrestrial_mask.tif")
 
+## SECTORS
 # lookup files for sector mapping
 dt_sec <<- fread("data/lookups/EMEP_sectors.csv")[!is.na(sec)]
 dt_SNAPGNFR <<- fread("data/lookups/SNAP_to_GNFR.csv")
@@ -122,15 +142,6 @@ dt_GNFRSNAP <<- fread("data/lookups/GNFR_to_SNAP.csv")
 
 # lookup file for pollutant names
 dt_poll <<- fread("data/lookups/pollutant_names.csv")
-
-# lookup file for EMEP country names - taken from EMEPv5.0 file
-dt_iso <<- readRDS("data/lookups/dt_iso.rds")
-dt_iso <<- dt_iso[!is.na(ISO_char)]
-r_iso <<- rast("data/spatial/iso_map.tif") # use this to summarise other data
-r_iso <- crop(extend(r_iso, r_dom_EU), r_dom_EU)
-# Alter Kazakhstan from code 92 --> 53
-r_iso[r_iso == 92] <- 53
-# codes 57 (Malta) & 62 (Monaco) are not in the ISO raster (too small)
 
 # EMEP input missing value
 EMEP_fillval <<- 9.96920996838687e+36
@@ -144,7 +155,7 @@ v_yday <<- 1:365
 #### function to return molecular weight of the species being processed
 get_mol_weight <- function(species) {
   if (species == "") {
-    c(,, "sox", "pm25", "pmco", "co", "voc")
+    c(, , "sox", "pm25", "pmco", "co", "voc")
   } else if (species == "nox") {
     mw <- 46
   } else if (species == "nh3") {

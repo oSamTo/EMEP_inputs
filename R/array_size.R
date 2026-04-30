@@ -4,13 +4,14 @@ require(data.table)
 source("R/run_setup.R")
 
 dt_cj <- CJ(
-    v_years,
-    time_dim,
-    tp_scheme,
-    uk_agg_schema,
-    eu_agg_schema,
-    output_project,
-    v_scenarios
+    run_domain,
+  run_source,
+  v_years,
+  time_dim,
+  tp_scheme,
+  agg_schema,
+  output_project,
+  v_scenarios
 )
 
 i <- data.table(nrow(dt_cj))

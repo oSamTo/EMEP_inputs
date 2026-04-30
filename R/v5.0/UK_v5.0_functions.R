@@ -70,6 +70,7 @@ vectorPolls <- function(dt_PID, class = c("ceh", "emep", "mapeire", "naei")) {
 ######################################################################################################
 #### function to take NAEI emissions, make ready to EMEP format and create netCDFs for UK & Eire
 EMEP_UKEIRE_v5.0 <- function(
+  data_source,
   y,
   v_pollutants,
   time_dim = c("annual", "month", "yday"),
@@ -128,6 +129,7 @@ EMEP_UKEIRE_v5.0 <- function(
   ####################################################
   #### CREATE THE NETCDF FILE TO PUT EMISSIONS IN
   fname_ncdf <- create_NETCDF_uk(
+    data_source,
     y,
     v_pollutants,
     folname,
@@ -1735,6 +1737,7 @@ archive_data <- function(species, folname) {
 ######################################################################################################
 #### function to create a netCDF and input the data - simple routine chooser
 create_NETCDF_uk <- function(
+  data_source,
   y,
   v_pollutants,
   folname,
@@ -1748,6 +1751,7 @@ create_NETCDF_uk <- function(
 ) {
   if (time_dim == "annual") {
     fname <- create_NETCDF_uk_annual(
+      data_source,
       y,
       v_pollutants,
       folname,
@@ -1769,6 +1773,7 @@ create_NETCDF_uk <- function(
 ######################################################################################################
 #### function to create a netCDF and input the data - this is the ANNUAL/MONTHLY input (EMEPv5.0)
 create_NETCDF_uk_annual <- function(
+  data_source,
   y,
   v_pollutants,
   folname,
@@ -1861,7 +1866,7 @@ create_NETCDF_uk_annual <- function(
   )
 
   # Create names and variables for all pollutants_ISOs SEPARATELY
-  if (uk_agg_schema == "oneUKIE") {
+  if (uk_agg_schema == "oneGRID") {
     v_vars <- unlist(lapply(v_pollutants, function(x) paste0(x, "_UKIE")))
   } else if (uk_agg_schema == "allISO") {
     v_iso_emep <- c("GB", "IE", "SEA")
@@ -1920,12 +1925,30 @@ create_NETCDF_uk_annual <- function(
   ncatt_put(nc_new, 0, "projection", "lon lat", prec = "char")
   ncatt_put(nc_new, 0, "periodicity", "yearly", prec = "char")
 
-  # 6 extras by me
-  ncatt_put(nc_new, 0, "Emissions_year", as.character(y), prec = "char")
+  ncatt_put(nc_new, 0, "Grid_resolution", "0.01", prec = "char")
+
   ncatt_put(
     nc_new,
     0,
-    "UK_Inventory_year",
+    "Created_with",
+    R.Version()$version.string,
+    prec = "char"
+  )
+  ncatt_put(
+    nc_new,
+    0,
+    "ncdf4_version",
+    packageDescription("ncdf4")$Version,
+    prec = "char"
+  )
+
+  # extras by me
+  ncatt_put(nc_new, 0, "EMISSIONS_SOURCE", data_source, prec = "char")
+
+  ncatt_put(
+    nc_new,
+    0,
+    "UK_emissions_year",
     as.character(naei_inv - 2),
     prec = "char"
   )
@@ -1946,23 +1969,6 @@ create_NETCDF_uk_annual <- function(
     prec = "char"
   )
 
-  ncatt_put(nc_new, 0, "Grid_resolution", "0.01", prec = "char")
-
-  ncatt_put(
-    nc_new,
-    0,
-    "Created_with",
-    R.Version()$version.string,
-    prec = "char"
-  )
-  ncatt_put(
-    nc_new,
-    0,
-    "ncdf4_version",
-    packageDescription("ncdf4")$Version,
-    prec = "char"
-  )
-
   # sectors - this might have to change if the amount of sectors input changes
   ncatt_put(nc_new, 0, "SECTORS_NAME", "GNFR", prec = "char")
 
@@ -1974,13 +1980,15 @@ create_NETCDF_uk_annual <- function(
   }
 
   #ncatt_put(nc_new, 0, "NCO","netCDF Operators version 4.9.8 (Homepage = http://nco.sf.net, Code = http://github.com/nco/nco)", prec = "char")
-  ncatt_put(
-    nc_new,
-    0,
-    "non-UK HCl",
-    "doi.org/10.1021/acs.est.1c05634",
-    prec = "char"
-  )
+  if ("hcl" %in% v_pollutants) {
+    ncatt_put(
+      nc_new,
+      0,
+      "non-UK HCl",
+      "doi.org/10.1021/acs.est.1c05634",
+      prec = "char"
+    )
+  }
 
   #close connection
   nc_close(nc_new)
@@ -2038,7 +2046,7 @@ input_data_NETCDF_uk <- function(
 
   # create the vector of variables (needs to match ncdf created above, or it wil fail).
   # pollutant_iso only, not the total summary variable.
-  if (uk_agg_schema == "oneUKIE") {
+  if (uk_agg_schema == "oneGRID") {
     # THIS HAS NOT BEEN RUN, TO DATE
 
     v_vars <- unlist(lapply(species, function(x) paste0(x, "_UKIE")))
@@ -2066,7 +2074,7 @@ input_data_NETCDF_uk <- function(
     if (uk_agg_schema == "allISO") {
       var_code <- ifelse(var_iso == "GB", 27, ifelse(var_iso == "IE", 14, 171))
     }
-    if (uk_agg_schema == "oneUKIE") {
+    if (uk_agg_schema == "oneGRID") {
       var_code <- 64
     } # DON'T KNOW!!
     mol_weight <- get_mol_weight(species)
@@ -2395,7 +2403,7 @@ summarise_nc_file_uk <- function(
     if (uk_agg_schema == "allISO") {
       var_code <- ifelse(var_iso == "GB", 27, ifelse(var_iso == "IE", 14, 171))
     }
-    if (uk_agg_schema == "oneUKIE") {
+    if (uk_agg_schema == "oneGRID") {
       var_code <- 64
     } # DON'T KNOW!!
 

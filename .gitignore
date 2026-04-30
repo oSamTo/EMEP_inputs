@@ -3,5 +3,8 @@
 .RData
 .Ruserdata
 *.nc
+dump/*.tif
 outputs/**/*.csv
 outputs/**/*.png
+data/spatial/HTAP_iso_grids/*.tif
+data/spatial/EDGAR_iso_grids/*.tif
