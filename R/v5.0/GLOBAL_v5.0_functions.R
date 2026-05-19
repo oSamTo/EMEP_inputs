@@ -17,9 +17,9 @@ EMEP_GLOBAL_v5.0 <- function(
   tp_scheme,
   global_agg_schema
 ) {
-  # v_years  = vector, *numeric*, year to process.
-  if (!is.numeric(v_years)) {
-    stop("Year vector is not numeric")
+  # y  = numeric, year to process.
+  if (!is.numeric(y)) {
+    stop("Year is not numeric")
   }
 
   print(paste0(
@@ -54,7 +54,7 @@ EMEP_GLOBAL_v5.0 <- function(
   # emissions have been represented as best as possible.
 
   ## ISO information - summaries, look-ups, EMEP territory names etc.
-  # HTAP ISO table - add on experimental SEA zone
+  # ISO table - add on experimental SEA zone
   dt_iso <- fread(paste0("data/lookups/dt_iso_", data_source, ".csv"))
   dt_iso <- rbindlist(list(
     dt_iso,
@@ -70,8 +70,8 @@ EMEP_GLOBAL_v5.0 <- function(
   # - Furthermore, land masks have been expanded into the sea and the SEA mask
   # expanded onto land to capture as much emission as possible.
   fname_iso <- paste0("data/spatial/iso_map_", data_source, ".tif")
-  r_iso <- terra::rast(fname_iso)
-  names(r_iso) <- "ISO_num"
+  r_iso_land <- terra::rast(fname_iso)
+  names(r_iso_land) <- "ISO_num"
 
   fname_iso_ship <- paste0(
     "data/spatial/iso_map_",
@@ -80,6 +80,9 @@ EMEP_GLOBAL_v5.0 <- function(
   )
   r_iso_ship <- terra::rast(fname_iso_ship)
   names(r_iso_ship) <- "ISO_num"
+
+  r_iso <- app(c(r_iso_land, r_iso_ship), "first", na.rm = TRUE)
+  names(r_iso) <- "ISO_num"
 
   ## (For ncdf data creation, a raster for each ISO has already been made) ##
   ## (Each one of these single ISO rasters takes ~30 secs to make on the fly) ##
@@ -159,10 +162,15 @@ EMEP_GLOBAL_v5.0 <- function(
         next
       } # not interested in blank named GNFR sectors either
 
+      i_GNFR <- dt_sec[sec == i, GNFRlong]
+      if (i_GNFR == "Q_LULUCF") {
+        i_GNFR <- "q_LULUCF"
+      }
+
       print(paste0(
         format(Sys.time(), "%F %T"),
         ":                          ",
-        dt_sec[sec == i, GNFRlong]
+        i_GNFR
       ))
 
       #######################################################
@@ -182,16 +190,16 @@ EMEP_GLOBAL_v5.0 <- function(
       ###################################
       #### LIST OF EMISSION SURFACES ####
       # evaluate the emissions input file only.
-      l_EMEP_file <- summarise_EMEP_file(
+      l_EMEP_file <- summarise_emission_file(
         emis_loc,
         species,
         data_source,
         y,
         i,
+        i_GNFR,
         glob_inv,
         dt_iso,
-        fname_iso,
-        fname_iso_ship
+        r_iso
       )
 
       l_ds_tots[[i]] <- l_EMEP_file[[2]]
@@ -204,8 +212,7 @@ EMEP_GLOBAL_v5.0 <- function(
         species,
         dt_iso,
         data_source,
-        r_iso,
-        r_iso_ship
+        r_iso
       )
 
       #l_glob <- EMEP_sector_Emissions(
@@ -256,6 +263,40 @@ EMEP_GLOBAL_v5.0 <- function(
       rm(l_glob)
       rm(l_glob_prof)
     } # sector loop
+
+    # Then we do some special 'inventory only' additions.
+    # Not all inventory data gets a GNFR and not all GNFR go into model...
+    # We can capture the map version of the latter: GNFR not used in model.
+    # This is important data-loss sequence to recognise.
+    #
+    # Furthermore, the inventory tables != inventory maps, per ISO.
+
+    for (i in c("sec31", "sec32", "sec33")) {
+      i_GNFR <- dt_sec[sec == i, GNFRlong]
+      if (i_GNFR == "Q_LULUCF") {
+        i_GNFR <- "q_LULUCF"
+      }
+
+      print(paste0(
+        format(Sys.time(), "%F %T"),
+        ":                          ",
+        i_GNFR
+      ))
+
+      l_EMEP_file <- summarise_emission_file(
+        emis_loc,
+        species,
+        data_source,
+        y,
+        i,
+        i_GNFR,
+        glob_inv,
+        dt_iso,
+        r_iso
+      )
+
+      l_ds_tots[[i]] <- l_EMEP_file[[2]]
+    }
 
     ###########################################################
     #### summary files - emissions and processed emissions ####
@@ -355,6 +396,7 @@ EMEP_GLOBAL_v5.0 <- function(
 
     gc()
     terra::tmpFiles(remove = TRUE)
+    unlink("dump/GLOBAL_write_dump/*.tif")
     unlink("dump/GLOBAL_write_dump/iso/*.tif")
   } # pollutant loop
 
@@ -364,28 +406,21 @@ EMEP_GLOBAL_v5.0 <- function(
 ###############################################################################
 #### function to summarise the emissions file, before anything is done to it.
 
-summarise_EMEP_file <- function(
+summarise_emission_file <- function(
   emis_loc,
   species,
   data_source,
   y,
   i,
+  i_GNFR,
   glob_inv,
   dt_iso,
-  fname_iso,
-  fname_iso_ship
+  r_iso
 ) {
   # v_years  = vector, *numeric*, year to process.
   if (!is.numeric(y)) {
     stop("Year vector is not numeric")
   }
-
-  # read iso rasters inside parallel job
-  r_iso_f <- terra::rast(fname_iso)
-  names(r_iso_f) <- "ISO_num"
-
-  r_iso_ship_f <- terra::rast(fname_iso_ship)
-  names(r_iso_ship_f) <- "ISO_num"
 
   # set the diffuse filename - inventory version determines when produced
   # e.g. choose HTAP inventory v32
@@ -408,7 +443,7 @@ summarise_EMEP_file <- function(
       "/GNFR/Zhang_tcl_DIFFUSE_inv2022_emis_",
       file_y,
       "_GNFR_",
-      dt_sec[sec == i, GNFRlong],
+      i_GNFR,
       "_t_LL.tif"
     )
 
@@ -441,7 +476,7 @@ summarise_EMEP_file <- function(
       "_emis_",
       file_y,
       "_GNFR_",
-      dt_sec[sec == i, GNFRlong],
+      i_GNFR,
       "_t_LL.tif"
     )
 
@@ -461,34 +496,21 @@ summarise_EMEP_file <- function(
 
     # stack with iso codes
     # this is now non-standard as EU has different codes.
-    # need to summarise ships and territories with different rules.
+    # need to summarise ships and territories with different grids.
 
-    if (dt_sec[sec == i, GNFRlong] == "P_IntShipping") {
-      dt_emis <- as.data.table(terra::zonal(
-        r_emis,
-        r_iso_ship_f,
-        fun = "sum",
-        na.rm = T
-      ))
-      # } else if (
-      #  dt_sec[sec == i, GNFRlong] == "D_Fugitive" & species == "nmvoc"
-      # ) {
-      #  s <- c(r_iso_ship, r_emis)
-    } else {
-      dt_emis <- as.data.table(terra::zonal(
-        r_emis,
-        r_iso_f,
-        fun = "sum",
-        na.rm = T
-      ))
-    }
+    dt_emis <- as.data.table(terra::zonal(
+      r_emis,
+      r_iso,
+      fun = "sum",
+      na.rm = T
+    ))
 
     # attach iso names
     dt_emis <- dt_iso[dt_emis, on = "ISO_num"]
 
     # Global data uses ISO on the ISO3 system
     setnames(dt_emis, c("ISO_char"), c("ISO3"))
-    setnames(dt_emis, dt_sec[sec == i, GNFRlong], c("emis_t"))
+    setnames(dt_emis, i_GNFR, c("emis_t"))
 
     # format and subset
     dt_emis[, c("Year", "Pollutant", "GNFR") := list(y, species, i)]
@@ -558,6 +580,9 @@ summarise_EMEP_file <- function(
   fname <- paste0(
     "dump/GLOBAL_write_dump/array_",
     i_a,
+    "_",
+    species,
+    "_",
     "_highresSector_",
     i,
     ".tif"
@@ -581,27 +606,22 @@ new_EMEP_sector_Emissions <- function(
   species,
   dt_iso,
   data_source,
-  r_iso,
-  r_iso_ship
+  r_iso
 ) {
   sector_long <- dt_sec[sec == i, GNFRlong]
 
   # use ship mask for P_IntShipping
-  is_shipping <- sector_long == "P_IntShipping"
-  is_fugitive_voc <- species == "voc" && sector_long == "D_Fugitive"
+  #is_shipping <- sector_long == "P_IntShipping"
+  #is_fugitive_voc <- species == "voc" && sector_long == "D_Fugitive"
 
   # allow the use of iso_code = 0 in the r_iso, if voc + D_Fugitive
-  allow_sea <- is_shipping || is_fugitive_voc
+  #allow_sea <- is_shipping || is_fugitive_voc
 
   # 0.01° emissions
   r_emis_001 <- rast(fname_data)
 
   # 0.01° ISO mask - choose
-  r_iso_001 <- if (is_shipping) {
-    copy(r_iso_ship)
-  } else {
-    copy(r_iso)
-  }
+  r_iso_001 <- copy(r_iso)
 
   # create 0.1° cell ID raster, then disaggregate to 0.01°
   r_cell_01deg <- init(r_dom_glob, "cell")
@@ -618,13 +638,13 @@ new_EMEP_sector_Emissions <- function(
   dt <- dt[!is.na(iso) & !is.na(cell_001deg)]
 
   # apply SEA rule before aggregation
-  if (!allow_sea) {
-    dt <- dt[iso != 0]
-  }
+  #if (!allow_sea) {
+  #  dt <- dt[iso != 0]
+  #}
 
-  if (sector_long == "P_IntShipping") {
-    dt <- dt[iso == 0]
-  }
+  #if (sector_long == "P_IntShipping") {
+  #  dt <- dt[iso == 0]
+  #}
 
   # aggregate at 0.01° precision into final 0.1° EMEP cells
   dt_sum <- dt[,
@@ -798,6 +818,11 @@ ISO_sector_raster <- function(
   y,
   data_source
 ) {
+  i_GNFR <- dt_sec[sec == i, GNFRlong]
+  if (i_GNFR == "Q_LULUCF") {
+    i_GNFR <- "q_LULUCF"
+  }
+
   # read the high-res emissions raster for this sector
   r <- rast(fname)
 
@@ -814,12 +839,12 @@ ISO_sector_raster <- function(
   if (
     iso == "SEA" &&
       species == "voc" &&
-      dt_sec[sec == i, GNFRlong] %in% c("D_Fugitive", "P_IntShipping")
+      i_GNFR %in% c("D_Fugitive", "P_IntShipping")
   ) {
     r_masked <- mask(r, r_iso_sub)
     # aggregate back to 0.1 degree, to match EMEP grid.
     r_agg <- aggregate(r_masked, fact = 10, fun = sum, na.rm = T)
-  } else if (iso == "SEA" && dt_sec[sec == i, GNFRlong] != "P_IntShipping") {
+  } else if (iso == "SEA" && i_GNFR != "P_IntShipping") {
     # use empty domain - don't aggregate (already at 0.1 degree).
     r_agg <- copy(r_dom_glob)
   } else {
@@ -1367,8 +1392,8 @@ input_data_NETCDF_global <- function(
   fname_ncdf,
   dt_iso
 ) {
-  if (length(l_glob) != 235) {
-    stop("There are not 235 ISO sector lists.")
+  if (length(l_glob) != nrow(dt_iso)) {
+    stop(paste0("There are not ", nrow(dt_iso), "ISO sector lists."))
   }
 
   if (
@@ -1644,8 +1669,11 @@ summarise_nc_file_global <- function(
 
   # list for summary data
   l <- list()
+  l_r <- list()
+  l_s <- list()
 
   for (v in v_var) {
+    #print(paste0(format(Sys.time(), "%F %T"), ": ", v))
     ## if it's the full sum layer, change the v_EMEP_sec to 1.
     if (v == species) {
       v_EMEP_sec_now <- 1
@@ -1750,14 +1778,68 @@ summarise_nc_file_global <- function(
     # dt <- rbindlist(list(dt_time, dt_tot), use.names = T)
 
     l[[v]] <- dt
+
+    l_r[[v]] <- app(rast(l_out), sum, na.rm = TRUE)
+    l_s[[v]] <- l_out
   } # var name
 
+  # do some raster calcs and writing, v useful for QACQ - it's essentially the
+  # same operation as QAQC, reading in from the written ncdf.
+
+  # create a holding folder
+  dir.create(
+    file.path(folname, "rast", paste0("e", y)),
+    showWarnings = FALSE,
+    recursive = T
+  )
+
+  # total domain surface
+  s <- rast(l_r)
+
+  fname <- paste0(species, "_total_emis_qaqc.tif")
+
+  r <- suppressWarnings(app(
+    s,
+    sum,
+    na.rm = TRUE,
+    filename = file.path(folname, "rast", paste0("e", y), fname),
+    overwrite = TRUE
+  ))
+
+  # sectoral totals for domain surface
+  l_t <- purrr::list_transpose(l_s)
+  l_s_sec <- lapply(l_t, function(x) rast(x))
+
+  l_r_sec <- lapply(seq_along(l_s_sec), function(x) {
+    suppressWarnings(app(
+      l_s_sec[[x]],
+      sum,
+      na.rm = TRUE,
+      filename = paste0(
+        folname,
+        "/rast/",
+        "e",
+        y,
+        "/",
+        species,
+        "_sector",
+        x,
+        "_emis_qaqc.tif"
+      ),
+      overwrite = T
+    ))
+  })
+
+  # bind summary tables and return
   dt_ncfile_summary <- rbindlist(l, use.names = T)
+
+  gc()
+  terra::tmpFiles(remove = TRUE)
 
   return(dt_ncfile_summary)
 }
 
-######################################################################################################
+###############################################################################
 #### function to write out the summary tables into a new folder
 write_summaries_global <- function(
   y,

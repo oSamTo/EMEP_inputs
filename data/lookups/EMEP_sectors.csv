@@ -12,9 +12,9 @@ J ,J_Waste,9,sec10,9,6,10,Waste
 K ,K_AgriLivestock,10,sec11,10,2,11,AgriLivestock
 L ,L_AgriOther,10,sec12,10,2,12,AgriOther
 M ,M_Other,11,sec13,5,5,13,Other
-O,O_AviCruise,,,,,,AviationCruise
-P,P_IntShipping,8,,,,,InternationalShipping
-Q,Q_LULUCF,,,,,,LULUCF
+O,O_AviCruise,,sec31,,,,AviationCruise
+P,P_IntShipping,8,sec32,,,,InternationalShipping
+Q,Q_LULUCF,,sec33,,,,LULUCF
 A1 ,,1,sec14,1,1,1,PublicPower_Point
 A2 ,,1,sec15,1,3,1,PublicPower_Area
 F1 ,,7,sec16,7,2,16,RoadTransportExhaustGasoline

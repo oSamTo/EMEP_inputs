@@ -27,16 +27,25 @@ packs <- c(
   "janitor"
 )
 
-lapply(packs, require, character.only = TRUE)
+suppressPackageStartupMessages({
+  lapply(packs, require, character.only = TRUE)
+})
+
 
 ###############################################################################
 options(datatable.showProgress = FALSE)
 terraOptions(progress = 0)
 
-source(paste0("R/", emep_version, "/UK_", emep_version, "_functions.R"))
-source(paste0("R/", emep_version, "/EU_", emep_version, "_functions.R"))
-source(paste0("R/", emep_version, "/GLOBAL_", emep_version, "_functions.R"))
-source("R/QAQC_functions.R")
+domain_funcs <- if (run_domain == "UKEIRE") "UK" else run_domain
+source(paste0(
+  "R/",
+  emep_version,
+  "/",
+  domain_funcs,
+  "_",
+  emep_version,
+  "_functions.R"
+))
 
 ###########################################################
 #### SETTING UP WORKSPACE FOR MAKING EMEP MODEL INPUTS ####
@@ -104,17 +113,19 @@ r_dom_glob <<- rast(
 # disable some spherical geometry in sf() that causes plot issues
 suppressWarnings(sf::sf_use_s2(FALSE))
 
-sf_world <<- st_read("data/spatial/world/TM_WORLD_BORDERS-0.3.shp")
-st_crs(sf_world) <- "epsg:4326"
-sf_world <- st_make_valid(sf_world)
-sf_uk <<- st_crop(sf_world, ext(r_dom_ukplot))
-sf_eu <<- st_crop(sf_world, ext(r_dom_EU))
-sf_ie <<- sf_uk[sf_uk$NAME == "Ireland", ]
-
-# a specific HTAP shapefile;
-sf_htap <<- st_read("data/spatial/world/global_iso_htap.shp")
-st_crs(sf_htap) <- "epsg:4326"
-sf_htap <- st_make_valid(sf_htap)
+suppressWarnings(
+  suppressMessages({
+    sf_world <<- st_read(
+      "data/spatial/world/TM_WORLD_BORDERS-0.3.shp",
+      quiet = TRUE
+    )
+    st_crs(sf_world) <- "epsg:4326"
+    sf_world <- st_make_valid(sf_world)
+    sf_uk <<- st_crop(sf_world, ext(r_dom_ukplot))
+    sf_eu <<- st_crop(sf_world, ext(r_dom_EU))
+    sf_ie <<- sf_uk[sf_uk$NAME == "Ireland", ]
+  })
+)
 
 # reinstate spherical geometry in sf()
 suppressWarnings(sf::sf_use_s2(TRUE))
@@ -155,7 +166,7 @@ v_yday <<- 1:365
 #### function to return molecular weight of the species being processed
 get_mol_weight <- function(species) {
   if (species == "") {
-    c(, , "sox", "pm25", "pmco", "co", "voc")
+    c(,, "sox", "pm25", "pmco", "co", "voc")
   } else if (species == "nox") {
     mw <- 46
   } else if (species == "nh3") {

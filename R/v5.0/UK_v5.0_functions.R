@@ -2,7 +2,7 @@
 #### FUNCTIONS FOR CREATION OF EMEP - UK INPUT FILES ####
 #########################################################
 
-######################################################################################################
+###############################################################################
 #### function to set the combined UK/EIRE domain
 setDomain <- function(area = c("UKEIRE", "EU_EMEP"), crs = c("BNG", "LL")) {
   area <- match.arg(area) # area to process
@@ -65,10 +65,11 @@ vectorPolls <- function(dt_PID, class = c("ceh", "emep", "mapeire", "naei")) {
   return(v)
 }
 
-######################################################################################################
+###############################################################################
 
-######################################################################################################
-#### function to take NAEI emissions, make ready to EMEP format and create netCDFs for UK & Eire
+###############################################################################
+#### function to take NAEI emissions, make ready to EMEP format and
+#### create netCDFs for UK & Eire
 EMEP_UKEIRE_v5.0 <- function(
   data_source,
   y,
@@ -118,9 +119,10 @@ EMEP_UKEIRE_v5.0 <- function(
 
   # For the years & pollutants, take the regional emissions in Lat Long and;
   #   i) convert point emissions (.csv) into a raster
-  #  ii) combine the points with the diffuse (.tif) data as required for the model
+  #  ii) combine the points with the diffuse data as required for the model
   # iii) MASK THE DATA to fit *inside* the EU emissions data
-  #  iv) For SNAP 1: ONLY point sources go into A_PublicPower as this is treated with 200m injection. All other into B_Industry.
+  #  iv) For SNAP 1: ONLY point sources go into A_PublicPower as this is
+  #      treated with 200m injection. All other into B_Industry.
   #   v) split into monthly emissions, if needed
   #  vi) create netCDF
 
@@ -143,14 +145,15 @@ EMEP_UKEIRE_v5.0 <- function(
   )
 
   ## loop through pollutants listed and populate the netCDF input file.
-  ## years before 1970 (1980 for NH3) will always use the SPEED time series - /gws/nopw/j04/ceh_generic/samtom/SPEED
+  ## years before 1970 (1980 for NH3) will always use the SPEED time series
+  ## (/gws/nopw/j04/ceh_generic/samtom/SPEED)
   ## SNAP 1 prior to 1990 will use point data from the same folder above.
 
   for (species in v_pollutants) {
     ## Data can be made with a monthly time attribute
     # for the month, profile is chosen in run_setup.R
 
-    ######################################################################################
+    ###########################################################################
     if (
       !(species %in%
         c("nox", "sox", "nh3", "co", "voc", "pm25", "pm10", "pmco", "hcl"))
@@ -161,7 +164,7 @@ EMEP_UKEIRE_v5.0 <- function(
                                             PM:    pm25, pm10, pmco"
       )
     }
-    ######################################################################################
+    ###########################################################################
 
     print(paste0(format(Sys.time(), "%F %T"), ":        ", species, " data:"))
 
@@ -406,7 +409,8 @@ EMEP_UKEIRE_v5.0 <- function(
       species,
       naei_inv,
       time_dim,
-      v_EMEP_sec
+      v_EMEP_sec,
+      uk_agg_schema
     )
 
     write_summaries_uk(
@@ -1761,7 +1765,7 @@ create_NETCDF_uk <- function(
       tp_scheme,
       v_EMEP_sec,
       time_dim,
-      eu_agg_schema
+      uk_agg_schema
     )
   } else if (time_dim == "month") {
     fname <- create_NETCDF_uk_month()
@@ -2348,7 +2352,8 @@ summarise_nc_file_uk <- function(
   species,
   naei_inv,
   time_dim,
-  v_EMEP_sec
+  v_EMEP_sec,
+  uk_agg_schema
 ) {
   # time dims
   if (time_dim == "annual") {
@@ -2367,6 +2372,8 @@ summarise_nc_file_uk <- function(
 
   # list for summary data
   l <- list()
+  l_r <- list()
+  l_s <- list()
 
   for (v in v_var) {
     ## if it's the full sum layer, change the v_EMEP_sec to 1.
@@ -2463,8 +2470,59 @@ summarise_nc_file_uk <- function(
     # dt <- rbindlist(list(dt_time, dt_tot), use.names = T)
 
     l[[v]] <- dt
+
+    l_r[[v]] <- app(rast(l_out), sum, na.rm = TRUE)
+    l_s[[v]] <- l_out
   } # var name
 
+  # do some raster calcs and writing, v useful for QACQ - it's essentially the
+  # same operation as QAQC, reading in from the written ncdf.
+
+  # create a holding folder
+  dir.create(
+    file.path(folname, "rast", paste0("e", y)),
+    showWarnings = FALSE,
+    recursive = T
+  )
+
+  # total domain surface
+  s <- rast(l_r)
+
+  fname <- paste0(species, "_total_emis_qaqc.tif")
+
+  r <- suppressWarnings(app(
+    s,
+    sum,
+    na.rm = TRUE,
+    filename = file.path(folname, "rast", paste0("e", y), fname),
+    overwrite = TRUE
+  ))
+
+  # sectoral totals for domain surface
+  l_t <- purrr::list_transpose(l_s)
+  l_s_sec <- lapply(l_t, function(x) rast(x))
+
+  l_r_sec <- lapply(seq_along(l_s_sec), function(x) {
+    suppressWarnings(app(
+      l_s_sec[[x]],
+      sum,
+      na.rm = TRUE,
+      filename = paste0(
+        folname,
+        "/rast/",
+        "e",
+        y,
+        "/",
+        species,
+        "_sector",
+        x,
+        "_emis_qaqc.tif"
+      ),
+      overwrite = T
+    ))
+  })
+
+  # bind summary tables and return
   dt_ncfile_summary <- rbindlist(l, use.names = T)
 
   return(dt_ncfile_summary)

@@ -1,5 +1,7 @@
 source("R/run_setup.R")
 source("R/workspace.R")
+source("R/qaqc_codex_v2/utils.R")
+qaqc_v2_source()
 
 ##########################################################
 ####                                                  ####
@@ -42,12 +44,13 @@ if (run_source == "NAEI") {
   dir_inv <- emep_inv
 } else if (run_source == "HTAP") {
   dir_inv <- htap_inv
+} else if (run_source == "EDGAR") {
+  dir_inv <- edgar_inv
 } else {
   stop("Choose a valid data source.")
 }
 
-dt_cj[
-  ,
+dt_cj[,
   output_dir := paste0(
     "/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/outputs/", # nolint
     output_project,
@@ -152,22 +155,25 @@ if (run_domain == "UKEIRE") {
 # this should be lapply over v_pollutants for a separate file.
 if (output_QAQC) {
   for (species in v_pollutants) {
-    create_qaqc(
+    create_qaqc_v2_codex(
+      array_id = i_a,
       project = project,
       scenario = scenario,
       y = y,
       species = species,
-      uk_folname = uk_folname,
-      eu_folname = eu_folname,
+      domain = dt_cj[i_a, run_domain],
+      folname = folname,
+      inv = dir_inv,
+      data_source = data_source,
       map_yr_uk = map_yr_uk,
-      naei_inv = naei_inv,
-      emep_inv = emep_inv,
       time_dim = time_dim,
       emep_version = emep_version,
       v_EMEP_sec = v_EMEP_sec,
-      uk_agg_schema = uk_agg_schema,
-      eu_agg_schema = eu_agg_schema,
-      tp_scheme = tp_scheme
+      agg_schema = agg_schema,
+      tp_scheme = tp_scheme,
+      dt_sec = dt_sec,
+      dt_poll = dt_poll,
+      render_pdf = TRUE
     )
   }
 }

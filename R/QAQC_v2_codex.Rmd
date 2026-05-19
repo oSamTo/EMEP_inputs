@@ -1,0 +1,342 @@
+---
+params:
+  project: NA
+  scenario: NA
+  y: NA
+  species: NA
+  domain: NA
+  folname: NA
+  inv: NA
+  data_source: NA
+  map_yr_uk: NA
+  time_dim: NA
+  emep_version: NA
+  v_EMEP_sec: NA
+  agg_schema: NA
+  tp_scheme: NA
+  dt_sec: NA
+  dt_poll: NA
+  summary_paths: NA
+  raster_paths: NA
+  plot_paths: NA
+title: "EMEP input files QAQC"
+author: "Sam Tomlinson"
+date: "`r Sys.Date()`"
+header-includes:
+ \usepackage{geometry}
+ \geometry{top=1cm,left=1cm,bottom=1cm,right=1cm}
+output:
+  pdf_document:
+    fig_caption: true
+    extra_dependencies: ["booktabs"]
+---
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(janitor)
+library(terra)
+root <- "/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs"
+source(file.path(root, "R/qaqc_codex_v2/utils.R"))
+source(file.path(root, "R/qaqc_codex_v2/data.R"))
+source(file.path(root, "R/qaqc_codex_v2/plots.R"))
+
+kbl <- function(...) {
+  print(knitr::kable(...))
+  invisible(NULL)
+}
+
+include_plot <- function(path) {
+  path <- as.character(path)[1]
+  if (!is.na(path) && file.exists(path)) {
+    knitr::include_graphics(path, rel_path = FALSE)
+  } else {
+    cat("Plot not available.")
+  }
+}
+
+domain_label <- switch(params$domain, UKEIRE = "UK/Eire", EU = "EU", GLOBAL = "Global", params$domain)
+summary_paths <- params$summary_paths
+raster_paths <- params$raster_paths
+plot_paths <- params$plot_paths
+```
+
+# `r domain_label` Input Files
+
+## Metadata
+
+**Project:** `r params$project`
+
+**Scenario:** `r params$scenario`
+
+**Domain:** `r params$domain`
+
+**Species:** `r params$species`
+
+**Emissions year:** `r params$y`
+
+**Inventory / source version:** `r params$inv`
+
+**Data source:** `r params$data_source`
+
+**Output dir:** `r gsub("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/", "", params$folname)`
+
+**EMEP version:** `r params$emep_version`
+
+```{r metadata-table, echo = FALSE, results = "asis"}
+
+eire_sec <- if(params$species == "hcl")	{
+	          "zhang_2022"
+	        } else {
+		      "GNFR"
+		    }
+
+eire_res <- if(params$species == "hcl")	{
+	          "0.1_deg"
+	        } else {
+		      "1km"
+		    }
+
+eire_crs <- if(params$species == "hcl")	{
+	          "LL"
+	        } else {
+		      "TM65"
+		    }
+
+if(params$domain == "UKEIRE"){
+
+  dt_meta <- data.table(
+    Domain = params$domain,
+    Species = params$species,
+    Area = c("UK", "Eire", "SEA"),
+    Emis_Year = params$y,
+    Source = c(params$data_source,"EMEP", "N/A"),
+    Inv = params$inv,
+    orig_sec = c("SNAP", eire_sec, "N/A"),
+		orig_res = c("1km", eire_res, "N/A"),
+    Temporal = params$time_dim    
+  )
+  kbl(dt_meta, align = "ccccccccc", caption = "Run metadata", booktabs = TRUE)
+
+  }else{
+
+  dt_meta <- data.table(
+    Domain = params$domain,
+    Species = params$species,
+    Emis_Year = params$y,
+    Source = params$data_source,
+    Inv = params$inv,
+    Temporal = params$time_dim,
+    Aggregation = params$agg_schema
+  )
+  kbl(dt_meta, align = "ccccccc", caption = "Run metadata", booktabs = TRUE)
+}
+
+```
+
+```{r, results='asis', echo=FALSE}
+if (params$domain == "UKEIRE") {
+
+cat("
+Notes: 
+
+* Emissions from the UK and Eire are processed to consistent sector categories (see 
+/data/lookups/EMEP_sectors.csv) and masked to a UK+10km mask. EMEP/CEIP 
+emissions take precedence outside of this mask. 
+
+* The 10km strip from the land territory into the sea is combined (UK + Eire) to a 'SEA' ISO 
+code, for all sectors.
+
+* Emissions maps are pre-processed from 1km x 1km BNG (UK) and 1km x 1km Irish 
+Grid TM65 (Eire) into WGS84 lat lon, at 0.01$^\\circ$ x 0.01$^\\circ$ resolution. 
+
+  * HCl data for Eire/EU is taken from Zhang et al. (2022) - https://doi.org/10.5194/essd-14-5297-2022
+
+  * This is done in /gws/ssde/j25b/ceh_generic/inventory_processor
+
+* Totals are adherent to NFR level reporting (i.e. maps are scaled)
+
+  * Taken from: https://naei.energysecurity.gov.uk/data/data-selector
+")
+
+}else if(params$domain == "EU"){
+
+cat("
+Notes: 
+
+* Emissions from the EU (and wider) domain remain in GNFR sectors (see 
+/data/lookups/EMEP_sectors.csv) with UK+10km data masked out. EMEP/CEIP 
+emissions take precedence outside of this mask. 
+
+* Emissions data are provided in WGS84 lat lon, at 0.1$^\\circ$ x 0.1$^\\circ$ resolution. 
+
+  * This is done in /gws/ssde/j25b/ceh_generic/inventory_processor
+
+")
+
+}
+```
+
+
+\newpage
+
+## Processing Flow
+
+```{r stage-plot, echo = FALSE, fig.align = "center", out.width = "0.95\\linewidth", fig.cap = "Processing-stage totals by ISO, normalised to each ISO inventory total. Inventory is therefore 1."}
+include_plot(plot_paths$stage)
+```
+
+```{r stage-table, echo = FALSE, results = "asis"}
+dt_stage <- qaqc_v2_stage_totals(summary_paths)
+if (nrow(dt_stage) > 0) {
+  dt <- dt_stage[, .(Total_kt = round(sum(emis_t, na.rm = TRUE) / 1000, 3)), by = .(Area, stage)]
+  dt_domain <- dt[, .(Total_kt = sum(Total_kt, na.rm = TRUE)), by = stage]
+  ref <- dt_domain[stage == "inventory", Total_kt][1]
+  if (!is.na(ref)) {
+    dt_domain[, ratio_to_inventory := round(Total_kt / ref, 6)]
+    dt_domain[, delta_from_inventory_kt := round(Total_kt - ref, 6)]
+  }
+  kbl(dt_domain, caption = "Domain-level conservation check", booktabs = TRUE)
+} else {
+  kbl(data.table(Note = "No processing-stage summaries found."), booktabs = TRUE)
+}
+```
+
+```{r inventory-processed-sector-loss, echo = FALSE, results = "asis"}
+dt_sector_loss <- qaqc_v2_inventory_processed_sector_loss(summary_paths, params$dt_sec)
+if (nrow(dt_sector_loss) > 0) {
+  kbl(
+    dt_sector_loss,
+    caption = paste0(
+      "GNFR sectors contributing to inventory-to-processed ",
+      params$species,
+      " losses (kt). Missing_pct is percent of total positive loss."
+    ),
+    booktabs = TRUE
+  )
+} else {
+  kbl(
+    data.table(Note = "No positive inventory-to-processed sector losses found, or sector columns were unavailable."),
+    booktabs = TRUE
+  )
+}
+```
+
+\newpage
+
+## Total Emissions Map
+
+Map classes use quantiles with probabilities `0.20, 0.40, 0.55, 0.70, 0.82, 0.92, 0.97, 1.00` and the `Spectral` brewer palette. For the global domain, ISO polygons are drawn on this total map only.
+
+```{r total-map, echo = FALSE, fig.align = "center", out.width = "0.95\\linewidth", fig.cap = "Total emissions from precomputed QAQC raster (data inside .nc file)."}
+include_plot(plot_paths$raster_total)
+```
+
+```{r raster-summary, echo = FALSE, results = "asis"}
+dt_rast <- qaqc_v2_raster_summary(raster_paths)
+if (nrow(dt_rast) > 0) {
+  kbl(dt_rast, caption = "Precomputed QAQC raster summaries (data inside .nc input file)", booktabs = TRUE)
+} else {
+  kbl(data.table(Note = "No precomputed QAQC rasters found."), booktabs = TRUE)
+}
+```
+
+\newpage
+
+## Sectoral Emissions Maps
+
+```{r sector-map, echo = FALSE, fig.align = "center", out.width = "0.98\\linewidth", fig.cap = "Sectoral emissions from precomputed QAQC rasters."}
+include_plot(plot_paths$raster_sector)
+```
+
+\newpage
+
+## Sectoral Emissions: Top ISO Codes
+
+Figure 4 and Table 5 are restricted to the ten ISO codes with the biggest totals across all sectors.
+
+```{r sector-plot, echo = FALSE, fig.align = "center", out.width = "0.82\\linewidth", fig.cap = "Sectoral emissions for the ten largest ISO totals."}
+include_plot(plot_paths$sector_bar)
+```
+
+```{r sector-table, echo = FALSE, results = "asis"}
+dt_sector <- qaqc_v2_top_iso_sector_table(summary_paths, top_n = 10)
+if (nrow(dt_sector) > 0) {
+  if(params$domain == "UKEIRE"){
+    dt_sector[, ncTotal := rowSums(.SD, na.rm=T), .SDcols = c("GB", "IE", "SEA")]
+  }
+  kbl(dt_sector, caption = paste0(params$species, " emissions by sector for top ten ISO totals (kt). ISO columns are ordered largest to smallest."), booktabs = TRUE)
+} else {
+  kbl(data.table(Note = "No sectoral NetCDF output summary found."), booktabs = TRUE)
+}
+```
+
+\newpage
+
+```{r global-timeseries-title, echo = FALSE, results = "asis"}
+if (params$domain == "GLOBAL") {
+  cat("## Global Inventory Time Series\n\n")
+} else {
+  cat("## Inventory Time Series\n\n")
+}
+```
+
+```{r ts-plots, echo = FALSE, fig.align = "center", out.width = "0.82\\linewidth", fig.cap = "Global inventory total over time."}
+if (params$domain == "GLOBAL") {
+  include_plot(plot_paths$timeseries_total)
+}
+```
+
+```{r ts-sector-plot, echo = FALSE, fig.align = "center", out.width = "0.9\\linewidth", fig.cap = "Global inventory sector totals over time."}
+if (params$domain == "GLOBAL") {
+  include_plot(plot_paths$timeseries_sector)
+}
+```
+
+```{r ts-table, echo = FALSE, results = "asis"}
+if (params$domain == "GLOBAL") {
+  ts <- qaqc_v2_global_timeseries(params$data_source, params$inv, params$species, params$y)
+  if (nrow(ts$data) > 0) {
+    dt <- copy(ts$data)
+    dt[, emis_kt := round(emis_kt, 3)]
+    kbl(dt, caption = paste0("Global ", params$species, " inventory totals from ", basename(ts$file), " (kt)"), booktabs = TRUE)
+  } else {
+    kbl(data.table(Note = "No global time-series data found."), booktabs = TRUE)
+  }
+}
+```
+
+\newpage
+
+## Monthly Emissions
+
+```{r monthly-table, echo = FALSE, results = "asis"}
+dt_out <- qaqc_v2_read_csv(summary_paths$ncoutput)
+time_cols <- grep("^t[0-9]+$", names(dt_out), value = TRUE)
+if (nrow(dt_out) > 0 && length(time_cols) > 1) {
+  area_col <- intersect(c("Area", "ISO", "iso_char"), names(dt_out))[1]
+  if (!is.na(area_col)) data.table::setnames(dt_out, area_col, "Area")
+  id_cols <- setdiff(names(dt_out), time_cols)
+  dt <- melt(dt_out, id.vars = id_cols, measure.vars = time_cols, variable.name = "time", value.name = "emis_t")
+  dt <- dt[, .(emis_kt = round(sum(emis_t, na.rm = TRUE) / 1000, 3)), by = .(Area, time)]
+  dt_wide <- dcast(dt, Area ~ time, value.var = "emis_kt", fill = 0)
+  kbl(dt_wide, caption = paste0("Monthly ", params$species, " NetCDF output emissions (kt)"), booktabs = TRUE)
+} else {
+  kbl(data.table(Note = "No monthly columns available. Annual-only NetCDF summaries contain t1 only."), booktabs = TRUE)
+}
+```
+
+\newpage
+
+## Sector Classifications
+
+```{r sector-lookup, echo = FALSE, results = "asis"}
+if (!is.null(params$dt_sec) && nrow(params$dt_sec) > 0) {
+  dt <- as.data.table(params$dt_sec)
+  dt[, names(dt) := lapply(.SD, function(x) if (is.character(x)) iconv(x, from = "", to = "UTF-8", sub = "") else x)]
+  kbl(dt, caption = "Sectoral lookup table", booktabs = TRUE)
+} else {
+  kbl(data.table(Note = "No sector lookup table supplied."), booktabs = TRUE)
+}
+```

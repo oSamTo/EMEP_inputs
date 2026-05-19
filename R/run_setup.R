@@ -9,7 +9,7 @@ require(data.table)
 ########################
 ## EMEP MODEL DOMAINS ##
 # set which domains to run.
-run_domain <<- c("GLOBAL") # "UKEIRE", "EU", "GLOBAL"
+run_domain <<- c("UKEIRE") # "UKEIRE", "EU", "GLOBAL"
 
 if (length(run_domain) > 1) {
   stop("Choose exactly one domain to construct.")
@@ -24,7 +24,7 @@ if (!(run_domain %in% c("UKEIRE", "EU", "GLOBAL"))) {
 # UKEIRE file = "NAEI" (actually uses MapEire & EMEP as well)
 # EU file     = "EMEP" (to be expanded to EDGAR, CAMS)
 # GLOBAL      = "HTAP" (to be expanded to EDGAR)
-run_source <<- c("HTAP")
+run_source <<- c("NAEI")
 
 # For now the run_source is linked to the domain, and only one is chosen,
 # but we could have multiple data sources for the same domain.
@@ -43,13 +43,13 @@ if (length(emep_version) > 1) {
 
 #######################
 ## OUTPUT QAQC FILES ##
-output_QAQC <<- FALSE
+output_QAQC <<- TRUE
 
 #################################
 ## EMISSIONS & INVENTORY YEARS ##
 
 ## vectors of emissions years and pollutants to run ##
-v_years <- c(2020) # what emissions years to process
+v_years <- c(2023) # what emissions years to process
 v_pollutants <- c("nox", "nh3", "sox", "pm25", "pmco", "co", "voc")
 # "nox","nh3","sox","pm25","pmco","co","voc", "hcl",
 # "cd", "cu", "ni", "pb", "zn" - CEH names, not EMEP model
@@ -77,6 +77,13 @@ htap_inv <- "v32" # only option at the moment is 'v32'
 
 if (htap_inv != "v32") {
   stop("Change HTAP inventory version. Only v32 is available at the moment.")
+}
+
+# EDGAR emissions version
+edgar_inv <- "v81" # only option at the moment is 'v81'
+
+if (edgar_inv != "v81") {
+  stop("Change EDGAR inventory version. Only v81 is available at the moment.")
 }
 
 #########################
@@ -122,6 +129,12 @@ if (run_domain == "EU" && tp_scheme != "annual" && agg_schema == "allISO") {
 if (run_domain == "EU" && tp_scheme == "annual" && agg_schema == "oneGRID") {
   stop("Don't run annual EU with one aggregated surface.")
 }
+
+# break if GLOBAL is not EDGAR or HTAP
+if (run_domain == "GLOBAL" && !(run_source %in% c("HTAP", "EDGAR"))) {
+  stop("Need to choose either HTAP or EDGAR as source data for GLOBAL domain.")
+}
+
 # break if GLOB is monthly AND ISO - the files are too big. THIS WILL CHANGE
 if (run_domain == "GLOBAL" && tp_scheme != "annual" && agg_schema == "allISO") {
   stop("Don't run sub-annual GLOBAL on ISO codes. Files too large.")
@@ -130,11 +143,18 @@ if (run_domain == "GLOBAL" && tp_scheme != "annual" && agg_schema == "allISO") {
 if (run_domain == "GLOBAL" && length(v_years) > 1) {
   stop("Run max 1 year for GLOBAL domain. Run time too long. Not enough cores.")
 }
-# break if GLOB is HTAP_32 and the year is outside of 2000:2020
+# break if GLOB is HTAP_v32 and the year is outside of 2000:2020
 if (
   run_source == "HTAP" && htap_inv == "v32" && any(!c(v_years %in% 2000:2020))
 ) {
   stop("HTAP_v32 GLOBAL only runs from 2000 to 2020. Check year chosen!")
+}
+
+# break if GLOB is EDGAR_v81 and the year is outside of 2000:2022
+if (
+  run_source == "EDGAR" && edgar_inv == "v81" && any(!c(v_years %in% 2000:2022))
+) {
+  stop("EDGAR_v81 GLOBAL only runs from 2000 to 2022. Check year chosen!")
 }
 
 
@@ -145,7 +165,7 @@ if (
 # STANDARD/NFC = paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK", # nolint
 # 					    emep_version,"/inv",naei_inv)
 
-output_project <- "HTAP_32"
+output_project <- "NFCv2"
 v_scenarios <- "BASE" # paste0("SGS",6) # names or 'BASE'
 
 # if there are errors re no "alternate_emissions.csv" file, make sure this

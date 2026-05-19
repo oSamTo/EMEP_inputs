@@ -20,7 +20,9 @@ packs <- c(
   "janitor"
 )
 
-lapply(packs, require, character.only = TRUE)
+suppressPackageStartupMessages({
+  lapply(packs, require, character.only = TRUE)
+})
 
 ###############################################################################
 options(datatable.showProgress = FALSE)
@@ -73,11 +75,20 @@ r_dom_EU <<- rast(
   vals = NA
 )
 
-sf_world <<- st_read("data/spatial/world/TM_WORLD_BORDERS-0.3.shp")
-st_crs(sf_world) <- "epsg:4326"
-sf_world <- st_make_valid(sf_world)
-sf_uk <<- st_crop(sf_world, ext(r_dom_ukplot))
-sf_eu <<- st_crop(sf_world, ext(r_dom_EU))
+suppressWarnings(
+  suppressMessages({
+    sf_global <<- st_read(
+      "data/spatial/world/TM_WORLD_BORDERS-0.3.shp",
+      quiet = TRUE
+    )
+    st_crs(sf_global) <- "EPSG:4326"
+    sf_global <<- st_make_valid(sf_global)
+    sf_ukeire <<- st_crop(sf_global, ext(r_dom_ukplot))
+    sf_eu <<- st_crop(sf_global, ext(r_dom_EU))
+
+    sf_plot_poly <- copy(get(paste0("sf_", tolower(domain))))
+  })
+)
 
 # reinstate spherical geometry in sf()
 suppressWarnings(sf::sf_use_s2(TRUE))
@@ -102,8 +113,8 @@ dt_sec <<- fread("data/lookups/EMEP_sectors.csv")[!is.na(sec)]
 dt_poll <<- fread("data/lookups/pollutant_names.csv")
 
 # lookup file for EMEP country names - taken from EMEPv5.0 file
-dt_iso <<- readRDS("data/lookups/dt_iso.rds")
-dt_iso <<- dt_iso[!is.na(ISO_char)]
+#dt_iso <<- readRDS("data/lookups/dt_iso.rds")
+#dt_iso <<- dt_iso[!is.na(ISO_char)]
 
 # EMEP input missing value
 EMEP_fillval <<- 9.96920996838687e+36
@@ -117,16 +128,21 @@ v_yday <<- 1:365
 
 ###############################################################################
 #### wrapper function to call other functions for document creation
-output_comparison <- function(
+#### ANNUAL ####
+output_comparison_annual <- function(
   pollutant,
-  folname_1,
-  emis_yr_1,
-  folname_2,
-  emis_yr_2
+  domain = c("UKEIRE", "EU", "GLOBAL"),
+  folname_from,
+  emis_yr_from,
+  folname_to,
+  emis_yr_to,
+  array_id
 ) {
   print(paste0(
     format(Sys.time(), "%Y-%m-%d %X"),
-    ": Comparing 2 sets of EMEP inputs:"
+    ": Comparing 2 sets of EMEP inputs for ",
+    domain,
+    ":"
   ))
   # If the 2nd part of the folder path DOES NOT have an EMEP version, it is an
   # older file (pre-2025) and each pollutant has its own .nc file.
@@ -137,37 +153,49 @@ output_comparison <- function(
     format(Sys.time(), "%Y-%m-%d %X"),
     ":            collecting data..."
   ))
+
+  time_res <- "annual"
+
   # Get filename for pollutant, for folder name 1
-  l_fname_1 <- construct_filepath(pollutant, fol = folname_1, y = emis_yr_1)
+  l_fname_from <- construct_filepath(
+    domain,
+    pollutant,
+    fol = folname_from,
+    y = emis_yr_from,
+    time_res = time_res
+  )
 
   # Get filename for pollutant, for folder name 2
-  l_fname_2 <- construct_filepath(pollutant, fol = folname_2, y = emis_yr_2)
+  l_fname_to <- construct_filepath(
+    domain,
+    pollutant,
+    fol = folname_to,
+    y = emis_yr_to,
+    time_res = time_res
+  )
 
   # create some folders.
   plot_dir <- create_folders(
-    pollutant,
-    folname_1,
-    emis_yr_1,
-    folname_2,
-    emis_yr_2,
-    l_fname_1,
-    l_fname_2
+    time_res,
+    l_fname_from,
+    l_fname_to
   )
 
-  # Get the requisite data - in monthly format.
-  # If the data are annual, get the EMEP version internal file and split it.
-  l_m_1 <- worked_totals(
+  # Get the requisite annual data.
+  l_data_from <- worked_totals_annual(
     pollutant,
-    folname = folname_1,
-    fname = l_fname_1[["filename"]],
-    dt_metadata = l_fname_1[["metadata"]]
+    y,
+    folname = l_fname_from[["folname"]],
+    nc_fname = l_fname_from[["filename"]],
+    dt_metadata = l_fname_from[["metadata"]]
   )
 
-  l_m_2 <- worked_totals(
+  l_data_to <- worked_totals_annual(
     pollutant,
-    folname = folname_2,
-    fname = l_fname_2[["filename"]],
-    dt_metadata = l_fname_2[["metadata"]]
+    y,
+    folname = l_fname_to[["folname"]],
+    nc_fname = l_fname_to[["filename"]],
+    dt_metadata = l_fname_to[["metadata"]]
   )
 
   print(paste0(
@@ -176,25 +204,39 @@ output_comparison <- function(
   ))
 
   # Plot 1: plot differences in annual total emissions. (UK).
-  gg_p1 <- comp_map_tot_ann(pollutant, l_m_1, l_m_2, plot_dir)
+  gg_p1 <- comp_map_tot_ann(
+    pollutant,
+    l_fname_from,
+    l_fname_to,
+    l_data_from,
+    l_data_to,
+    plot_dir
+  )
 
   # Plot 2: plot differences in annual sector total emissions. (UK).
-  gg_p2 <- comp_map_sec_ann(pollutant, l_m_1, l_m_2, plot_dir)
+  gg_p2 <- comp_map_sec_ann(
+    pollutant,
+    l_fname_from,
+    l_fname_to,
+    l_data_from,
+    l_data_to,
+    plot_dir
+  )
 
   # Plot 3: plot differences in monthly total emissions. (UK).
-  gg_p3 <- comp_map_tot_mon(pollutant, l_m_1, l_m_2, plot_dir)
+  #gg_p3 <- comp_map_tot_mon(pollutant, l_data_from, l_data_to, plot_dir)
 
   # Plot 4: monthly line graph; totals. (UK).
-  gg_p4 <- comp_lin_tot_mon(pollutant, l_m_1, l_m_2, plot_dir)
+  #gg_p4 <- comp_lin_tot_mon(pollutant, l_data_from, l_data_to, plot_dir)
 
   # Plot 5: monthly line graphs; sectors. (UK).
-  gg_p5 <- comp_lin_sec_mon(pollutant, l_m_1, l_m_2, plot_dir)
+  #gg_p5 <- comp_lin_sec_mon(pollutant, l_data_from, l_data_to, plot_dir)
 
   # Plot 6: annual bar charts; sectors. (UK).
-  gg_p6 <- comp_bar_sec_ann(pollutant, l_m_1, l_m_2, plot_dir)
+  #gg_p6 <- comp_bar_sec_ann(pollutant, l_data_from, l_data_to, plot_dir)
 
   # Plot 7: major SNAP contributor to change, both positive and negative. (UK).
-  gg_p7 <- domSNAP_map_tot_ann(pollutant, l_m_1, l_m_2, plot_dir)
+  gg_p7 <- domSNAP_map_tot_ann(pollutant, l_data_from, l_data_to, plot_dir)
 
   # then we need to put together .Rmd parameters and call a 'comparison_pdf.Rmd' file
 
@@ -217,54 +259,106 @@ output_comparison <- function(
 
   l_pdf_params <- list(
     species = pollutant,
+    domain = domain,
     plot_dir = plot_dir,
-    emis_yr_1 = emis_yr_1,
-    emis_yr_2 = emis_yr_2,
-    folname_1 = folname_1,
-    folname_2 = folname_2,
-    l_fname_1 = l_fname_1,
-    l_fname_2 = l_fname_2,
-    l_m_1 = l_m_1,
-    l_m_2 = l_m_2,
+    emis_yr_from = emis_yr_from,
+    emis_yr_to = emis_yr_to,
+    folname_from = folname_from,
+    folname_to = folname_to,
+    l_fname_from = l_fname_from,
+    l_fname_to = l_fname_to,
+    l_data_from = l_data_from,
+    l_data_to = l_data_to,
     uk_plot1 = gg_p1,
     uk_plot2 = gg_p2,
-    uk_plot3 = gg_p3,
-    uk_plot4 = gg_p4,
-    uk_plot5 = gg_p5,
-    uk_plot6 = gg_p6,
+    #uk_plot3 = gg_p3,
+    #uk_plot4 = gg_p4,
+    #uk_plot5 = gg_p5,
+    #uk_plot6 = gg_p6,
     uk_plot7 = gg_p7
   )
 
   # render the source of the document to the default output format:
+
+  render_log_dir <- file.path(
+    plot_dir,
+    "render_logs",
+    paste0("array_", array_id)
+  )
+
+  dir.create(render_log_dir, recursive = TRUE, showWarnings = FALSE)
+
   rmarkdown::render(
     input = "comparisons/compare_markdown.Rmd",
     output_file = paste0("input_comparison_", pollutant, ".pdf"),
     output_dir = paste0(plot_dir, "/.."),
-    params = l_pdf_params
+    intermediates_dir = render_log_dir,
+    params = l_pdf_params,
+    envir = new.env(parent = globalenv())
   )
+
+  #rmarkdown::render(
+  #  input = "comparisons/compare_markdown.Rmd",
+  #  output_file = paste0("input_comparison_", pollutant, ".html"),
+  #  output_format = "html_document",
+  #  output_dir = paste0(plot_dir, "/.."),
+  #  intermediates_dir = render_log_dir,
+  #  params = l_pdf_params,
+  #  envir = new.env(parent = globalenv())
+  #)
 
   print(paste0(format(Sys.time(), "%Y-%m-%d %X"), ": DONE."))
 }
 
 ###############################################################################
-#### function to make the filepath based
-construct_filepath <- function(pollutant, fol, y) {
-  # return a filename based on the folder structure
-  fol_projName <- strsplit(fol, "/")[[1]][2] # project name, e.g. NFC
-  fol_basescen <- strsplit(fol, "/")[[1]][3] # BASE or SCENARIO name
-  fol_EMEPver <- strsplit(fol, "/")[[1]][4] # EMEP4UKvX.XX
-  fol_emisInv <- strsplit(fol, "/")[[1]][5] # invXXXX
-  fol_invYear <- as.numeric(gsub("inv", "", fol_emisInv))
-  fol_area <- strsplit(fol, "/")[[1]][6] # UKEIRE or EU
+#### wrapper function to call other functions for document creation
+#### MONTHLY ####
+output_comparison_monthly <- function(
+  pollutant,
+  domain = c("UKEIRE", "EU", "GLOBAL"),
+  folname_from,
+  emis_yr_from,
+  folname_to,
+  emis_yr_to
+) {
+  stop(paste0(
+    format(Sys.time(), "%Y-%m-%d %X"),
+    ": NO COMPARISONS POSSIBLE FOR MONTHLY DATA AT THIS TIME."
+  ))
+}
 
-  #fol_part2 <- strsplit(fol, "/")[[1]][2]
-  #fol_partInv <- strsplit(fol, "/")[[1]][3]
-  #fol_partInv <- as.numeric(gsub("inv", "", fol_partInv))
+###############################################################################
+#### function to make the filepath based
+construct_filepath <- function(domain, pollutant, fol, y, time_res) {
+  # return a filename based on the folder structure
+
+  # project name - always position 2
+  fol_projName <- strsplit(fol, "/")[[1]][2]
+  # BASE or SCENARIO name - always position 3
+  fol_basescen <- strsplit(fol, "/")[[1]][3]
+  # extract the version, using prefix "EMEP4UKv"
+  fol_EMEPver <- str_extract(fol, "EMEP4UKv[^/]+")
+
+  # extract inventory version - need some if-else
+  fol_emisInv <- str_extract(fol, "inv[^/]+")
+
+  # now do checks - if it isn't previous style, change
+  if (is.na(fol_emisInv)) {
+    # new style - new search
+    fol_emisInv <- str_match(
+      fol,
+      "(EMEP|HTAP|EDGAR|NAEI|CEIP|ECLIPSE)/([^/]+)"
+    )[, 3]
+  } else if (length(fol_emisInv) == 1) {
+    fol_emisInv <- gsub("inv", "", fol_emisInv)
+  } else {
+    stop("Error in extracting inventory version.")
+  }
 
   # set resolution part of filename to be in-line with UK or EU
-  if (fol_area == "UKEIRE") {
+  if (domain == "UKEIRE") {
     file_res <- "0.01"
-  } else if (fol_area == "EU") {
+  } else if (domain %in% c("EU", "GLOBAL")) {
     file_res <- "0.1"
   }
 
@@ -278,18 +372,16 @@ construct_filepath <- function(pollutant, fol, y) {
       fol,
       pattern = paste0("^", pollutant, ".*", file_res, ".nc$")
     )
-  }
+  } else {
+    # fname to the general all pollutant file.
+    # These file types DO require a y object as many exist in one folder.
 
-  # If fol_part2 has a version number, extract some filename info and set
-  # fname to the general all pollutant file.
-  # These file types DO require a y object as many exist in one folder.
-  if (grepl("EMEP4UKv", fol_EMEPver)) {
     version_pre25 = FALSE
     EMEP_v <- gsub("EMEP4UK", "", fol_EMEPver)
     EMEP_v <- gsub("_Jan25", "", EMEP_v)
     fname <- list.files(
       fol,
-      pattern = paste0("^", fol_area, ".*", y, ".*", file_res, ".nc$")
+      pattern = paste0("^", domain, ".*", y, "emis", ".*", file_res, ".nc$")
     )
   }
 
@@ -297,77 +389,116 @@ construct_filepath <- function(pollutant, fol, y) {
   nc_file <- file.path(fol, fname)
   nc <- nc_open(nc_file)
   nc_time_len <- nc$dim$time$len
+  input_source <- ncatt_get(nc, 0, "EMISSIONS_SOURCE")$value
+  # pre-2026 nc files will not have "EMISSIONS_SOURCE"
+  if (input_source == 0) {
+    if (domain == "UKEIRE") {
+      input_source <- "NAEI"
+    } else if (domain == "EU") {
+      input_source <- "EMEP"
+    }
+  }
   nc_close(nc)
+
+  # check whether the pre-written rast files exist
+  rast_writ <- dir.exists(file.path(fol, "rast"))
 
   # metadata
   dt <- data.table(
     projectName = fol_projName,
+    projectScen = fol_basescen,
+    pollutant = pollutant,
     emis_y = paste0("e", y),
-    inv_y = paste0("i", fol_invYear),
-    time = paste0("t", nc_time_len),
-    area = fol_area,
+    inv_y = paste0("i", fol_emisInv),
+    time_nc = paste0("t", nc_time_len),
+    time_comp = time_res,
+    area = domain,
+    data_source = input_source,
     res = file_res,
     EMEP_version = EMEP_v,
-    pre25 = version_pre25
+    pre25 = version_pre25,
+    rast_exists = rast_writ,
+    from_to = names(fol)
   )
 
-  return(list("filename" = fname, "metadata" = dt))
+  # rename to sectors
+  layname <-
+    paste0(
+      toupper(dt$from_to),
+      ": ",
+      dt$emis_y,
+      "_",
+      dt$inv_y,
+      "_",
+      dt$EMEP_version
+    )
+
+  return(list(
+    "filename" = fname,
+    "folname" = fol,
+    "metadata" = dt,
+    "layer_name" = layname
+  ))
 }
 
 ###############################################################################
 #### function to create a folder structure for outputs, plus dir to write to
 create_folders <- function(
-  pollutant,
-  folname_1,
-  emis_yr_1,
-  folname_2,
-  emis_yr_2,
-  l_fname_1,
-  l_fname_2
+  time_res,
+  l_fname_from,
+  l_fname_to
 ) {
-  # top level is UK or EU
+  # top level is the domain
   #  - next is emis yr vs emis yr (e.g. 2021 vs 2022)
-  #    - next is invYears with EMEP version
+  #    - next is source + invYears + EMEP version
   #      - put all pollutant docs in here. Plots/tables folder here.
 
-  if (l_fname_1$metadata$area != l_fname_2$metadata$area) {
+  if (l_fname_from$metadata$area != l_fname_to$metadata$area) {
     stop("not comparing same area!")
-  } # nolint
+  }
 
   # construct folders and create
   plot_dir <- paste0(
     "comparisons/",
-    l_fname_1$metadata$area,
+    l_fname_from$metadata$area,
     "/",
-    l_fname_1$metadata$emis_y,
+    l_fname_from$metadata$emis_y,
     "_vs_",
-    l_fname_2$metadata$emis_y,
+    l_fname_to$metadata$emis_y,
     "/",
-    l_fname_1$metadata$inv_y,
+    l_fname_from$metadata$data_source,
+    l_fname_from$metadata$inv_y,
     "emep",
-    l_fname_1$metadata$EMEP_version,
+    l_fname_from$metadata$EMEP_version,
     "_vs_",
-    l_fname_2$metadata$inv_y,
+    l_fname_to$metadata$data_source,
+    l_fname_to$metadata$inv_y,
     "emep",
-    l_fname_2$metadata$EMEP_version,
+    l_fname_to$metadata$EMEP_version,
+    "/",
+    time_res,
     "/plots"
   )
 
   table_dir <- paste0(
     "comparisons/",
-    l_fname_1$metadata$area,
+    l_fname_from$metadata$area,
     "/",
-    l_fname_1$metadata$emis_y,
+    l_fname_from$metadata$emis_y,
     "_vs_",
-    l_fname_2$metadata$emis_y,
+    l_fname_to$metadata$emis_y,
     "/",
-    l_fname_1$metadata$inv_y,
+    l_fname_from$metadata$data_source,
+    l_fname_from$metadata$inv_y,
     "emep",
-    l_fname_1$metadata$EMEP_version,
+    l_fname_from$metadata$EMEP_version,
     "_vs_",
-    l_fname_2$metadata$inv_y,
+    l_fname_to$metadata$data_source,
+    l_fname_to$metadata$inv_y,
     "emep",
-    l_fname_2$metadata$EMEP_version,
+    l_fname_to$metadata$EMEP_version,
+    "/",
+    time_res,
     "/tables"
   )
 
@@ -378,8 +509,161 @@ create_folders <- function(
 }
 
 ###############################################################################
+#### function to extract data and ensure it is annual.
+worked_totals_annual <- function(pollutant, y, folname, nc_fname, dt_metadata) {
+  # bring in the annual emissions. We can use tabular data and pre-made rasters
+  # where available.
+
+  ## TABULAR DATA ##
+  # tables location and required summary
+  tab_fol <- file.path(folname, "tables", dt_metadata[, emis_y])
+
+  tab_file <- list.files(
+    tab_fol,
+    pattern = paste0("^", pollutant, "_.*NETCDFOUT.csv$"),
+    full.names = TRUE
+  )
+
+  if (length(tab_file) != 1) {
+    stop("Not finding correct summary table. Check.")
+  }
+
+  # table of annual sector totals, by ISO.
+  dt_tots <- fread(tab_file)
+
+  # standardise some names.
+  if (dt_metadata[, area] != "UKEIRE") {
+    dt_tots[,
+      c("Project", "Scenario") := list(
+        dt_metadata[, projectName],
+        dt_metadata[, projectScen]
+      )
+    ]
+  }
+
+  if (dt_metadata[, area] == "UKEIRE") {
+    setnames(dt_tots, c("Area"), c("iso_char"))
+  }
+
+  dt_tots[, from_to := dt_metadata[, from_to]]
+
+  ## ANNUAL RASTER DATA - TOTAL & SECTORS ##
+  # Check for 1. pre2025 and 2. existence of QAQC rasts.
+  # Can be one of 3 things.
+  # cannot be TRUE then FALSE, QAQC rasts never written for pre25.
+  if (dt_metadata[, pre25]) {
+    # if TRUE, need code for archived nc files. Extract grids.
+    stop("This is an archived dataset - add code!!")
+  } else if (dt_metadata[, rast_exists]) {
+    # The pre25 was FALSE, so either 2025 or '26 datasets.
+    # if TRUE, get pre-made data for 2026+ datasets.
+    print(paste0(
+      format(Sys.time(), "%Y-%m-%d %X"),
+      ":                  (Data '",
+      dt_metadata[, from_to],
+      "': This filename has pre-computed QAQC grids)" # nolint
+    ))
+
+    ## SECTORAL
+    v_fname_data <- list.files(
+      file.path(folname, "rast", dt_metadata[, emis_y]),
+      pattern = paste0("^", pollutant, ".*qaqc.tif$"),
+      full.names = TRUE
+    )
+
+    v_fname_sec <- v_fname_data[grep("total_emis", v_fname_data, invert = TRUE)]
+    if (length(v_fname_sec) != 13) {
+      stop("MUST BE 13 sector layers in qaqc.")
+    }
+    s_sec <- rast(v_fname_sec)
+
+    f <- basename(v_fname_sec)
+
+    sec_num <- stringr::str_extract(f, "(?<=sector)\\d+")
+
+    sec_names <- sprintf("sec%02d", as.integer(sec_num))
+
+    names(s_sec) <- dt_sec[
+      match(sec_names, sec),
+      GNFRlong
+    ]
+
+    s_sec <- s_sec[[sort(names(s_sec))]]
+
+    ## ANNUAL
+    fname_all <- v_fname_data[grep("total_emis", v_fname_data)]
+    r_all <- rast(fname_all)
+    names(r_all) <- dt_metadata[, from_to]
+  } else {
+    # if 2nd condition FALSE, extract data from nc for 2025 datasets.
+
+    print(paste0(
+      format(Sys.time(), "%Y-%m-%d %X"),
+      ":                  (Data '",
+      dt_metadata[, from_to],
+      "': This filename has no pre-computed QAQC grids, accessing .nc...)" # nolint
+    ))
+
+    ## SECTORAL
+    nc_file <- file.path(folname, nc_fname)
+    nc <- nc_open(nc_file)
+    v_vars <- names(nc$var)
+    v_vars <- v_vars[grep(paste0("^", pollutant), v_vars)]
+    nc_close(nc)
+
+    l_iso_bysec <- list()
+
+    for (v in v_vars) {
+      # read annual sectors
+      s <- suppressWarnings(rast(nc_file, subds = v))
+
+      l_iso_bysec[[v]] <- s
+    }
+
+    # switch over to sector total maps.
+
+    l_sec_byiso <- lapply(seq_len(nlyr(l_iso_bysec[[1]])), function(i) {
+      s <- rast(
+        lapply(l_iso_bysec, function(x) x[[i]])
+      )
+      r <- suppressWarnings(app(s, sum, na.rm = TRUE))
+
+      names(r) <- paste0("sec", str_pad(i, 2, side = "left", 0))
+
+      r
+    })
+
+    s_sec <- rast(l_sec_byiso)
+    sec_names <- names(s_sec)
+    names(s_sec) <- dt_sec[
+      match(sec_names, sec),
+      GNFRlong
+    ]
+
+    s_sec <- s_sec[[sort(names(s_sec))]]
+
+    ## ANNUAL
+    s_all <- rast(l_iso_bysec)
+    r_all <- suppressWarnings(app(s_all, sum, na.rm = TRUE))
+    names(r_all) <- dt_metadata[, from_to]
+  } # ifelse
+
+  return(list(
+    "annual_sector_emis" = s_sec,
+    "annual_total_emis" = r_all,
+    "sector_table" = dt_tots
+  ))
+}
+
+###############################################################################
 #### function to extract data and ensure it is monthly.
-worked_totals <- function(pollutant, folname, fname, dt_metadata) {
+worked_totals_monthly <- function() {
+  ## !!  ------------------------------------------------------------- !!##
+  ## The following is a direct copy/paste of what used to be in the
+  ## 'worked_totals()' function. It processed too much data but has good
+  ## code re monthly splits etc. 14/05/26: TBC.
+  ## !!  ------------------------------------------------------------- !!##
+
   # set nc file name and get variable names
   nc_file <- file.path(folname, fname)
   nc <- nc_open(nc_file)
@@ -475,7 +759,7 @@ worked_totals <- function(pollutant, folname, fname, dt_metadata) {
   } # ifelse for pre 2025 data
 
   ###################################################
-  # get data if the file/folder is 2025+ processing
+  # get data if the file/folder is 2025/26 processing
   if (!(dt_metadata[, pre25])) {
     l_summary <- list()
     l_a_m <- list() # monthly total list, per ISO
@@ -645,18 +929,23 @@ worked_totals <- function(pollutant, folname, fname, dt_metadata) {
 
 ###############################################################################
 #### function to compare annual totals of pollutants in run files.
-comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
+comp_map_tot_ann <- function(
+  pollutant,
+  l_fname_from,
+  l_fname_to,
+  l_data_from,
+  l_data_to,
+  plot_dir
+) {
   # as this is an annual map, we need to some everything up.
-  s1 <- rast(l_m_1[["total_month"]])
-  r1 <- app(s1, sum, na.rm = T)
+  r_from <- l_data_from[["annual_total_emis"]]
 
-  s2 <- rast(l_m_2[["total_month"]])
-  r2 <- app(s2, sum, na.rm = T)
+  r_to <- l_data_to[["annual_total_emis"]]
 
   ### Plot national totals
 
   # new stack, with the rasters in order of the filenames provided
-  s <- c(r1, r2)
+  s <- c(r_from, r_to)
   s[s == 0] <- NA
 
   ## reclassify and plot ##
@@ -690,7 +979,7 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
   v_labs[length(v_labs)] <- paste0("> ", round(m[nrow(m), 1], 2))
 
   # reclassify the data
-  s_rc <- terra::classify(s, m)
+  s_rc <- terra::classify(s, m, include.lowest = TRUE, right = FALSE)
   s_rc <- as.factor(s_rc)
 
   # names
@@ -698,42 +987,27 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     stop("There should be 2 layers in the comparison")
   }
 
-  # rename to sectors
-  names(s_rc) <- c(
-    paste0(
-      unique(l_m_1$summary$emis_y),
-      "_",
-      unique(l_m_1$summary$inv_y),
-      "_",
-      unique(l_m_1$summary$emep_v)
-    ),
-    paste0(
-      unique(l_m_2$summary$emis_y),
-      "_",
-      unique(l_m_2$summary$inv_y),
-      "_",
-      unique(l_m_2$summary$emep_v)
-    )
-  )
+  names(s_rc)[1] <- l_fname_from$layer_name
+  names(s_rc)[2] <- l_fname_to$layer_name
 
   p_tots <- ggplot() +
     geom_spatraster(data = s_rc, na.rm = T, maxcell = 1e+06) +
     scale_fill_brewer(
       labels = v_labs,
       palette = "Spectral",
-      breaks = 1:length(v_q),
+      breaks = seq_len(nrow(m)),
       direction = brew_d
     ) +
     scale_y_continuous(expand = c(0, 0)) +
     scale_x_continuous(expand = c(0, 0)) +
     ggtitle(paste0(
-      unique(l_m_1$summary$fname),
+      l_fname_from$filename,
       " vs ",
-      unique(l_m_2$summary$fname)
+      l_fname_to$filename
     )) +
     labs(fill = bquote(tonnes ~ a^-1), y = "", x = "") +
     # ggtitle(bquote("Emissions of"~.(p)~a^-1))+
-    geom_sf(data = sf_uk, fill = NA, colour = "black") +
+    geom_sf(data = sf_plot_poly, fill = NA, colour = "black") +
     facet_wrap(~lyr, nrow = 1) +
     theme_bw() +
     {
@@ -753,9 +1027,9 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
   #fname <- paste0(plot_dir,"/test1.png")
   #ggsave(fname, p_tots, width = 14, height = 11)
 
-  ### Plot a relative change map - file 2 divided by file 1.
-  r_a <- r2 / r1
-  r_a[r_a == 0] <- NA
+  ### Plot a relative change map - file 'to' divided by file 'from'.
+  r_a <- r_to / r_from
+  r_a[r_a <= 0] <- NA
   r_a[is.infinite(r_a)] <- NA
 
   ## reclassify and plot ##
@@ -792,7 +1066,7 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
   r_a_rc <- terra::classify(r_a, m)
   r_a_rc <- as.factor(r_a_rc)
 
-  names(r_a_rc) <- paste0("file_2 / file_1")
+  names(r_a_rc) <- paste0("'to' / 'from'")
 
   dt_levs <- levels(r_a_rc)[[1]]
 
@@ -815,7 +1089,7 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     #scale_y_continuous(expand = c(0, 0)) +
     labs(fill = "rel") +
     ggtitle(names(r_a_rc)) +
-    geom_sf(data = sf_uk, fill = NA, colour = "black") +
+    geom_sf(data = sf_plot_poly, fill = NA, colour = "black") +
     facet_wrap(~lyr) +
     #scale_fill_hypso_d(labels = v_labs, na.value = "transparent", palette = "etopo1")+
     theme_bw() +
@@ -835,7 +1109,7 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
   #ggsave(fname, g_diff, width = 7, height = 5)
 
   ### Plot an absolute change map - file 2 minus file 1.
-  r_a <- r2 - r1
+  r_a <- r_to - r_from
   # r_a[r_a == 0] <- NA
   r_a[is.infinite(r_a)] <- NA
 
@@ -883,7 +1157,7 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
   r_a_rc <- terra::classify(r_a, m)
   r_a_rc <- as.factor(r_a_rc)
 
-  names(r_a_rc) <- paste0("file_2 - file_1")
+  names(r_a_rc) <- paste0("'to' - 'from'")
 
   dt_levs <- levels(r_a_rc)[[1]]
 
@@ -903,7 +1177,7 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     #scale_y_continuous(expand = c(0, 0)) +
     labs(fill = "tonnes") +
     ggtitle(names(r_a_rc)) +
-    geom_sf(data = sf_uk, fill = NA, colour = "black") +
+    geom_sf(data = sf_plot_poly, fill = NA, colour = "black") +
     facet_wrap(~lyr) +
     #scale_fill_hypso_d(labels = v_labs, na.value = "transparent", palette = "etopo1")+
     theme_bw() +
@@ -935,13 +1209,20 @@ comp_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
 
 ###############################################################################
 #### function to compare annual totals of pollutant, per sector
-comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
+comp_map_sec_ann <- function(
+  pollutant,
+  l_fname_from,
+  l_fname_to,
+  l_data_from,
+  l_data_to,
+  plot_dir
+) {
   # premise is to plot as per total emissions, then patchwork together all.
   # only do for the first 12 sectors. IGNORE M_Other.
 
   l <- list()
 
-  # ignore 13, M_Other
+  # sec loop
   for (i in 1:13) {
     print(i)
     sec_GNFR <- dt_sec[
@@ -950,25 +1231,26 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     ]
 
     # as this is an annual map, we need to some everything up.
-    s1 <- rast(l_m_1[["annual_sector"]][[sec_GNFR]])
-    r1 <- app(s1, sum, na.rm = T)
+    s_from <- l_data_from[["annual_sector_emis"]]
+    r_from <- s_from[[match(sec_GNFR, names(s_from))]]
 
-    s2 <- rast(l_m_2[["annual_sector"]][[sec_GNFR]])
-    r2 <- app(s2, sum, na.rm = T)
+    s_to <- l_data_to[["annual_sector_emis"]]
+    r_to <- s_to[[match(sec_GNFR, names(s_to))]]
 
     ### Plot national totals
 
     # new stack, with the rasters in order of the filenames provided
-    s <- c(r1, r2)
+    s <- c(r_from, r_to)
 
     if (sum(global(s, sum, na.rm = T)[, 1]) > 0) {
       s[s == 0] <- NA
-      # s[is.na(s)] <- 0
 
       ## reclassify and plot ##
       # exract all the values present, into a vector.
       v_v <- values(s)
       v_v <- as.vector(v_v)
+
+      s[is.na(s)] <- 0
 
       # create break points based on quantiles
       v_q <- as.vector(quantile(
@@ -1009,20 +1291,8 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
 
     # rename to sectors
     names(s_rc) <- c(
-      paste0(
-        unique(l_m_1$summary$emis_y),
-        "_",
-        unique(l_m_1$summary$inv_y),
-        "_",
-        unique(l_m_1$summary$emep_v)
-      ),
-      paste0(
-        unique(l_m_2$summary$emis_y),
-        "_",
-        unique(l_m_2$summary$inv_y),
-        "_",
-        unique(l_m_2$summary$emep_v)
-      )
+      l_fname_from$layer_name,
+      l_fname_to$layer_name
     )
 
     p_tots <- ggplot() +
@@ -1032,18 +1302,18 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
           scale_fill_brewer(
             labels = v_labs,
             palette = "Spectral",
-            breaks = 1:length(v_q),
+            breaks = seq_len(nrow(m)),
             direction = brew_d
           )
         }
       } +
       scale_y_continuous(expand = c(0, 0)) +
       scale_x_continuous(expand = c(0, 0)) +
-      # ggtitle(paste0(unique(l_m_1$summary$fname)," vs ",unique(l_m_2$summary$fname)))+
+      # ggtitle(paste0(unique(l_data_from$summary$fname)," vs ",unique(l_data_to$summary$fname)))+
       ggtitle(sec_GNFR) +
       labs(fill = bquote(tonnes ~ a^-1), y = "", x = "") +
       # ggtitle(bquote("Emissions of"~.(p)~a^-1))+
-      geom_sf(data = sf_uk, fill = NA, colour = "black") +
+      geom_sf(data = sf_plot_poly, fill = NA, colour = "black") +
       facet_wrap(~lyr, nrow = 1) +
       theme_bw() +
       {
@@ -1066,7 +1336,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
 
     ### Plot a relative change map - file 2 divided by file 1.
 
-    r_a <- r2 / r1
+    r_a <- r_to / r_from
     r_a[is.na(r_a)] <- 0
 
     if (global(r_a, sum, na.rm = T)[, 1] > 0) {
@@ -1127,7 +1397,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
       r_a_rc <- terra::classify(r_a, m)
       r_a_rc <- as.factor(r_a_rc)
 
-      names(r_a_rc) <- paste0("file_2 / file_1")
+      names(r_a_rc) <- paste0("to / from")
 
       dt_levs <- levels(r_a_rc)[[1]]
       #levels(r_a_rc)[[1]] <- data.table(ID = 1:11, sum = 1:11)
@@ -1158,7 +1428,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
       #scale_y_continuous(expand = c(0, 0)) +
       labs(fill = "rel") +
       ggtitle(names(r_a_rc)) +
-      geom_sf(data = sf_uk, fill = NA, colour = "black") +
+      geom_sf(data = sf_plot_poly, fill = NA, colour = "black") +
       facet_wrap(~lyr) +
       #scale_fill_hypso_d(labels = v_labs, na.value = "transparent", palette = "etopo1")+
       theme_bw() +
@@ -1178,7 +1448,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     #ggsave(fname, g_diff, width = 7, height = 5)
 
     ### Plot an absolute change map - file 2 divided by file 1.
-    r_a <- r2 - r1
+    r_a <- r_to - r_from
 
     if (global(r_a, sum, na.rm = T)[, 1] != 0) {
       #r_a[is.na(r_a)] <- 0
@@ -1230,7 +1500,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
       r_a_rc <- terra::classify(r_a, m)
       r_a_rc <- as.factor(r_a_rc)
 
-      names(r_a_rc) <- paste0("file_2 - file_1")
+      names(r_a_rc) <- paste0("to - from")
 
       dt_levs <- levels(r_a_rc)[[1]]
 
@@ -1262,7 +1532,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
       #scale_y_continuous(expand = c(0, 0)) +
       labs(fill = "tonnes") +
       ggtitle(names(r_a_rc)) +
-      geom_sf(data = sf_uk, fill = NA, colour = "black") +
+      geom_sf(data = sf_plot_poly, fill = NA, colour = "black") +
       facet_wrap(~lyr) +
       #scale_fill_hypso_d(labels = v_labs, na.value = "transparent", palette = "etopo1")+
       theme_bw() +
@@ -1297,7 +1567,7 @@ comp_map_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
 
 ###############################################################################
 #### function to
-comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
+comp_map_tot_mon <- function(pollutant, l_data_from, l_data_to, plot_dir) {
   # plot out each monthly total
 
   l <- list()
@@ -1306,16 +1576,16 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     print(i)
 
     # retrieve data
-    s1 <- rast(lapply(l_m_1[["total_month"]], function(x) x[[i]]))
-    r1 <- app(s1, sum, na.rm = T)
+    s_from <- rast(lapply(l_data_from[["total_month"]], function(x) x[[i]]))
+    r_from <- app(s_from, sum, na.rm = T)
 
-    s2 <- rast(lapply(l_m_2[["total_month"]], function(x) x[[i]]))
-    r2 <- app(s2, sum, na.rm = T)
+    s_to <- rast(lapply(l_data_to[["total_month"]], function(x) x[[i]]))
+    r_to <- app(s_to, sum, na.rm = T)
 
     ### Plot national totals
 
     # new stack, with the rasters in order of the filenames provided
-    s <- c(r1, r2)
+    s <- c(r_from, r_to)
 
     if (sum(global(s, sum, na.rm = T)[, 1]) > 0) {
       s[s == 0] <- NA
@@ -1366,18 +1636,18 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     # rename to sectors
     names(s_rc) <- c(
       paste0(
-        unique(l_m_1$summary$emis_y),
+        unique(l_data_from$summary$emis_y),
         "_",
-        unique(l_m_1$summary$inv_y),
+        unique(l_data_from$summary$inv_y),
         "_",
-        unique(l_m_1$summary$emep_v)
+        unique(l_data_from$summary$emep_v)
       ),
       paste0(
-        unique(l_m_2$summary$emis_y),
+        unique(l_data_to$summary$emis_y),
         "_",
-        unique(l_m_2$summary$inv_y),
+        unique(l_data_to$summary$inv_y),
         "_",
-        unique(l_m_2$summary$emep_v)
+        unique(l_data_to$summary$emep_v)
       )
     )
 
@@ -1395,11 +1665,11 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
       } +
       scale_y_continuous(expand = c(0, 0)) +
       scale_x_continuous(expand = c(0, 0)) +
-      # ggtitle(paste0(unique(l_m_1$summary$fname)," vs ",unique(l_m_2$summary$fname)))+
+      # ggtitle(paste0(unique(l_data_from$summary$fname)," vs ",unique(l_data_to$summary$fname)))+
       ggtitle(month.name[i]) +
       labs(fill = bquote(tonnes ~ a^-1), y = "", x = "") +
       # ggtitle(bquote("Emissions of"~.(p)~a^-1))+
-      geom_sf(data = sf_uk, fill = NA, colour = "black") +
+      geom_sf(data = sf_plot_poly, fill = NA, colour = "black") +
       facet_wrap(~lyr, nrow = 1) +
       theme_bw() +
       {
@@ -1422,7 +1692,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
 
     ### Plot a relative change map - file 2 divided by file 1.
 
-    r_a <- r2 / r1
+    r_a <- r_to / r_from
     r_a[is.na(r_a)] <- 0
 
     if (global(r_a, sum, na.rm = T)[, 1] > 0) {
@@ -1483,7 +1753,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
       r_a_rc <- terra::classify(r_a, m)
       r_a_rc <- as.factor(r_a_rc)
 
-      names(r_a_rc) <- paste0("file_2 / file_1")
+      names(r_a_rc) <- paste0("to / from")
 
       dt_levs <- levels(r_a_rc)[[1]]
 
@@ -1493,7 +1763,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     } else {
       r_a_rc <- copy(r_a)
       r_a_rc[r_a_rc == 0] <- NA
-      names(r_a_rc) <- paste0("file_2 / file_1")
+      names(r_a_rc) <- paste0("to / from")
       v_cols <- "#ececec"
       v_labs <- "1"
     }
@@ -1514,7 +1784,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
       #scale_y_continuous(expand = c(0, 0)) +
       labs(fill = "rel") +
       ggtitle(names(r_a_rc)) +
-      geom_sf(data = sf_uk, fill = NA, colour = "black") +
+      geom_sf(data = sf_plot_poly, fill = NA, colour = "black") +
       facet_wrap(~lyr) +
       #scale_fill_hypso_d(labels = v_labs, na.value = "transparent", palette = "etopo1")+
       theme_bw() +
@@ -1534,7 +1804,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     #ggsave(fname, g_diff, width = 7, height = 5)
 
     ### Plot an absolute change map - file 2 divided by file 1.
-    r_a <- r2 - r1
+    r_a <- r_to - r_from
 
     if (global(r_a, sum, na.rm = T)[, 1] != 0) {
       r_a[is.na(r_a)] <- 0
@@ -1586,7 +1856,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
       r_a_rc <- terra::classify(r_a, m)
       r_a_rc <- as.factor(r_a_rc)
 
-      names(r_a_rc) <- paste0("file_2 - file_1")
+      names(r_a_rc) <- paste0("to - from")
 
       dt_levs <- levels(r_a_rc)[[1]]
 
@@ -1596,7 +1866,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
     } else {
       r_a_rc <- copy(r_a)
       r_a_rc[r_a_rc == 0] <- NA
-      names(r_a_rc) <- paste0("file_2 - file_1")
+      names(r_a_rc) <- paste0("to - from")
       if (length(v_cols) == 0) {
         v_cols <- "#ececec"
       }
@@ -1619,7 +1889,7 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
       #scale_y_continuous(expand = c(0, 0)) +
       labs(fill = "tonnes") +
       ggtitle(names(r_a_rc)) +
-      geom_sf(data = sf_uk, fill = NA, colour = "black") +
+      geom_sf(data = sf_plot_poly, fill = NA, colour = "black") +
       facet_wrap(~lyr) +
       #scale_fill_hypso_d(labels = v_labs, na.value = "transparent", palette = "etopo1")+
       theme_bw() +
@@ -1654,31 +1924,31 @@ comp_map_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
 
 ###############################################################################
 #### function to plot monthly totals per ISO on a line graph
-comp_lin_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
+comp_lin_tot_mon <- function(pollutant, l_data_from, l_data_to, plot_dir) {
   # comparing monthly totals in one plot
 
   i_time <- 1:12
 
-  dt1 <- l_m_1[["summary"]] %>%
+  dt1 <- l_data_from[["summary"]] %>%
     .[, .(emis_kt = sum(emis_t, na.rm = T) / 1000), by = .(Area, t)]
   dt1[,
     file := paste0(
-      unique(l_m_1$summary$emis_y),
+      unique(l_data_from$summary$emis_y),
       "_",
-      unique(l_m_1$summary$inv_y),
+      unique(l_data_from$summary$inv_y),
       "_",
-      unique(l_m_1$summary$emep_v)
+      unique(l_data_from$summary$emep_v)
     )
   ]
-  dt2 <- l_m_2[["summary"]] %>%
+  dt2 <- l_data_to[["summary"]] %>%
     .[, .(emis_kt = sum(emis_t, na.rm = T) / 1000), by = .(Area, t)]
   dt2[,
     file := paste0(
-      unique(l_m_2$summary$emis_y),
+      unique(l_data_to$summary$emis_y),
       "_",
-      unique(l_m_2$summary$inv_y),
+      unique(l_data_to$summary$inv_y),
       "_",
-      unique(l_m_2$summary$emep_v)
+      unique(l_data_to$summary$emep_v)
     )
   ]
   dt <- rbindlist(list(dt1, dt2), use.names = T)
@@ -1712,29 +1982,29 @@ comp_lin_tot_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
 
 ###############################################################################
 #### function to plot monthly totals per ISO on line graph composite
-comp_lin_sec_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
+comp_lin_sec_mon <- function(pollutant, l_data_from, l_data_to, plot_dir) {
   i_time <- 1:12
 
-  dt1 <- l_m_1[["summary"]] %>%
+  dt1 <- l_data_from[["summary"]] %>%
     .[, .(emis_kt = sum(emis_t, na.rm = T) / 1000), by = .(Area, GNFR, t)]
   dt1[,
     file := paste0(
-      unique(l_m_1$summary$emis_y),
+      unique(l_data_from$summary$emis_y),
       "_",
-      unique(l_m_1$summary$inv_y),
+      unique(l_data_from$summary$inv_y),
       "_",
-      unique(l_m_1$summary$emep_v)
+      unique(l_data_from$summary$emep_v)
     )
   ]
-  dt2 <- l_m_2[["summary"]] %>%
+  dt2 <- l_data_to[["summary"]] %>%
     .[, .(emis_kt = sum(emis_t, na.rm = T) / 1000), by = .(Area, GNFR, t)]
   dt2[,
     file := paste0(
-      unique(l_m_2$summary$emis_y),
+      unique(l_data_to$summary$emis_y),
       "_",
-      unique(l_m_2$summary$inv_y),
+      unique(l_data_to$summary$inv_y),
       "_",
-      unique(l_m_2$summary$emep_v)
+      unique(l_data_to$summary$emep_v)
     )
   ]
 
@@ -1788,79 +2058,114 @@ comp_lin_sec_mon <- function(pollutant, l_m_1, l_m_2, plot_dir) {
 
 ################################################################################
 #### function to plot dominant sector in change
-domSNAP_map_tot_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
+domSNAP_map_tot_ann <- function(pollutant, l_data_from, l_data_to, plot_dir) {
   # retrieve data
-  l1 <- l_m_1[["annual_sector"]]
-  l2 <- l_m_2[["annual_sector"]]
+  s_from <- l_data_from[["annual_sector_emis"]]
+  #s_from[s_from == 0] <- NA
 
-  # make sectoral stack
-  l1 <- lapply(l1, function(x) {
-    app(rast(x), sum, na.rm = T)
-  })
-
-  l2 <- lapply(l2, function(x) {
-    app(rast(x), sum, na.rm = T)
-  })
-
-  s1 <- rast(l1)
-  s1[s1 == 0] <- NA
-  s2 <- rast(l2)
-  s2[s2 == 0] <- NA
+  s_to <- l_data_to[["annual_sector_emis"]]
+  #s_to[s_to == 0] <- NA
 
   # calculate difference
-  s_diff <- s2 - s1
+  s_diff <- s_to - s_from
 
   # set any infinite values to NA
   s_diff[is.infinite(s_diff)] <- NA
+  s_diff[s_diff == 0] <- NA
 
   # create positive and negative change stacks
   # we need this as which.min might still be a positive value
   s_diff_pos <- s_diff
   s_diff_pos[s_diff_pos < 0] <- NA
+  #s_diff_pos[is.na(s_diff_pos)] <- 0
+
   s_diff_neg <- s_diff
   s_diff_neg[s_diff_neg > 0] <- NA
+  #s_diff_neg[is.na(s_diff_neg)] <- 0
+
+  which_max_safe <- function(x) {
+    if (all(is.na(x))) {
+      return(NA_integer_)
+    }
+    which.max(x)
+  }
+
+  which_min_safe <- function(x) {
+    if (all(is.na(x))) {
+      return(NA_integer_)
+    }
+    which.min(x)
+  }
 
   # make a raster of the max change per cell - positive and negative
-  r_diff_posmax <- app(s_diff_pos, which.max, na.rm = T)
-  r_diff_posmax <- as.factor(r_diff_posmax)
+  r_diff_posmax <- app(s_diff_pos, which_max_safe)
+  r_diff_negmax <- app(s_diff_neg, which_min_safe)
 
-  r_diff_negmax <- app(s_diff_neg, which.min, na.rm = T)
+  r_diff_posmax[is.na(r_diff_posmax)] <- 0
+  r_diff_negmax[is.na(r_diff_negmax)] <- 0
+
+  sector_levels <- data.frame(
+    ID = 0:13,
+    sector = c("No Sector", names(s_diff))
+  )
+
+  levels(r_diff_posmax) <- sector_levels
+  levels(r_diff_negmax) <- sector_levels
+
+  r_diff_posmax <- as.factor(r_diff_posmax)
   r_diff_negmax <- as.factor(r_diff_negmax)
 
+  #r_diff_posmax <- app(s_diff_pos, which.max, na.rm = T)
+  #r_diff_posmax <- as.factor(r_diff_posmax)
+
+  #r_diff_negmax <- app(s_diff_neg, which.min, na.rm = T)
+  #r_diff_negmax <- as.factor(r_diff_negmax)
+
   # extract the levels in both rasters, for the plotting
-  v_secID <- c(levels(r_diff_posmax)[[1]]$ID, levels(r_diff_negmax)[[1]]$ID)
-  v_secID <- sort(unique(v_secID[!is.na(v_secID)]))
+  #v_secID <- c(levels(r_diff_posmax)[[1]]$ID, levels(r_diff_negmax)[[1]]$ID)
+  #v_secID <- sort(unique(v_secID[!is.na(v_secID)]))
 
   v_secCols <- c(
-    "#46f149",
-    "#5950bf",
-    "#85c9a7",
-    "#4f587c",
-    "#a31890",
-    "#e79120",
-    "#213f13",
-    "#9c701e",
-    "#f157ff",
-    "#2023d8",
-    "#bed7f8",
-    "#ffee54",
-    "#fc4d2a"
+    "0" = "grey90",
+    "1" = "#46f149",
+    "2" = "#5950bf",
+    "3" = "#85c9a7",
+    "4" = "#4f587c",
+    "5" = "#a31890",
+    "6" = "#e79120",
+    "7" = "#213f13",
+    "8" = "#9c701e",
+    "9" = "#f157ff",
+    "10" = "#2023d8",
+    "11" = "#bed7f8",
+    "12" = "#ffee54",
+    "13" = "#fc4d2a"
   )
 
   # plot
   s_plot <- c(r_diff_posmax, r_diff_negmax)
-  names(s_plot) <- c("Max Abs Positive Change", "Max Abs Negative Change")
+  names(s_plot) <- c("Largest Positive Change", "Largest Negative Change")
+
+  #v_secID <- sort(unique(stats::na.omit(as.vector(values(s_plot)))))
+
+  #v_secCols_use <- v_secCols[v_secID]
+  #names(v_secCols_use) <- v_secID
+
+  #v_secLabs_use <- names(s_diff)[v_secID]
+  #names(v_secLabs_use) <- v_secID
 
   g_change <- ggplot() +
     geom_spatraster(data = s_plot, na.rm = T, maxcell = 1e+06) +
     scale_fill_manual(
-      labels = names(s_diff_pos)[v_secID],
-      values = v_secCols[v_secID],
+      values = v_secCols,
+      breaks = as.character(0:13),
+      labels = sector_levels$sector,
+      drop = FALSE,
       na.value = "transparent"
     ) +
     labs(fill = "Sector") +
     # ggtitle(names(r_a_rc)) +
-    # geom_sf(data = sf_uk, fill = NA, colour = "black") +
+    # geom_sf(data = sf_plot_poly, fill = NA, colour = "black") +
     facet_wrap(~lyr) +
     #scale_fill_hypso_d(labels = v_labs, na.value = "transparent", palette = "etopo1")+
     theme_bw() +
@@ -1948,15 +2253,15 @@ month_sector_theme <- function(sector) {
 ################################################################################
 #### function to plot up the sectoral totals in bars
 
-comp_bar_sec_ann <- function(pollutant, l_m_1, l_m_2, plot_dir) {
-  dt_tots_1 <- l_m_1[["summary"]]
+comp_bar_sec_ann <- function(pollutant, l_data_from, l_data_to, plot_dir) {
+  dt_tots_1 <- l_data_from[["summary"]]
   dt_tots_1[, plot_group := paste0(emis_y, "_", inv_y, "_", emep_v)]
   dt_tots_1 <- dt_tots_1[,
     .(emis_kt = sum(emis_t, na.rm = T) / 1000),
     by = .(Area, GNFR, emis_y, inv_y, emep_v, plot_group)
   ]
 
-  dt_tots_2 <- l_m_2[["summary"]]
+  dt_tots_2 <- l_data_to[["summary"]]
   dt_tots_2[, plot_group := paste0(emis_y, "_", inv_y, "_", emep_v)]
   dt_tots_2 <- dt_tots_2[,
     .(emis_kt = sum(emis_t, na.rm = T) / 1000),

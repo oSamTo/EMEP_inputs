@@ -18,7 +18,7 @@ EMEP_EU_v5.0 <- function(
   eu_agg_schema
 ) {
   # v_years  = vector, *numeric*, year to process.
-  if (!is.numeric(v_years)) {
+  if (!is.numeric(y)) {
     stop("Year vector is not numeric")
   }
 
@@ -67,7 +67,8 @@ EMEP_EU_v5.0 <- function(
     emep_inv,
     v_EMEP_sec,
     time_dim,
-    eu_agg_schema
+    eu_agg_schema,
+    dt_iso
   )
 
   for (species in v_pollutants) {
@@ -151,7 +152,8 @@ EMEP_EU_v5.0 <- function(
         y,
         i,
         emep_inv,
-        r_uk_EU_ext
+        r_uk_EU_ext,
+        dt_iso
       )
 
       l_EMEP_tots[[i]] <- l_EMEP_file[[2]]
@@ -162,7 +164,8 @@ EMEP_EU_v5.0 <- function(
         i,
         y,
         species,
-        r_uk_EU_ext
+        r_uk_EU_ext,
+        dt_iso
       )
 
       ########################
@@ -244,7 +247,8 @@ EMEP_EU_v5.0 <- function(
       v_EMEP_sec,
       eu_agg_schema,
       l_eu = l_eu_toInp,
-      fname_ncdf
+      fname_ncdf,
+      dt_iso
     )
 
     ##############################
@@ -258,7 +262,9 @@ EMEP_EU_v5.0 <- function(
       species,
       emep_inv,
       time_dim,
-      v_EMEP_sec
+      v_EMEP_sec,
+      dt_iso,
+      eu_agg_schema
     )
 
     # write out polluatnt level tables. These can be used for plots etc.
@@ -301,7 +307,8 @@ summarise_EMEP_file <- function(
   y,
   i,
   emep_inv,
-  r_uk_EU_ext
+  r_uk_EU_ext,
+  dt_iso
 ) {
   # v_years  = vector, *numeric*, year to process.
   if (!is.numeric(y)) {
@@ -474,7 +481,14 @@ summarise_EMEP_file <- function(
 
 ######################################################################################################
 #### function to collect EMEP sector data, per country, for diffuse emissions
-EMEP_sector_Emissions <- function(fname_data, i, y, species, r_uk_EU_ext) {
+EMEP_sector_Emissions <- function(
+  fname_data,
+  i,
+  y,
+  species,
+  r_uk_EU_ext,
+  dt_iso
+) {
   # swapped to using actual data, not the filename
   dt_emis <- copy(fname_data)
   dt_emis[ISO2 == "KZT", ISO2 := "KZ"] # reset KZT iso to KZ, (pre-2024 inventory)
@@ -706,7 +720,7 @@ split_EU_annual <- function(
 
       # as there are up to 60 ISO codes in the list/stack, best to use lapply
       l_s <- lapply(names(l_annual), function(x) {
-        emep_ISO_profile(x, species, dt_profs, i_time, l_annual, i)
+        emep_ISO_profile(x, species, dt_profs, i_time, l_annual, i, dt_iso)
       })
 
       names(l_s) <- names(l_annual)
@@ -720,7 +734,15 @@ split_EU_annual <- function(
 
 ######################################################################################################
 #### function to apply temporal profile splits by ISO ID
-emep_ISO_profile <- function(iso, species, dt_profs, i_time, l_annual, i) {
+emep_ISO_profile <- function(
+  iso,
+  species,
+  dt_profs,
+  i_time,
+  l_annual,
+  i,
+  dt_iso
+) {
   # subset list
   r <- l_annual[[iso]]
 
@@ -894,7 +916,8 @@ create_NETCDF_eu <- function(
   emep_inv,
   v_EMEP_sec,
   time_dim,
-  eu_agg_schema
+  eu_agg_schema,
+  dt_iso
 ) {
   if (time_dim == "annual") {
     fname <- create_NETCDF_eu_annual(
@@ -905,7 +928,8 @@ create_NETCDF_eu <- function(
       emep_inv,
       v_EMEP_sec,
       time_dim,
-      eu_agg_schema
+      eu_agg_schema,
+      dt_iso
     )
   } else if (time_dim == "month") {
     fname <- create_NETCDF_eu_month()
@@ -924,7 +948,8 @@ create_NETCDF_eu_annual <- function(
   emep_inv,
   v_EMEP_sec,
   time_dim,
-  eu_agg_schema
+  eu_agg_schema,
+  dt_iso
 ) {
   if (time_dim != "annual") {
     stop("time choice has to be annual to make an annual netcdf.")
@@ -1098,7 +1123,13 @@ create_NETCDF_eu_annual <- function(
 
   # emissions data source
   ncatt_put(nc_new, 0, "EMISSIONS_SOURCE", data_source, prec = "char")
-  ncatt_put(nc_new, 0, "EMISSIONS_VERSION", emep_inv, prec = "char")
+  ncatt_put(
+    nc_new,
+    0,
+    "EMISSIONS_VERSION",
+    as.character(emep_inv),
+    prec = "char"
+  )
 
   # sectors - this might have to change if the amount of sectors input changes
   ncatt_put(nc_new, 0, "SECTORS_NAME", "GNFR", prec = "char")
@@ -1143,7 +1174,8 @@ input_data_NETCDF_eu <- function(
   v_EMEP_sec,
   eu_agg_schema,
   l_eu,
-  fname_ncdf
+  fname_ncdf,
+  dt_iso
 ) {
   if (length(l_eu) != 60) {
     stop("There is not 60 ISO sector lists.")
@@ -1394,7 +1426,9 @@ summarise_nc_file_eu <- function(
   species,
   emep_inv,
   time_dim,
-  v_EMEP_sec
+  v_EMEP_sec,
+  dt_iso,
+  eu_agg_schema
 ) {
   # time dims
   if (time_dim == "annual") {
@@ -1413,6 +1447,8 @@ summarise_nc_file_eu <- function(
 
   # list for summary data
   l <- list()
+  l_r <- list()
+  l_s <- list()
 
   for (v in v_var) {
     ## if it's the full sum layer, change the v_EMEP_sec to 1.
@@ -1510,8 +1546,59 @@ summarise_nc_file_eu <- function(
     # dt <- rbindlist(list(dt_time, dt_tot), use.names = T)
 
     l[[v]] <- dt
+
+    l_r[[v]] <- app(rast(l_out), sum, na.rm = TRUE)
+    l_s[[v]] <- l_out
   } # var name
 
+  # do some raster calcs and writing, v useful for QACQ - it's essentially the
+  # same operation as QAQC, reading in from the written ncdf.
+
+  # create a holding folder
+  dir.create(
+    file.path(folname, "rast", paste0("e", y)),
+    showWarnings = FALSE,
+    recursive = T
+  )
+
+  # total domain surface
+  s <- rast(l_r)
+
+  fname <- paste0(species, "_total_emis_qaqc.tif")
+
+  r <- suppressWarnings(app(
+    s,
+    sum,
+    na.rm = TRUE,
+    filename = file.path(folname, "rast", paste0("e", y), fname),
+    overwrite = TRUE
+  ))
+
+  # sectoral totals for domain surface
+  l_t <- purrr::list_transpose(l_s)
+  l_s_sec <- lapply(l_t, function(x) rast(x))
+
+  l_r_sec <- lapply(seq_along(l_s_sec), function(x) {
+    suppressWarnings(app(
+      l_s_sec[[x]],
+      sum,
+      na.rm = TRUE,
+      filename = paste0(
+        folname,
+        "/rast/",
+        "e",
+        y,
+        "/",
+        species,
+        "_sector",
+        x,
+        "_emis_qaqc.tif"
+      ),
+      overwrite = T
+    ))
+  })
+
+  # bind summary tables and return
   dt_ncfile_summary <- rbindlist(l, use.names = T)
 
   return(dt_ncfile_summary)
@@ -1540,7 +1627,7 @@ write_summaries_eu <- function(
     "_EU_",
     y,
     "emis_",
-    naei_inv,
+    emep_inv,
     "inv"
   )
 
