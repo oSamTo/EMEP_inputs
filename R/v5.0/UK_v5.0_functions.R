@@ -78,6 +78,7 @@ EMEP_UKEIRE_v5.0 <- function(
   v_EMEP_sec,
   naei_inv,
   map_yr_uk,
+  dynamic_map,
   map_yr_ie,
   folname,
   project,
@@ -105,6 +106,12 @@ EMEP_UKEIRE_v5.0 <- function(
   if (!(map_yr_ie %in% c(2016, 2019))) {
     stop("Eire spatial distribution must be 2016 or 2019")
   }
+
+  # RESET map_yr_uk if dynamic_map is TRUE
+  if (dynamic_map) {
+    map_yr_uk <- y
+  }
+  # now the map_yr_uk is the same as the year of emissions.
 
   print(paste0(
     format(Sys.time(), "%F %T"),
@@ -202,8 +209,8 @@ EMEP_UKEIRE_v5.0 <- function(
       ####################################
       #### LISTS OF EMISSION SURFACES ####
 
-      # we do not make a new sea list here, because the temporal data doesn't exist.
-      # i.e. we need to keep the sea buffer emissions associated with country of origin.
+      # Do not make a new sea list here, because the temporal data doesn't exist
+      # We need to keep the sea buffer emissions associated with origin country
       l_uk <- UKIE_sector_Emissions(
         dt_alt_emis,
         species,
@@ -238,7 +245,8 @@ EMEP_UKEIRE_v5.0 <- function(
       # if the time_dim is 'yday',   the data needs to be split into 365 layers.
       # this is either the temporal profiles from inside EMEP4UKv4.45 / v5.0
       # or newly generated data (e.g. ukem_pro)
-      # the sea & outwith layers need to be split based on the country it came from (i.e. UK or Eire)
+      # the sea & outwith layers need to be split based on the country
+      # it came from (i.e. UK or Eire)
       l_uk_prof <- split_UKIE_annual(
         species = species,
         time_dim,
@@ -258,7 +266,8 @@ EMEP_UKEIRE_v5.0 <- function(
 
       ###########################
       #### AREA BASED STACKS ####
-      # create stacks for UK, Eire, SEA buffer and outwith UK domain (annual or monthly); separate & total
+      # create stacks for UK, Eire, SEA buffer and outwith UK domain
+      # (annual or monthly); separate & total
       l_s_uk <- stack_data(species, l_uk_prof, l_ie_prof, i, mask = "uk")
       l_s_ie <- stack_data(species, l_uk_prof, l_ie_prof, i, mask = "ie")
       l_s_sea <- stack_data(species, l_uk_prof, l_ie_prof, i, mask = "sea")
@@ -314,6 +323,8 @@ EMEP_UKEIRE_v5.0 <- function(
         scenario,
         y,
         naei_inv,
+        map_yr_uk,
+        map_yr_ie,
         species,
         i,
         time_dim,
@@ -357,10 +368,7 @@ EMEP_UKEIRE_v5.0 <- function(
     ####################################################
     #### AGGREGATION BY SECTOR OR ISO (IF REQUIRED) ####
 
-    #print(paste0(format(Sys.time(), "%F %T"),":               Aggregating by sector and/or ISO code..."))
-    #l_eu_agg <- aggregateEU(y, species, schema, time_dim, l_eu_allSec)
-    ## code to go here for any aggregations, e.g. ISO code ##
-    # will need to create 'l_uk_agg' object, like in EU code
+    # not for the UK & Eire data
 
     ###################################################
     #### INPUT DATA TO NETCDF TO SPECIES VARIABLES ####
@@ -444,7 +452,7 @@ EMEP_UKEIRE_v5.0 <- function(
 
 
 ###############################################################################
-#### function to collect sector data for diffuse and points, based on country and sector
+#### function to collect sector data for diffuse/points, for country & sector
 UKIE_sector_Emissions <- function(
   dt_alt_emis,
   species,
@@ -531,18 +539,20 @@ UKIE_sector_Emissions <- function(
         fol_emis,
         "/NAEI/inv",
         naei_inv,
-        "/maps/NAEI_",
+        "/maps/",
+        map_yr,
+        "/NAEI_",
         dt_poll[ceh_poll == species, invProc],
         "_DIFFUSE_inv",
         naei_inv,
         "_emis_",
-        naei_inv - 2,
+        map_yr,
         "/GNFR/NAEI_",
         dt_poll[ceh_poll == species, invProc],
         "_DIFFUSE_inv",
         naei_inv,
         "_emis_",
-        naei_inv - 2,
+        map_yr,
         "_GNFR_",
         dt_sec[sec == i, GNFRlong],
         "_t_LL.tif"
@@ -656,7 +666,7 @@ UKIE_sector_Emissions <- function(
         )
         loctext_diff <- "zhang_glob"
       } else {
-        # diffuse filename - Eire inventory is currently set to 2021 with 2019 maps
+        # diffuse filename - Eire inventory is set to 2021 with 2019 maps
         f_diff <- paste0(
           fol_emis,
           "/MapEire/inv2021/maps/tif/MapEire_",
@@ -673,12 +683,12 @@ UKIE_sector_Emissions <- function(
 
     ## Points Eire
     # set the points filename
-    # you cant replace Eire points at the moment, as they are not separate in source data
+    # you cant replace Eire points, as they are not separate in source data
     f_pt <- "no_file"
     loctext_pt <- "no_file"
   } # country ifelse
 
-  ### read in the data; if diff/pts are empty or don't exist, set as blank domain
+  ### read in the data; if diff/pts are empty / don't exist, set as blank domain
   ### read diffuse data ###
   if (file.exists(f_diff)) {
     r_diff <- rast(f_diff)
@@ -714,7 +724,7 @@ UKIE_sector_Emissions <- function(
 
     if (i == "sec01") {
       dt_pts <- dt_pts[Year == y]
-    } else if (i != "sec01" & y >= 2000) {
+    } else if (i != "sec01" && y >= 2000) {
       dt_pts <- dt_pts[Year == y]
     } else {
       dt_pts <- dt_pts[Year == 2000]
@@ -740,15 +750,18 @@ UKIE_sector_Emissions <- function(
   ###############
   ### SCALING ###
 
-  # Scale the mapped data to a chosen year - scale by emissions, not an alpha factor
+  # Scale the mapped data to a chosen year - scale by emissions,
+  # not an alpha factor.
   # BUT, if alternative emission supplied, do not scale that surface; use as is.
 
   if (country == "uk") {
     # read in the SNAP time series;
     # SNAP maps were put into GNFR maps, so there will be 0 data in some GNFRs
-    # but there may be data in equiv inventory GNFRs, as it's just sector totalling, so data will be lost to maps of 0
-    # use the ACTUAL amounts, not the alpha - this is due to the complex relationship of point &
-    #                                         diffuse data, data completeness and relative scaling causing error
+    # but there may be data in equiv inventory GNFRs, as it's just sector
+    # totalling, so data will be lost to maps of 0.
+    # use the ACTUAL amounts, not the alpha - this is due to the complex
+    # relationship of point & diffuse data, data completeness and relative
+    # scaling causing error.
 
     # anything prior to 1970 (or 1980 for NH3) needs the SPEED totals.
     if (y >= 1980) {
@@ -1016,6 +1029,7 @@ UKIE_sector_Emissions <- function(
     data_source_diff = loctext_diff,
     data_source_pt = loctext_pt,
     emis_y = y,
+    map_y = map_yr,
     inv_y = naei_inv,
     sec_EMEP = i,
     sec_GNFR = dt_sec[sec == i, GNFRlong],
@@ -1032,7 +1046,7 @@ UKIE_sector_Emissions <- function(
     emis_t_spatial_scaled = global(rs, sum, na.rm = T)$sum
   )
 
-  l <- list(r, r_t, r_t10, r_ow, r_sea, dt_inv)
+  l <- list(rs, r_t, r_t10, r_ow, r_sea, dt_inv)
   names(l) <- c(
     "total",
     "terrestrial",
@@ -1509,6 +1523,8 @@ summarise_UKIE_emissions <- function(
   scenario,
   y,
   naei_inv,
+  map_yr_uk,
+  map_yr_ie,
   species,
   i,
   time_dim,
@@ -1538,6 +1554,8 @@ summarise_UKIE_emissions <- function(
     Pollutant = species,
     data_source = "masked",
     emis_y = y,
+    map_y_uk = map_yr_uk,
+    map_y_ie = map_yr_ie,
     inv_y = naei_inv,
     sec_EMEP = i,
     sec_GNFR = dt_sec[sec == i, GNFRlong],
@@ -1584,6 +1602,8 @@ summarise_UKIE_emissions <- function(
     Pollutant = species,
     data_source = "grouped",
     emis_y = y,
+    map_y_uk = map_yr_uk,
+    map_y_ie = map_yr_ie,
     inv_y = naei_inv,
     sec_EMEP = i,
     sec_GNFR = dt_sec[sec == i, GNFRlong],
@@ -1802,6 +1822,8 @@ create_NETCDF_uk_annual <- function(
     "/UKEIRE_",
     naei_inv,
     "inv_",
+    map_yr_uk,
+    "map_",
     y,
     "emis_0.01.nc"
   )
@@ -2168,6 +2190,7 @@ input_data_NETCDF_uk <- function(
       Pollutant = species,
       data_source = "NetCDF_input",
       emis_y = y,
+      map_y_uk = map_yr_uk,
       inv_y = naei_inv,
       agg = uk_agg_schema,
       time_res = time_dim,
@@ -2302,8 +2325,16 @@ write_summaries_uk <- function(
   dt_ncinp,
   dt_ncout
 ) {
+  folname_table <- paste0(
+    "tables",
+    "/",
+    paste0("e", y),
+    "_",
+    paste0("m", map_yr_uk)
+  )
+
   dir.create(
-    file.path(folname, "tables", paste0("e", y)),
+    file.path(folname, folname_table),
     showWarnings = FALSE,
     recursive = T
   )
@@ -2322,23 +2353,23 @@ write_summaries_uk <- function(
   # write
   fwrite(
     dt_inv,
-    paste0(folname, "/tables/e", y, "/", fname_route, "_INVENTORY.csv")
+    paste0(folname, "/", folname_table, "/", fname_route, "_INVENTORY.csv")
   )
   fwrite(
     dt_mask,
-    paste0(folname, "/tables/e", y, "/", fname_route, "_MASKED.csv")
+    paste0(folname, "/", folname_table, "/", fname_route, "_MASKED.csv")
   )
   fwrite(
     dt_group,
-    paste0(folname, "/tables/e", y, "/", fname_route, "_PROCESSED.csv")
+    paste0(folname, "/", folname_table, "/", fname_route, "_PROCESSED.csv")
   )
   fwrite(
     dt_ncinp,
-    paste0(folname, "/tables/e", y, "/", fname_route, "_NETCDFINP.csv")
+    paste0(folname, "/", folname_table, "/", fname_route, "_NETCDFINP.csv")
   )
   fwrite(
     dt_ncout,
-    paste0(folname, "/tables/e", y, "/", fname_route, "_NETCDFOUT.csv")
+    paste0(folname, "/", folname_table, "/", fname_route, "_NETCDFOUT.csv")
   )
 }
 
@@ -2368,6 +2399,11 @@ summarise_nc_file_uk <- function(
   nc <- nc_open(fname_ncdf)
   v_var <- names(nc$var)
   v_var <- v_var[grep(paste0("^", species), v_var)] # as all variables exist in .nc, restrict to species.
+
+  nc_map_yr_uk <- ncatt_get(nc, 0)$UK_map_year
+  nc_map_yr_ie <- ncatt_get(nc, 0)$IE_map_year
+  nc_naei_inv <- ncatt_get(nc, 0)$UK_Inventory_released
+
   nc_close(nc)
 
   # list for summary data
@@ -2429,7 +2465,9 @@ summarise_nc_file_uk <- function(
       Pollutant = species,
       data_source = "NetCDF_output",
       emis_y = y,
-      inv_y = naei_inv,
+      map_y_uk = nc_map_yr_uk,
+      map_y_ie = nc_map_yr_ie,
+      inv_y = nc_naei_inv,
       agg = uk_agg_schema,
       time_res = time_dim,
       sec_num = v_secs
@@ -2479,8 +2517,16 @@ summarise_nc_file_uk <- function(
   # same operation as QAQC, reading in from the written ncdf.
 
   # create a holding folder
+  folname_rast <- paste0(
+    "rast",
+    "/",
+    paste0("e", y),
+    "_",
+    paste0("m", nc_map_yr_uk)
+  )
+
   dir.create(
-    file.path(folname, "rast", paste0("e", y)),
+    file.path(folname, folname_rast),
     showWarnings = FALSE,
     recursive = T
   )
@@ -2494,7 +2540,7 @@ summarise_nc_file_uk <- function(
     s,
     sum,
     na.rm = TRUE,
-    filename = file.path(folname, "rast", paste0("e", y), fname),
+    filename = file.path(folname, folname_rast, fname),
     overwrite = TRUE
   ))
 
@@ -2509,9 +2555,8 @@ summarise_nc_file_uk <- function(
       na.rm = TRUE,
       filename = paste0(
         folname,
-        "/rast/",
-        "e",
-        y,
+        "/",
+        folname_rast,
         "/",
         species,
         "_sector",

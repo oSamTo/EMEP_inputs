@@ -10,6 +10,7 @@ create_qaqc_v2_codex <- function(
   inv,
   data_source = NA,
   map_yr_uk = NA,
+  dynamic_map = FALSE,
   time_dim,
   emep_version,
   v_EMEP_sec,
@@ -19,6 +20,11 @@ create_qaqc_v2_codex <- function(
   dt_poll = get0("dt_poll", inherits = TRUE),
   render_pdf = TRUE
 ) {
+  # RESET map_yr_uk if dynamic_map is TRUE
+  if (dynamic_map) {
+    map_yr_uk <- y
+  }
+
   root <- qaqc_v2_project_root()
   domain <- qaqc_v2_normalise_domain(domain)
   folname <- qaqc_v2_abs_path(folname, root)
@@ -34,7 +40,7 @@ create_qaqc_v2_codex <- function(
   }
 
   dir.create(
-    file.path(folname, "qaqc", paste0("e", y)),
+    file.path(folname, "qaqc", paste0("e", y, "_m", map_yr_uk)),
     recursive = TRUE,
     showWarnings = FALSE
   )
@@ -53,7 +59,7 @@ create_qaqc_v2_codex <- function(
     map_yr_uk,
     data_source
   )
-  raster_paths <- qaqc_v2_raster_paths(y, species, folname)
+  raster_paths <- qaqc_v2_raster_paths(y, species, folname, map_yr_uk)
   plot_paths <- qaqc_v2_write_plots(
     domain = domain,
     y = y,
@@ -61,6 +67,7 @@ create_qaqc_v2_codex <- function(
     folname = folname,
     summary_paths = summary_paths,
     raster_paths = raster_paths,
+    map_yr_uk = map_yr_uk,
     dt_sec = dt_sec,
     data_source = data_source,
     inv = inv
@@ -98,7 +105,7 @@ create_qaqc_v2_codex <- function(
     y,
     "emis_",
     inv,
-    "inv_QAQC_v2_codex.pdf"
+    "inv_QAQC.html"
   )
 
   latex_log_dir <- file.path(root, "latex_logs", paste0("array_", array_id))
@@ -107,11 +114,24 @@ create_qaqc_v2_codex <- function(
 
   ## Rendering can be disabled when callers only want paths/data for testing or inspection.
   if (render_pdf) {
+    #rmarkdown::render(
+    #  input = file.path(root, "R", "QAQC_v2_codex.Rmd"),
+    #  output_file = output_file,
+    #  output_dir = file.path(folname, "qaqc", paste0("e", y, "_m", map_yr_uk)),
+    #  intermediates_dir = latex_log_dir,
+    #  params = params,
+    #  envir = new.env(parent = globalenv())
+    #)
     rmarkdown::render(
-      input = file.path(root, "R", "QAQC_v2_codex.Rmd"),
+      input = file.path(root, "R", "QAQC_html.Rmd"),
+      output_format = "html_document",
       output_file = output_file,
-      output_dir = file.path(folname, "qaqc", paste0("e", y)),
-      intermediates_dir = latex_log_dir,
+      output_dir = file.path(folname, "qaqc", paste0("e", y, "_m", map_yr_uk)),
+      intermediates_dir = file.path(
+        root,
+        "latex_logs",
+        paste0("array_", array_id)
+      ),
       params = params,
       envir = new.env(parent = globalenv())
     )

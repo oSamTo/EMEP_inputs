@@ -112,7 +112,7 @@ qaqc_v2_total_map_plot <- function(path, domain, species, y, data_source = NA) {
   breaks <- qaqc_v2_class_breaks(r)
   df <- qaqc_v2_raster_df(path, breaks)
   sf_poly <- qaqc_v2_world_polygons(
-    domain,    
+    domain,
     data_source = data_source
   )
 
@@ -124,7 +124,7 @@ qaqc_v2_total_map_plot <- function(path, domain, species, y, data_source = NA) {
       na.value = NA
     ) +
     ggplot2::coord_sf(expand = FALSE) +
-	ggplot2::geom_sf(
+    ggplot2::geom_sf(
       data = sf_poly,
       inherit.aes = FALSE,
       fill = NA,
@@ -147,7 +147,7 @@ qaqc_v2_total_map_plot <- function(path, domain, species, y, data_source = NA) {
       legend.position = "bottom",
       plot.margin = ggplot2::margin(t = 2, r = 2, b = 2, l = 2, unit = "mm")
     )
- 
+
   p
 }
 
@@ -192,7 +192,7 @@ qaqc_v2_sector_map_plot <- function(
 
   ## Add domain-specific outlines for improved visualization.
   sf_poly <- qaqc_v2_world_polygons(
-    domain,    
+    domain,
     data_source = data_source
   )
 
@@ -241,11 +241,12 @@ qaqc_v2_write_plots <- function(
   folname,
   summary_paths,
   raster_paths,
+  map_yr_uk,
   dt_sec = NULL,
   data_source = NA,
   inv = NA
 ) {
-  plot_dir <- file.path(folname, "plots", paste0("e", y))
+  plot_dir <- file.path(folname, "plots", paste0("e", y, "_m", map_yr_uk))
   dir.create(plot_dir, recursive = TRUE, showWarnings = FALSE)
 
   ## Initialise every expected output path as missing; plots fill these in when created.

@@ -4,9 +4,10 @@ require(data.table)
 source("R/run_setup.R")
 
 dt_cj <- CJ(
-    run_domain,
+  run_domain,
   run_source,
   v_years,
+  dynamic_map_uk,
   time_dim,
   tp_scheme,
   agg_schema,

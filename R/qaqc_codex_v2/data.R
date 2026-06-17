@@ -64,7 +64,7 @@ qaqc_v2_summary_paths <- function(
     candidates <- file.path(
       folname,
       "tables",
-      paste0("e", y),
+      paste0("e", y, "_m", map_yr_uk),
       paste0(roots, "_", suffix, ".csv")
     )
     existing <- candidates[file.exists(candidates)][1]
@@ -75,8 +75,8 @@ qaqc_v2_summary_paths <- function(
 }
 
 ## Locate the total and per-sector QAQC raster outputs for one pollutant/year.
-qaqc_v2_raster_paths <- function(y, species, folname) {
-  rast_dir <- file.path(folname, "rast", paste0("e", y))
+qaqc_v2_raster_paths <- function(y, species, folname, map_yr_uk) {
+  rast_dir <- file.path(folname, "rast", paste0("e", y, "_m", map_yr_uk))
   sector <- list.files(
     rast_dir,
     pattern = paste0("^", species, "_sector[0-9]+_emis_qaqc[.]tif$"),

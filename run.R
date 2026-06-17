@@ -31,6 +31,7 @@ dt_cj <- CJ(
   run_domain,
   run_source,
   v_years,
+  dynamic_map_uk,
   time_dim,
   tp_scheme,
   agg_schema,
@@ -60,7 +61,7 @@ dt_cj[,
     run_domain,
     "/",
     run_source,
-    "/",
+    "/i",
     dir_inv,
     "/EMEP4UK",
     emep_version,
@@ -84,6 +85,7 @@ project <- dt_cj[i_a, output_project]
 scenario <- dt_cj[i_a, v_scenarios]
 dir_inv <- dir_inv
 folname <- dt_cj[i_a, output_dir]
+dynamic_map <- dt_cj[i_a, dynamic_map_uk]
 
 #######################
 #### RUN FUNCTIONS ####
@@ -100,6 +102,7 @@ if (run_domain == "UKEIRE") {
     v_EMEP_sec = v_EMEP_sec,
     naei_inv = dir_inv,
     map_yr_uk = map_yr_uk,
+    dynamic_map = dynamic_map,
     map_yr_ie = map_yr_ie,
     folname = folname,
     project = project,
@@ -166,6 +169,7 @@ if (output_QAQC) {
       inv = dir_inv,
       data_source = data_source,
       map_yr_uk = map_yr_uk,
+      dynamic_map = dynamic_map,
       time_dim = time_dim,
       emep_version = emep_version,
       v_EMEP_sec = v_EMEP_sec,

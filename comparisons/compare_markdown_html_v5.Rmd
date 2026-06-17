@@ -1,0 +1,664 @@
+---
+params:
+  species: NA
+  domain: NA
+  plot_dir: NA
+  emis_yr_from: NA
+  emis_yr_to: NA
+  folname_from: NA
+  folname_to: NA
+  l_fname_from: NA
+  l_fname_to: NA
+  l_data_from: NA
+  l_data_to: NA
+  uk_plot1: NA
+  uk_plot2: NA
+  uk_plot7: NA
+title: "EMEP4UK input files: comparison report"
+author: "Sam Tomlinson"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: flatly
+    df_print: paged
+    code_folding: hide
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+# This Rmd is designed for HTML output only. It avoids LaTeX/PDF commands.
+# The render call in compare_functions_html_v5.R sets knit_root_dir = getwd(),
+# so relative paths are resolved from the project root rather than from the
+# comparisons/ folder.
+
+project_root <- knitr::opts_knit$get("root.dir")
+if (is.null(project_root) || is.na(project_root) || !nzchar(project_root)) {
+  project_root <- getwd()
+}
+project_root <- normalizePath(project_root, mustWork = FALSE)
+
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  out.width = "100%"
+)
+
+suppressPackageStartupMessages({
+  library(data.table)
+  library(knitr)
+})
+
+`%||%` <- function(x, y) {
+  if (is.null(x) || length(x) == 0 || all(is.na(x))) y else x
+}
+
+q_is_abs_path <- function(path) {
+  grepl("^([A-Za-z]:[\\\\/]|/|\\\\\\\\)", path)
+}
+
+q_norm_slash <- function(path) {
+  gsub("\\\\", "/", path)
+}
+
+q_abs_path <- function(path) {
+  if (is.null(path) || length(path) == 0 || all(is.na(path))) {
+    return(NA_character_)
+  }
+
+  path <- as.character(path[[1]])
+  path <- q_norm_slash(path)
+
+  if (q_is_abs_path(path)) {
+    return(normalizePath(path, winslash = "/", mustWork = FALSE))
+  }
+
+  candidates <- c(
+    file.path(project_root, path),
+    path
+  )
+
+  existing <- candidates[file.exists(candidates)]
+  if (length(existing) > 0) {
+    return(normalizePath(existing[[1]], winslash = "/", mustWork = FALSE))
+  }
+
+  normalizePath(file.path(project_root, path), winslash = "/", mustWork = FALSE)
+}
+
+plot_dir_abs <- q_abs_path(params$plot_dir)
+report_dir <- normalizePath(file.path(plot_dir_abs, ".."), winslash = "/", mustWork = FALSE)
+
+# The HTML report is written into report_dir and the PNGs are in report_dir/plots.
+# Returning "plots/<filename>.png" is therefore the most robust path for browser use.
+q_plot_rel <- function(path) {
+  if (is.null(path) || length(path) == 0 || all(is.na(path))) return(NA_character_)
+
+  vapply(as.character(path), function(p) {
+    p <- q_norm_slash(p)
+    expected <- file.path(report_dir, "plots", basename(p))
+
+    if (file.exists(expected)) {
+      return(q_norm_slash(file.path("plots", basename(p))))
+    }
+
+    p_abs <- q_abs_path(p)
+    if (file.exists(p_abs) && requireNamespace("xfun", quietly = TRUE)) {
+      rel <- xfun::relative_path(
+        normalizePath(p_abs, winslash = "/", mustWork = TRUE),
+        normalizePath(report_dir, winslash = "/", mustWork = FALSE)
+      )
+      return(q_norm_slash(rel))
+    }
+
+    # Best fallback: this is where the comparison functions save the PNGs.
+    q_norm_slash(file.path("plots", basename(p)))
+  }, character(1))
+}
+
+
+q_html_escape <- function(x) {
+  x <- as.character(x)
+  x[is.na(x)] <- ""
+  x <- gsub("&", "&amp;", x, fixed = TRUE)
+  x <- gsub("<", "&lt;", x, fixed = TRUE)
+  x <- gsub(">", "&gt;", x, fixed = TRUE)
+  x <- gsub('"', "&quot;", x, fixed = TRUE)
+  x
+}
+
+q_include_plot <- function(path) {
+  paths <- as.character(unlist(path, use.names = FALSE))
+  paths <- paths[!is.na(paths) & nzchar(paths)]
+
+  if (length(paths) == 0) {
+    return(knitr::asis_output("<p><em>No image path was supplied.</em></p>"))
+  }
+
+  blocks <- vapply(paths, function(p) {
+    full <- q_abs_path(p)
+
+    if (!file.exists(full)) {
+      # Fallback for plots saved beside the final HTML as report_dir/plots/<basename>.
+      full2 <- file.path(report_dir, "plots", basename(p))
+      if (file.exists(full2)) {
+        full <- normalizePath(full2, winslash = "/", mustWork = TRUE)
+      }
+    }
+
+    if (!file.exists(full)) {
+      return(paste0(
+        "<p class=\"missing-plot\"><strong>Missing plot:</strong> ",
+        q_html_escape(p),
+        "</p>"
+      ))
+    }
+
+    # Embed the PNG as a data URI so the final HTML can be emailed/copied alone.
+    img_src <- knitr::image_uri(full)
+
+    paste0(
+      "<figure class=\"plot-figure\">",
+      "<img class=\"report-plot\" src=\"", q_html_escape(img_src), "\" alt=\"", q_html_escape(basename(full)), "\">",
+      "<figcaption>", q_html_escape(basename(full)), "</figcaption>",
+      "</figure>"
+    )
+  }, character(1))
+
+  wrapper_class <- if (length(blocks) > 1) "plot-grid" else "plot-single"
+  knitr::asis_output(paste0(
+    "<div class=\"", wrapper_class, "\">",
+    paste0(blocks, collapse = "
+"),
+    "</div>"
+  ))
+}
+
+q_meta_val <- function(x, col) {
+  dt <- x[["metadata"]]
+  if (is.null(dt) || !(col %in% names(dt))) return(NA_character_)
+  as.character(dt[[col]][1])
+}
+
+q_first_existing_col <- function(dt, candidates) {
+  x <- candidates[candidates %in% names(dt)]
+  if (length(x) == 0) return(NULL)
+  x[[1]]
+}
+
+q_emis_col <- function(dt) {
+  col <- q_first_existing_col(
+    dt,
+    c("emis_t_tot_ncoutput", "emis_t", "emis_kt", "emis", "value", "total")
+  )
+  if (is.null(col)) {
+    stop("Could not find an emissions column in the sector table.")
+  }
+  col
+}
+
+q_prepare_sector_table <- function(dt) {
+  dt <- as.data.table(copy(dt))
+
+  area_col <- q_first_existing_col(
+    dt,
+    c("iso_char", "Area", "area", "ISO_char", "ISO", "iso")
+  )
+  sec_col <- q_first_existing_col(
+    dt,
+    c("sec_name", "GNFR", "GNFRlong", "sector_name", "sector", "sec", "SNAP")
+  )
+  emis_col <- q_emis_col(dt)
+
+  if (is.null(area_col)) {
+    dt[, area__ := "All"]
+  } else {
+    dt[, area__ := as.character(get(area_col))]
+  }
+
+  if (is.null(sec_col)) {
+    dt[, sector__ := "All sectors"]
+  } else {
+    dt[, sector__ := as.character(get(sec_col))]
+  }
+
+  # If the source table is already in kt, keep it. Otherwise convert tonnes to kt.
+  if (emis_col == "emis_kt") {
+    dt_out <- dt[, .(emis_kt = sum(get(emis_col), na.rm = TRUE)), by = .(area__, sector__)]
+  } else {
+    dt_out <- dt[, .(emis_kt = sum(get(emis_col), na.rm = TRUE) / 1000), by = .(area__, sector__)]
+  }
+
+  setnames(dt_out, c("area__", "sector__"), c("Area", "Sector"))
+  dt_out[]
+}
+
+q_safe_ratio <- function(num, den) {
+  out <- rep(NA_real_, length(num))
+  ok <- !is.na(num) & !is.na(den) & den != 0
+  out[ok] <- num[ok] / den[ok]
+  out
+}
+
+q_make_total_table <- function() {
+  from <- q_prepare_sector_table(params$l_data_from[["sector_table"]])[
+    , .(File_from_kt = sum(emis_kt, na.rm = TRUE)), by = Area
+  ]
+  to <- q_prepare_sector_table(params$l_data_to[["sector_table"]])[
+    , .(File_to_kt = sum(emis_kt, na.rm = TRUE)), by = Area
+  ]
+
+  dt <- merge(from, to, by = "Area", all = TRUE)
+  dt[is.na(File_from_kt), File_from_kt := 0]
+  dt[is.na(File_to_kt), File_to_kt := 0]
+  dt[, diff_kt := File_to_kt - File_from_kt]
+  dt[, ratio_to_from := q_safe_ratio(File_to_kt, File_from_kt)]
+  dt[, pct_change := (ratio_to_from - 1) * 100]
+
+  total <- dt[, .(
+    Area = "Total",
+    File_from_kt = sum(File_from_kt, na.rm = TRUE),
+    File_to_kt = sum(File_to_kt, na.rm = TRUE)
+  )]
+  total[, diff_kt := File_to_kt - File_from_kt]
+  total[, ratio_to_from := q_safe_ratio(File_to_kt, File_from_kt)]
+  total[, pct_change := (ratio_to_from - 1) * 100]
+
+  dt <- rbindlist(list(dt[Area != "Total"], total), use.names = TRUE, fill = TRUE)
+  dt[, sort_order__ := fifelse(Area == "Total", 1L, 0L)]
+  setorder(dt, sort_order__, Area)
+  dt[, sort_order__ := NULL]
+
+  num_cols <- names(dt)[vapply(dt, is.numeric, logical(1))]
+  dt[, (num_cols) := lapply(.SD, round, 3), .SDcols = num_cols]
+  dt[]
+}
+
+q_make_sector_table <- function() {
+  from <- q_prepare_sector_table(params$l_data_from[["sector_table"]])
+  to <- q_prepare_sector_table(params$l_data_to[["sector_table"]])
+
+  setnames(from, "emis_kt", "File_from_kt")
+  setnames(to, "emis_kt", "File_to_kt")
+
+  dt <- merge(from, to, by = c("Area", "Sector"), all = TRUE)
+  dt[is.na(File_from_kt), File_from_kt := 0]
+  dt[is.na(File_to_kt), File_to_kt := 0]
+  dt[, diff_kt := File_to_kt - File_from_kt]
+  dt[, ratio_to_from := q_safe_ratio(File_to_kt, File_from_kt)]
+  dt[, pct_change := (ratio_to_from - 1) * 100]
+  dt[, abs_diff_kt := abs(diff_kt)]
+  setorder(dt, Area, Sector)
+
+  num_cols <- names(dt)[vapply(dt, is.numeric, logical(1))]
+  dt[, (num_cols) := lapply(.SD, round, 3), .SDcols = num_cols]
+  dt[]
+}
+
+q_table <- function(dt, caption = NULL, height = "430px", page_length = 25) {
+  dt <- as.data.frame(dt, stringsAsFactors = FALSE)
+  if (nrow(dt) == 0) {
+    return(knitr::asis_output("<p><em>No rows to display.</em></p>"))
+  }
+
+  col_headers <- paste0(
+    "<th>",
+    q_html_escape(names(dt)),
+    "</th>",
+    collapse = ""
+  )
+
+  body_rows <- apply(dt, 1, function(row) {
+    paste0(
+      "<tr>",
+      paste0("<td>", q_html_escape(row), "</td>", collapse = ""),
+      "</tr>"
+    )
+  })
+
+  caption_html <- ""
+  if (!is.null(caption) && length(caption) > 0 && !is.na(caption)) {
+    caption_html <- paste0("<caption>", q_html_escape(caption), "</caption>")
+  }
+
+  html <- paste0(
+    "<div class=\"table-scroll\" style=\"max-height:", height, ";\">",
+    "<table class=\"table table-striped table-hover table-condensed report-table\">",
+    caption_html,
+    "<thead><tr>", col_headers, "</tr></thead>",
+    "<tbody>", paste0(body_rows, collapse = "\n"), "</tbody>",
+    "</table>",
+    "</div>"
+  )
+
+  knitr::asis_output(html)
+}
+
+q_table_sortable <- function(dt, caption = NULL, height = "520px") {
+  dt <- as.data.frame(dt, stringsAsFactors = FALSE)
+
+  if (nrow(dt) == 0) {
+    return(knitr::asis_output("<p><em>No rows to display.</em></p>"))
+  }
+
+  x <- DT::datatable(
+    dt,
+    caption = caption,
+    rownames = FALSE,
+    filter = "none",
+    class = "stripe hover compact cell-border",
+    options = list(
+      ordering = TRUE,
+      paging = FALSE,
+      searching = FALSE,
+      info = FALSE,
+      dom = "t",
+      autoWidth = TRUE
+    )
+  )
+
+  htmltools::tags$div(
+    class = "dt-sort-scroll",
+    style = paste0("max-height:", height, ";"),
+    x
+  )
+}
+
+```
+
+```{css, echo=FALSE}
+body {
+  font-size: 15px;
+  line-height: 1.5;
+}
+.main-container {
+  max-width: 1500px !important;
+}
+h1, h2, h3 {
+  font-weight: 750;
+}
+blockquote {
+  background: #f6f8fb;
+  border-left: 5px solid #2c7fb8;
+  padding: 0.9rem 1.1rem;
+  border-radius: 0.4rem;
+  margin: 1rem 0 1.4rem 0;
+}
+.table caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 700;
+  color: #1f2933;
+}
+.table:not(.dataTable) {
+  width: auto !important;
+  white-space: nowrap;
+}
+img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #d9e2ec;
+  border-radius: 0.65rem;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+  background: white;
+  margin-bottom: 1.1rem;
+}
+
+.table-scroll {
+  overflow: auto;
+  width: 100%;
+  border: 1px solid #d9e2ec;
+  border-radius: 0.45rem;
+  margin: 0.75rem 0 1.4rem 0;
+}
+.report-table {
+  margin-bottom: 0 !important;
+  white-space: nowrap;
+}
+.report-table caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 700;
+  color: #1f2933;
+  padding: 0.6rem 0.75rem;
+}
+.report-table th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  z-index: 2;
+}
+.plot-single, .plot-grid {
+  margin: 1rem 0 1.6rem 0;
+}
+.plot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+.plot-figure {
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid #d9e2ec;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+.report-plot {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.plot-figure figcaption {
+  margin-top: 0.45rem;
+  font-size: 0.85rem;
+  color: #52606d;
+  word-break: break-all;
+}
+.missing-plot {
+  color: #9b1c1c;
+  background: #fff5f5;
+  border: 1px solid #f8b4b4;
+  border-radius: 0.4rem;
+  padding: 0.75rem;
+}
+/* Sortable DT tables: use one outer scroll box */
+.dt-sort-scroll {
+  overflow: auto;
+  width: 100%;
+  border: 1px solid #d9e2ec;
+  border-radius: 0.45rem;
+  margin: 0.75rem 0 1.4rem 0;
+}
+
+.dt-sort-scroll table.dataTable {
+  width: max-content !important;
+  min-width: 100%;
+  margin: 0 !important;
+  white-space: nowrap;
+}
+
+.dt-sort-scroll table.dataTable thead th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  z-index: 3;
+}
+
+.dt-sort-scroll .dataTables_wrapper {
+  width: 100%;
+}
+
+.dt-sort-scroll .dataTables_info,
+.dt-sort-scroll .dataTables_filter,
+.dt-sort-scroll .dataTables_length {
+  display: none;
+}
+```
+
+# `r params$domain` input file comparison
+
+> Comparisons are made from **File_from** to **File_to**. Positive absolute differences therefore mean **File_to is larger than File_from**. Ratios are calculated as `File_to / File_from`.
+
+## Metadata
+
+```{r metadata-summary}
+dt_report <- data.table(
+  Field = c(
+    "Pollutant",
+    "Domain",
+    "Comparison direction",
+    "Output directory",
+    "Plot directory",
+    "Rendered from project root"
+  ),
+  Value = c(
+    params$species,
+    params$domain,
+    "File_from -> File_to",
+    q_norm_slash(report_dir),
+    q_norm_slash(plot_dir_abs),
+    q_norm_slash(project_root)
+  )
+)
+q_table(dt_report, caption = "Report summary", height = "260px", page_length = 20)
+```
+
+```{r metadata-inputs}
+dt_meta <- data.table(
+  Variable = c(
+    "Project",
+    "Scenario",
+    "Pollutant",
+    "Data source",
+    "Emission year",
+    "Mapping year",
+    "Inventory year",
+    "EMEP version",
+    "NetCDF time steps",
+    "Comparison time resolution",
+    "Resolution",
+    "Pre-2025 file format",
+    "Pre-computed raster files found"
+  ),
+  File_from = c(
+    q_meta_val(params$l_fname_from, "projectName"),
+    q_meta_val(params$l_fname_from, "projectScen"),
+    params$species,
+    q_meta_val(params$l_fname_from, "data_source"),
+    q_meta_val(params$l_fname_from, "emis_y"),
+    q_meta_val(params$l_fname_from, "map_y"),
+    q_meta_val(params$l_fname_from, "inv_y"),
+    q_meta_val(params$l_fname_from, "EMEP_version"),
+    q_meta_val(params$l_fname_from, "time_nc"),
+    q_meta_val(params$l_fname_from, "time_comp"),
+    q_meta_val(params$l_fname_from, "res"),
+    q_meta_val(params$l_fname_from, "pre25"),
+    q_meta_val(params$l_fname_from, "rast_exists")
+  ),
+  File_to = c(
+    q_meta_val(params$l_fname_to, "projectName"),
+    q_meta_val(params$l_fname_to, "projectScen"),
+    params$species,
+    q_meta_val(params$l_fname_to, "data_source"),
+    q_meta_val(params$l_fname_to, "emis_y"),
+    q_meta_val(params$l_fname_to, "map_y"),
+    q_meta_val(params$l_fname_to, "inv_y"),
+    q_meta_val(params$l_fname_to, "EMEP_version"),
+    q_meta_val(params$l_fname_to, "time_nc"),
+    q_meta_val(params$l_fname_to, "time_comp"),
+    q_meta_val(params$l_fname_to, "res"),
+    q_meta_val(params$l_fname_to, "pre25"),
+    q_meta_val(params$l_fname_to, "rast_exists")
+  )
+)
+q_table(dt_meta, caption = "Metadata of compared inputs", height = "360px", page_length = 30)
+```
+
+```{r metadata-paths}
+dt_paths <- data.table(
+  Item = c("Input folder", "NetCDF filename"),
+  File_from = c(params$folname_from, paste(params$l_fname_from[["filename"]], collapse = "; ")),
+  File_to = c(params$folname_to, paste(params$l_fname_to[["filename"]], collapse = "; "))
+)
+q_table(dt_paths, caption = "Input folders and files", height = "230px", page_length = 10)
+```
+
+## Total annual emissions map
+
+```{r total-map, results='asis'}
+q_include_plot(params$uk_plot1)
+```
+
+## Annual emissions by area
+
+```{r total-table}
+dt_total <- q_make_total_table()
+q_table(
+  dt_total,
+  caption = paste0("Annual emissions of ", params$species, " by area. Units are kt yr-1."),
+  height = "420px"
+)
+```
+
+## Dominant sector contributing to change
+
+> The positive panel shows the sector with the largest positive cell-level change. The negative panel shows the sector with the largest negative cell-level change.
+
+```{r dominant-sector-map, results='asis'}
+q_include_plot(params$uk_plot7)
+```
+
+## Largest sectoral changes
+
+```{r largest-sector-table}
+dt_sector <- q_make_sector_table()
+dt_largest <- copy(dt_sector)
+setorder(dt_largest, -abs_diff_kt)
+dt_largest <- dt_largest[seq_len(min(nrow(dt_largest), 30))]
+dt_largest[, abs_diff_kt := NULL]
+q_table(
+  dt_largest,
+  caption = paste0("Largest absolute sectoral changes for ", params$species, ". Units are kt yr-1."),
+  height = "520px"
+)
+```
+
+## Sectoral maps
+
+> The sectoral PNGs are shown directly from the `plots/` folder beside this HTML file. Open the image in a new browser tab if you need the full-size version.
+
+```{r sector-map-grid, results='asis'}
+sector_paths <- unlist(params$uk_plot2, use.names = FALSE)
+sector_paths <- sector_paths[!is.na(sector_paths) & nzchar(sector_paths)]
+q_include_plot(sector_paths)
+```
+
+## Annex: sectoral emissions table
+
+```{r sector-table}
+dt_sector_annex <- copy(dt_sector)
+dt_sector_annex[, abs_diff_kt := NULL]
+#q_table(
+#  dt_sector_annex,
+#  caption = paste0("Annual emissions of ", params$species, " by area and sector. Units are kt yr-1."),
+#  height = "620px",
+#  page_length = 50
+#)
+
+q_table_sortable(
+  dt_sector_annex,
+  caption = paste0("Annual emissions of ", params$species, " by area and sector. Units are kt yr-1."),
+  height = "520px"
+)
+```
+
+## Notes
+
+- This HTML report avoids LaTeX-only commands and does not require a TeX installation.
+- Tables are static HTML tables inside scroll boxes, rather than `DT` tables with filter boxes.
+- The report is rendered with `self_contained: true`, and the PNG plots are embedded as base64 data URIs. The generated `.html` file can therefore be copied or emailed on its own, although it may be large.

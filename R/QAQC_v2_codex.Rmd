@@ -26,9 +26,8 @@ header-includes:
  \usepackage{geometry}
  \geometry{top=1cm,left=1cm,bottom=1cm,right=1cm}
 output:
-  pdf_document:
-    fig_caption: true
-    extra_dependencies: ["booktabs"]
+  html_document:
+    fig_caption: true    
 ---
 
 ```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
@@ -78,6 +77,8 @@ plot_paths <- params$plot_paths
 
 **Inventory / source version:** `r params$inv`
 
+**Map Used:** `r params$map_yr_uk`
+
 **Data source:** `r params$data_source`
 
 **Output dir:** `r gsub("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/", "", params$folname)`
@@ -111,13 +112,14 @@ if(params$domain == "UKEIRE"){
     Species = params$species,
     Area = c("UK", "Eire", "SEA"),
     Emis_Year = params$y,
+    Map_Year = c(params$map_yr_uk, "2019", "N/A"),
     Source = c(params$data_source,"EMEP", "N/A"),
     Inv = params$inv,
     orig_sec = c("SNAP", eire_sec, "N/A"),
 		orig_res = c("1km", eire_res, "N/A"),
     Temporal = params$time_dim    
   )
-  kbl(dt_meta, align = "ccccccccc", caption = "Run metadata", booktabs = TRUE)
+  kbl(dt_meta, align = "cccccccccc", caption = "Run metadata", booktabs = TRUE)
 
   }else{
 

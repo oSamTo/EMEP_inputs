@@ -6,8 +6,8 @@
 #SBATCH --job-name=comparison_array
 #SBATCH -o slurm/output_comparison/comparison_arr_%a.out
 #SBATCH -e slurm/output_comparison/comparison_arr_%a.err
-#SBATCH --mem=50G
-#SBATCH --time=02:00:00
+#SBATCH --mem=100G
+#SBATCH --time=01:00:00
 #SBATCH --array=1-7
 
-R CMD BATCH --no-restore --no-save "--args ${SLURM_ARRAY_TASK_ID}" comparisons/run_compare.R "slurm/output_comparison/console${SLURM_ARRAY_TASK_ID}_comparison.Rout"
+R CMD BATCH --no-restore --no-save "--args ${SLURM_ARRAY_TASK_ID}" comparisons/run_compare_html_v5.R "slurm/output_comparison/console${SLURM_ARRAY_TASK_ID}_comparison.Rout"

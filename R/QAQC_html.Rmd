@@ -1,0 +1,446 @@
+---
+params:
+  project: NA
+  scenario: NA
+  y: NA
+  species: NA
+  domain: NA
+  folname: NA
+  inv: NA
+  data_source: NA
+  map_yr_uk: NA
+  time_dim: NA
+  emep_version: NA
+  v_EMEP_sec: NA
+  agg_schema: NA
+  tp_scheme: NA
+  dt_sec: NA
+  dt_poll: NA
+  summary_paths: NA
+  raster_paths: NA
+  plot_paths: NA
+title: "EMEP input files QAQC"
+author: "Sam Tomlinson"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: false
+    toc_float: false
+    number_sections: false
+    theme: flatly
+    df_print: paged
+    code_folding: hide
+    self_contained: true
+    fig_caption: true
+---
+
+```{r setup, include=FALSE}
+# HTML-friendly QAQC report helpers (paths, plot embedding, table helpers)
+project_root <- knitr::opts_knit$get("root.dir")
+if (is.null(project_root) || is.na(project_root) || !nzchar(project_root)) {
+  project_root <- getwd()
+}
+project_root <- normalizePath(project_root, mustWork = FALSE)
+
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  out.width = "100%"
+)
+
+suppressPackageStartupMessages({
+  library(data.table)
+  library(knitr)
+  library(kableExtra)
+  library(janitor)
+  library(terra)
+})
+
+`%||%` <- function(x, y) {
+  if (is.null(x) || length(x) == 0 || all(is.na(x))) y else x
+}
+
+q_is_abs_path <- function(path) {
+  grepl("^([A-Za-z]:[\\\\/]|/|\\\\\\\\)", path)
+}
+
+q_norm_slash <- function(path) {
+  gsub("\\\\", "/", path)
+}
+
+q_abs_path <- function(path) {
+  if (is.null(path) || length(path) == 0 || all(is.na(path))) {
+    return(NA_character_)
+  }
+
+  path <- as.character(path[[1]])
+  path <- q_norm_slash(path)
+
+  if (q_is_abs_path(path)) {
+    return(normalizePath(path, winslash = "/", mustWork = FALSE))
+  }
+
+  candidates <- c(
+    file.path(project_root, path),
+    path
+  )
+
+  existing <- candidates[file.exists(candidates)]
+  if (length(existing) > 0) {
+    return(normalizePath(existing[[1]], winslash = "/", mustWork = FALSE))
+  }
+
+  normalizePath(file.path(project_root, path), winslash = "/", mustWork = FALSE)
+}
+
+# report_dir is expected to be the parent of the plots folder
+plot_dir_abs <- function(plot_dir) {
+  q_abs_path(plot_dir)
+}
+
+q_plot_rel <- function(path, plot_dir) {
+  if (is.null(path) || length(path) == 0 || all(is.na(path))) return(NA_character_)
+
+  vapply(as.character(path), function(p) {
+    p <- q_norm_slash(p)
+    report_dir <- normalizePath(file.path(plot_dir, ".."), winslash = "/", mustWork = FALSE)
+    expected <- file.path(report_dir, "plots", basename(p))
+
+    if (file.exists(expected)) {
+      return(q_norm_slash(file.path("plots", basename(p))))
+    }
+
+    p_abs <- q_abs_path(p)
+    if (file.exists(p_abs) && requireNamespace("xfun", quietly = TRUE)) {
+      rel <- xfun::relative_path(
+        normalizePath(p_abs, winslash = "/", mustWork = TRUE),
+        normalizePath(report_dir, winslash = "/", mustWork = FALSE)
+      )
+      return(q_norm_slash(rel))
+    }
+
+    q_norm_slash(file.path("plots", basename(p)))
+  }, character(1))
+}
+
+q_html_escape <- function(x) {
+  x <- as.character(x)
+  x[is.na(x)] <- ""
+  x <- gsub("&", "&amp;", x, fixed = TRUE)
+  x <- gsub("<", "&lt;", x, fixed = TRUE)
+  x <- gsub(">", "&gt;", x, fixed = TRUE)
+  x <- gsub('"', "&quot;", x, fixed = TRUE)
+  x
+}
+
+q_include_plot <- function(path, plot_dir = NULL) {
+  paths <- as.character(unlist(path, use.names = FALSE))
+  paths <- paths[!is.na(paths) & nzchar(paths)]
+
+  if (length(paths) == 0) {
+    return(knitr::asis_output("<p><em>No image path was supplied.</em></p>"))
+  }
+
+  report_dir <- if (is.character(plot_dir) && length(plot_dir) == 1 && !is.na(plot_dir)) {
+    normalizePath(plot_dir, winslash = "/", mustWork = FALSE)
+  } else {
+    project_root
+  }
+
+  blocks <- vapply(paths, function(p) {
+    full <- q_abs_path(p)
+
+    if (!file.exists(full)) {
+      full2 <- file.path(report_dir, "plots", basename(p))
+      if (file.exists(full2)) {
+        full <- normalizePath(full2, winslash = "/", mustWork = TRUE)
+      }
+    }
+
+    if (!file.exists(full)) {
+      return(paste0(
+        "<p class=\"missing-plot\"><strong>Missing plot:</strong> ",
+        q_html_escape(p),
+        "</p>"
+      ))
+    }
+
+    img_src <- knitr::image_uri(full)
+
+    paste0(
+      "<figure class=\"plot-figure\">",
+      "<img class=\"report-plot\" src=\"", q_html_escape(img_src), "\" alt=\"", q_html_escape(basename(full)), "\">",
+      "<figcaption>", q_html_escape(basename(full)), "</figcaption>",
+      "</figure>"
+    )
+  }, character(1))
+
+  wrapper_class <- if (length(blocks) > 1) "plot-grid" else "plot-single"
+  knitr::asis_output(paste0(
+    "<div class=\"", wrapper_class, "\">",
+    paste0(blocks, collapse = "\n"),
+    "</div>"
+  ))
+}
+
+# compatibility: preserve the include_plot name used in the PDF Rmd
+include_plot <- function(path) q_include_plot(path)
+
+# HTML-friendly table helper using kableExtra
+kbl <- function(dt, ...) {
+  if (is.data.frame(dt) || data.table::is.data.table(dt)) {
+    tbl <- knitr::kable(dt, format = "html", escape = FALSE)
+    if (requireNamespace("kableExtra", quietly = TRUE)) {
+      tbl <- kableExtra::kable_styling(tbl, bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+    }
+    print(tbl)
+  } else {
+    print(knitr::kable(dt))
+  }
+  invisible(NULL)
+}
+
+root <- "/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs"
+source(file.path(root, "R/qaqc_codex_v2/utils.R"))
+source(file.path(root, "R/qaqc_codex_v2/data.R"))
+source(file.path(root, "R/qaqc_codex_v2/plots.R"))
+
+# expose params-derived helpers
+summary_paths <- params$summary_paths
+raster_paths <- params$raster_paths
+plot_paths <- params$plot_paths
+```
+
+```{css, echo=FALSE}
+body { font-size: 15px; line-height: 1.5; }
+.main-container { max-width: 1500px !important; }
+h1, h2, h3 { font-weight: 750; }
+.table caption { caption-side: top; text-align: left; font-weight: 700; color: #1f2933; }
+img { max-width: 100%; height: auto; border: 1px solid #d9e2ec; border-radius: 0.65rem; box-shadow: 0 1px 5px rgba(0,0,0,0.08); background: white; margin-bottom: 1.1rem; }
+.table-scroll { overflow: auto; width: 100%; border: 1px solid #d9e2ec; border-radius: 0.45rem; margin: 0.75rem 0 1.4rem 0; }
+.report-table { margin-bottom: 0 !important; white-space: nowrap; }
+.plot-single, .plot-grid { margin: 1rem 0 1.6rem 0; }
+.plot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 1rem; align-items: start; }
+.plot-figure { margin: 0; padding: 0.75rem; border: 1px solid #d9e2ec; border-radius: 0.5rem; background: #fff; }
+.report-plot { display: block; width: 100%; height: auto; }
+.plot-figure figcaption { margin-top: 0.45rem; font-size: 0.85rem; color: #52606d; word-break: break-all; }
+.missing-plot { color: #9b1c1c; background: #fff5f5; border: 1px solid #f8b4b4; border-radius: 0.4rem; padding: 0.75rem; }
+```
+
+# `r switch(params$domain, UKEIRE = "UK/Eire", EU = "EU", GLOBAL = "Global", params$domain)` Input Files
+
+## Metadata
+
+**Project:** `r params$project`
+
+**Scenario:** `r params$scenario`
+
+**Domain:** `r params$domain`
+
+**Species:** `r params$species`
+
+**Emissions year:** `r params$y`
+
+**Inventory / source version:** `r params$inv`
+
+**Map Used:** `r params$map_yr_uk`
+
+**Data source:** `r params$data_source`
+
+**Output dir:** `r gsub("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/", "", params$folname)`
+
+**EMEP version:** `r params$emep_version`
+
+```{r metadata-table, echo = FALSE, results = "asis"}
+# preserve original metadata rendering but using HTML kbl
+
+if(params$domain == "UKEIRE"){
+  eire_sec <- if(params$species == "hcl"){"zhang_2022"} else {"GNFR"}
+  eire_res <- if(params$species == "hcl"){"0.1_deg"} else {"1km"}
+  eire_crs <- if(params$species == "hcl"){"LL"} else {"TM65"}
+
+  dt_meta <- data.table(
+    Domain = params$domain,
+    Species = params$species,
+    Area = c("UK", "Eire", "SEA"),
+    Emis_Year = params$y,
+    Map_Year = c(params$map_yr_uk, "2019", "N/A"),
+    Source = c(params$data_source,"EMEP", "N/A"),
+    Inv = params$inv,
+    orig_sec = c("SNAP", eire_sec, "N/A"),
+    orig_res = c("1km", eire_res, "N/A"),
+    Temporal = params$time_dim
+  )
+  kbl(dt_meta, caption = "Run metadata")
+
+} else {
+  dt_meta <- data.table(
+    Domain = params$domain,
+    Species = params$species,
+    Emis_Year = params$y,
+    Source = params$data_source,
+    Inv = params$inv,
+    Temporal = params$time_dim,
+    Aggregation = params$agg_schema
+  )
+  kbl(dt_meta, caption = "Run metadata")
+}
+```
+
+```{r, results='asis', echo=FALSE}
+if (params$domain == "UKEIRE") {
+cat("\nNotes: \n\n* Emissions from the UK and Eire are processed to consistent sector categories (see /data/lookups/EMEP_sectors.csv) and masked to a UK+10km mask. EMEP/CEIP emissions take precedence outside of this mask. \n\n* The 10km strip from the land territory into the sea is combined (UK + Eire) to a 'SEA' ISO code, for all sectors.\n\n* Emissions maps are pre-processed from 1km x 1km BNG (UK) and 1km x 1km Irish Grid TM65 (Eire) into WGS84 lat lon, at 0.01$^\\circ$ x 0.01$^\\circ$ resolution. \n\n  * HCl data for Eire/EU is taken from Zhang et al. (2022) - https://doi.org/10.5194/essd-14-5297-2022\n\n  * This is done in /gws/ssde/j25b/ceh_generic/inventory_processor\n\n* Totals are adherent to NFR level reporting (i.e. maps are scaled)\n\n  * Taken from: https://naei.energysecurity.gov.uk/data/data-selector\n")
+
+}else if(params$domain == "EU"){
+cat("\nNotes: \n\n* Emissions from the EU (and wider) domain remain in GNFR sectors (see /data/lookups/EMEP_sectors.csv) with UK+10km data masked out. EMEP/CEIP emissions take precedence outside of this mask. \n\n* Emissions data are provided in WGS84 lat lon, at 0.1$^\\circ$ x 0.1$^\\circ$ resolution. \n\n  * This is done in /gws/ssde/j25b/ceh_generic/inventory_processor\n\n")
+}
+```
+
+
+## Processing Flow
+
+```{r stage-plot, echo = FALSE, fig.align = "center", out.width = "95%", fig.cap = "Processing-stage totals by ISO, normalised to each ISO inventory total. Inventory is therefore 1."}
+include_plot(plot_paths$stage)
+```
+
+```{r stage-table, echo = FALSE, results = "asis"}
+dt_stage <- qaqc_v2_stage_totals(summary_paths)
+if (nrow(dt_stage) > 0) {
+  dt <- dt_stage[, .(Total_kt = round(sum(emis_t, na.rm = TRUE) / 1000, 3)), by = .(Area, stage)]
+  dt_domain <- dt[, .(Total_kt = sum(Total_kt, na.rm = TRUE)), by = stage]
+  ref <- dt_domain[stage == "inventory", Total_kt][1]
+  if (!is.na(ref)) {
+    dt_domain[, ratio_to_inventory := round(Total_kt / ref, 6)]
+    dt_domain[, delta_from_inventory_kt := round(Total_kt - ref, 6)]
+  }
+  kbl(dt_domain, caption = "Domain-level conservation check")
+} else {
+  kbl(data.table(Note = "No processing-stage summaries found."))
+}
+```
+
+```{r inventory-processed-sector-loss, echo = FALSE, results = "asis"}
+dt_sector_loss <- qaqc_v2_inventory_processed_sector_loss(summary_paths, params$dt_sec)
+if (nrow(dt_sector_loss) > 0) {
+  kbl(
+    dt_sector_loss,
+    caption = paste0(
+      "GNFR sectors contributing to inventory-to-processed ",
+      params$species,
+      " losses (kt). Missing_pct is percent of total positive loss."
+    )
+  )
+} else {
+  kbl(
+    data.table(Note = "No positive inventory-to-processed sector losses found, or sector columns were unavailable.")
+  )
+}
+```
+
+## Total Emissions Map
+
+Map classes use quantiles with probabilities `0.20, 0.40, 0.55, 0.70, 0.82, 0.92, 0.97, 1.00` and the `Spectral` brewer palette. For the global domain, ISO polygons are drawn on this total map only.
+
+```{r total-map, echo = FALSE, fig.align = "center", out.width = "95%", fig.cap = "Total emissions from precomputed QAQC raster (data inside .nc file)."}
+include_plot(plot_paths$raster_total)
+```
+
+```{r raster-summary, echo = FALSE, results = "asis"}
+dt_rast <- qaqc_v2_raster_summary(raster_paths)
+if (nrow(dt_rast) > 0) {
+  kbl(dt_rast, caption = "Precomputed QAQC raster summaries (data inside .nc input file)")
+} else {
+  kbl(data.table(Note = "No precomputed QAQC rasters found."))
+}
+```
+
+## Sectoral Emissions Maps
+
+```{r sector-map, echo = FALSE, fig.align = "center", out.width = "98%", fig.cap = "Sectoral emissions from precomputed QAQC rasters."}
+include_plot(plot_paths$raster_sector)
+```
+
+## Sectoral Emissions: Top ISO Codes
+
+Figure 4 and Table 5 are restricted to the ten ISO codes with the biggest totals across all sectors.
+
+```{r sector-plot, echo = FALSE, fig.align = "center", out.width = "82%", fig.cap = "Sectoral emissions for the ten largest ISO totals."}
+include_plot(plot_paths$sector_bar)
+```
+
+```{r sector-table, echo = FALSE, results = "asis"}
+dt_sector <- qaqc_v2_top_iso_sector_table(summary_paths, top_n = 10)
+if (nrow(dt_sector) > 0) {
+  if(params$domain == "UKEIRE"){
+    dt_sector[, ncTotal := rowSums(.SD, na.rm=T), .SDcols = c("GB", "IE", "SEA")]
+  }
+  kbl(dt_sector, caption = paste0(params$species, " emissions by sector for top ten ISO totals (kt). ISO columns are ordered largest to smallest."))
+} else {
+  kbl(data.table(Note = "No sectoral NetCDF output summary found."))
+}
+```
+
+```{r global-timeseries-title, echo = FALSE, results = "asis"}
+if (params$domain == "GLOBAL") {
+  cat("## Global Inventory Time Series\n\n")
+} else {
+  cat("## Inventory Time Series\n\n")
+}
+```
+
+```{r ts-plots, echo = FALSE, fig.align = "center", out.width = "82%", fig.cap = "Global inventory total over time."}
+if (params$domain == "GLOBAL") {
+  include_plot(plot_paths$timeseries_total)
+}
+```
+
+```{r ts-sector-plot, echo = FALSE, fig.align = "center", out.width = "90%", fig.cap = "Global inventory sector totals over time."}
+if (params$domain == "GLOBAL") {
+  include_plot(plot_paths$timeseries_sector)
+}
+```
+
+```{r ts-table, echo = FALSE, results = "asis"}
+if (params$domain == "GLOBAL") {
+  ts <- qaqc_v2_global_timeseries(params$data_source, params$inv, params$species, params$y)
+  if (nrow(ts$data) > 0) {
+    dt <- copy(ts$data)
+    dt[, emis_kt := round(emis_kt, 3)]
+    kbl(dt, caption = paste0("Global ", params$species, " inventory totals from ", basename(ts$file), " (kt)"))
+  } else {
+    kbl(data.table(Note = "No global time-series data found."))
+  }
+}
+```
+
+## Monthly Emissions
+
+```{r monthly-table, echo = FALSE, results = "asis"}
+dt_out <- qaqc_v2_read_csv(summary_paths$ncoutput)
+time_cols <- grep("^t[0-9]+$", names(dt_out), value = TRUE)
+if (nrow(dt_out) > 0 && length(time_cols) > 1) {
+  area_col <- intersect(c("Area", "ISO", "iso_char"), names(dt_out))[1]
+  if (!is.na(area_col)) data.table::setnames(dt_out, area_col, "Area")
+  id_cols <- setdiff(names(dt_out), time_cols)
+  dt <- melt(dt_out, id.vars = id_cols, measure.vars = time_cols, variable.name = "time", value.name = "emis_t")
+  dt <- dt[, .(emis_kt = round(sum(emis_t, na.rm = TRUE) / 1000, 3)), by = .(Area, time)]
+  dt_wide <- dcast(dt, Area ~ time, value.var = "emis_kt", fill = 0)
+  kbl(dt_wide, caption = paste0("Monthly ", params$species, " NetCDF output emissions (kt)"))
+} else {
+  kbl(data.table(Note = "No monthly columns available. Annual-only NetCDF summaries contain t1 only."))
+}
+```
+
+## Sector Classifications
+
+```{r sector-lookup, echo = FALSE, results = "asis"}
+if (!is.null(params$dt_sec) && nrow(params$dt_sec) > 0) {
+  dt <- as.data.table(params$dt_sec)
+  dt[, names(dt) := lapply(.SD, function(x) if (is.character(x)) iconv(x, from = "", to = "UTF-8", sub = "") else x)]
+  kbl(dt, caption = "Sectoral lookup table")
+} else {
+  kbl(data.table(Note = "No sector lookup table supplied."))
+}
+```

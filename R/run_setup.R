@@ -6,6 +6,19 @@
 #######################################################
 require(data.table)
 
+######################
+## OUTPUT LOCATIONS ##
+
+## choose output directory for the EMEP input files
+# STANDARD/NFC = paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK", # nolint
+# 					    emep_version,"/inv",naei_inv)
+
+output_project <- "NFCv2"
+v_scenarios <- "BASE" # paste0("SGS",6) # names or 'BASE'
+
+# if there are errors re no "alternate_emissions.csv" file, make sure this
+# has been considered in the set up. Make an empty one.
+
 ########################
 ## EMEP MODEL DOMAINS ##
 # set which domains to run.
@@ -49,10 +62,14 @@ output_QAQC <<- TRUE
 ## EMISSIONS & INVENTORY YEARS ##
 
 ## vectors of emissions years and pollutants to run ##
-v_years <- c(2023) # what emissions years to process
+v_years <- c(2015:2018) # what emissions years to process
 v_pollutants <- c("nox", "nh3", "sox", "pm25", "pmco", "co", "voc")
 # "nox","nh3","sox","pm25","pmco","co","voc", "hcl",
 # "cd", "cu", "ni", "pb", "zn" - CEH names, not EMEP model
+
+# choose whether to use a static map or dynamic map year (i.e. the latest
+# map scaled or the map pertinent to the emissions year)
+dynamic_map_uk <<- c(TRUE)
 
 # The following inventory choice is effectively the sub-folder of data choice.
 
@@ -60,6 +77,10 @@ v_pollutants <- c("nox", "nh3", "sox", "pm25", "pmco", "co", "voc")
 naei_inv <- 2025 # naei_inv  = which inventory compilation year to use
 map_yr_uk <- 2023 # map_yr_uk = year of NAEI spatial dist. for the data
 map_yr_ie <- 2019 # map_yr_ie = year of MapEire spatial dist. for the data
+
+if (run_source == "NAEI" && naei_inv < 2025 && map_yr_uk != (naei_inv - 2)) {
+  stop("If NAEI inventory is before 2025, the map year must be the latest.")
+}
 
 # EMEP EU emission years
 emep_inv <- 2025 # emep_inv  = which inventory compilation year to use
@@ -158,29 +179,23 @@ if (
 }
 
 
-######################
-## OUTPUT LOCATIONS ##
-
-## choose output directory for the EMEP input files
-# STANDARD/NFC = paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK", # nolint
-# 					    emep_version,"/inv",naei_inv)
-
-output_project <- "NFCv2"
-v_scenarios <- "BASE" # paste0("SGS",6) # names or 'BASE'
-
-# if there are errors re no "alternate_emissions.csv" file, make sure this
-# has been considered in the set up. Make an empty one.
-
 ##########################
 ## ALTERNATIVE EMISSIONS ##
 # a table to nominate file locations for different emissions ;
 # e.g. older years, different projects, and so on.
 
-dt_alt_emis <- fread(paste0(
+fol_alt_emis <- paste0(
   "/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/data/alt_emis/",
-  output_project,
-  "/alternate_emissions.csv"
-))
+  output_project
+)
+
+if (dir.exists(fol_alt_emis)) {
+  dt_alt_emis <- fread(file.path(fol_alt_emis, "alternate_emissions.csv"))
+} else {
+  dt_alt_emis <- fread(
+    "/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/data/alt_emis/alternate_emissions.csv" #nolint
+  )
+}
 
 # use empty structure when no alt emissions
 # dt_alt_emis <- data.table(projectName = character(), scenarioName = character(),
