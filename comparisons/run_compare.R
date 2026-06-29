@@ -2,6 +2,7 @@
 ####                                                  ####
 ####     THIS RUN FILE WILL COMPARE TWO DIFFERENT     ####
 ####    INPUT FILES FOR EMEP; RELATIVE AND ABSOLUTE   ####
+####              HTML REPORT VERSION                 ####
 ####                                                  ####
 ##########################################################
 
@@ -19,22 +20,24 @@ comp_annual <- TRUE
 comp_month <- FALSE # 15/05/26 : not available.
 
 # state the domain.
-domain <- "EU" # only UKEIRE / EU / GLOBAL
+domain <- "UKEIRE" # only UKEIRE / EU / GLOBAL
 
 # the named domain sources the correct functions
-source(paste0("comparisons/compare_functions.R"))
+source(paste0("comparisons/compare_functions_html_v5.R"))
 
 # need to make sure the folder name is changed in line with the desired
 # emissions year (if relevant, for example for older v4.45 inputs).
 
 ## comparisons always made FROM --> TO (i.e higher in 'to' = +ve value)
-folname_from <- "outputs/NFC/BASE/EMEP4UKv5.0/inv2025/EU/annual/TPannual_allISO" # nolint
+folname_from <- "outputs/NFCv2/BASE/UKEIRE/NAEI/i2025/EMEP4UKv5.0/annual/TPannual/allISO" # nolint
 names(folname_from) <- "from"
 emis_yr_from <- 2023
+map_yr_from <- 2023
 
-folname_to <- "/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/outputs/NFCv2/BASE/EU/EMEP/2025/EMEP4UKv5.0/annual/TPannual/allISO" # nolint
+folname_to <- "outputs/SNAPSPLIT/SN10/UKEIRE/NAEI/i2025/EMEP4UKv5.0/annual/TPannual/allISO" # nolint
 names(folname_to) <- "to"
 emis_yr_to <- 2023
+map_yr_to <- 2023
 
 # if the domain isn't in the filepath, stop process and check
 if (grepl(domain, folname_from) && grepl(domain, folname_to)) {
@@ -48,7 +51,7 @@ if (grepl(domain, folname_from) && grepl(domain, folname_to)) {
 v_pollutant <- c("nox", "nh3", "sox", "pm25", "pmco", "co", "voc")
 p <- v_pollutant[i_a]
 
-# process the annual and/or monthly pdf
+# process the annual and/or monthly HTML report
 if (comp_annual) {
     print(paste0(
         format(Sys.time(), "%Y-%m-%d %X"),
@@ -61,8 +64,10 @@ if (comp_annual) {
         domain,
         folname_from,
         emis_yr_from,
+        map_yr_from,
         folname_to,
         emis_yr_to,
+        map_yr_to,
         array_id = i_a
     )
 }
@@ -79,8 +84,11 @@ if (comp_month) {
         domain,
         folname_from,
         emis_yr_from,
+        map_yr_from,
         folname_to,
-        emis_yr_to
+        emis_yr_to,
+        map_yr_to,
+        array_id = i_a
     )
 }
 

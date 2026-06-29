@@ -2,7 +2,7 @@
 #### FUNCTIONS FOR CREATION OF EMEP - UK INPUT FILES ####
 #########################################################
 
-###############################################################################
+#### -------------------------------------------------------------------------
 #### function to set the combined UK/EIRE domain
 setDomain <- function(area = c("UKEIRE", "EU_EMEP"), crs = c("BNG", "LL")) {
   area <- match.arg(area) # area to process
@@ -67,7 +67,7 @@ vectorPolls <- function(dt_PID, class = c("ceh", "emep", "mapeire", "naei")) {
 
 ###############################################################################
 
-###############################################################################
+#### -------------------------------------------------------------------------
 #### function to take NAEI emissions, make ready to EMEP format and
 #### create netCDFs for UK & Eire
 EMEP_UKEIRE_v5.0 <- function(
@@ -79,6 +79,7 @@ EMEP_UKEIRE_v5.0 <- function(
   naei_inv,
   map_yr_uk,
   dynamic_map,
+  v_snap_split,
   map_yr_ie,
   folname,
   project,
@@ -135,8 +136,8 @@ EMEP_UKEIRE_v5.0 <- function(
 
   res_crs <- "0.01_LL"
 
-  ####################################################
-  #### CREATE THE NETCDF FILE TO PUT EMISSIONS IN
+  ## ------------------------------------------ ##
+  ## CREATE THE NETCDF FILE TO PUT EMISSIONS IN ##
   fname_ncdf <- create_NETCDF_uk(
     data_source,
     y,
@@ -148,7 +149,8 @@ EMEP_UKEIRE_v5.0 <- function(
     tp_scheme,
     v_EMEP_sec,
     time_dim,
-    uk_agg_schema
+    uk_agg_schema,
+    v_snap_split
   )
 
   ## loop through pollutants listed and populate the netCDF input file.
@@ -160,7 +162,7 @@ EMEP_UKEIRE_v5.0 <- function(
     ## Data can be made with a monthly time attribute
     # for the month, profile is chosen in run_setup.R
 
-    ###########################################################################
+    ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ##
     if (
       !(species %in%
         c("nox", "sox", "nh3", "co", "voc", "pm25", "pm10", "pmco", "hcl"))
@@ -171,7 +173,7 @@ EMEP_UKEIRE_v5.0 <- function(
                                             PM:    pm25, pm10, pmco"
       )
     }
-    ###########################################################################
+    ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ##
 
     print(paste0(format(Sys.time(), "%F %T"), ":        ", species, " data:"))
 
@@ -206,6 +208,11 @@ EMEP_UKEIRE_v5.0 <- function(
       } # not interested in blank named GNFR sectors either
       # print(paste0(format(Sys.time(), "%F %T"),":         ",i))
 
+      # set the GNFR code
+      i_gnfr <- dt_sec[sec == i, GNFRlong]
+      # set the SNAP code
+      i_snap <- dt_sec[sec == i, SNAP]
+
       ####################################
       #### LISTS OF EMISSION SURFACES ####
 
@@ -216,6 +223,7 @@ EMEP_UKEIRE_v5.0 <- function(
         species,
         y,
         i,
+        i_gnfr,
         project,
         scenario,
         time_dim,
@@ -224,11 +232,14 @@ EMEP_UKEIRE_v5.0 <- function(
         naei_inv,
         country = "uk"
       )
+
+      # Eire data never has a GNFR splitter for SNAP maps. Set as NULL.
       l_ie <- UKIE_sector_Emissions(
         dt_alt_emis,
         species,
         y,
         i,
+        i_gnfr,
         project,
         scenario,
         time_dim,
@@ -238,8 +249,32 @@ EMEP_UKEIRE_v5.0 <- function(
         country = "ie"
       )
 
-      ########################
-      #### TEMPORAL SPLIT ####
+      ## ------------------ ##
+      ## SECTORAL SPLITTING ##
+      # Splitting SNAP sectors into more maps. If possible.
+      # Ideally would split out after all sectors done but that would require
+      # a lot of re-write for the summary functions etc.
+      # Split UK only.
+      l_uk_split <- split_sec(
+        l_annual = l_uk,
+        v_snap_split,
+        i,
+        i_snap,
+        i_gnfr,
+        species,
+        y,
+        dt_alt_emis,
+        project,
+        scenario,
+        time_dim,
+        res_crs,
+        map_yr = map_yr_uk,
+        naei_inv
+      )
+
+      ## ------------------ ##
+      ## TEMPORAL PROFILING ##
+
       # if the time_dim is 'annual', the data stays as 1 annual total.
       # if the time_dim is 'month',  the data needs to be split into 12 layers.
       # if the time_dim is 'yday',   the data needs to be split into 365 layers.
@@ -247,15 +282,15 @@ EMEP_UKEIRE_v5.0 <- function(
       # or newly generated data (e.g. ukem_pro)
       # the sea & outwith layers need to be split based on the country
       # it came from (i.e. UK or Eire)
-      l_uk_prof <- split_UKIE_annual(
+      l_uk_prof <- prof_ukie_annual(
         species = species,
         time_dim,
         tp_scheme,
-        l_annual = l_uk,
+        l_annual = l_uk_split,
         i = i,
         country = "uk"
       )
-      l_ie_prof <- split_UKIE_annual(
+      l_ie_prof <- prof_ukie_annual(
         species = species,
         time_dim,
         tp_scheme,
@@ -313,8 +348,9 @@ EMEP_UKEIRE_v5.0 <- function(
       #### STATISTICS ####
       # inventory summary for UK & IE
       dt_inv_summary <- rbindlist(
-        list(l_uk$ann_summary, l_ie$ann_summary),
-        use.names = T
+        list(l_uk_split$ann_summary, l_ie$ann_summary),
+        use.names = TRUE,
+        fill = TRUE
       )
 
       # make summaries for all masked areas
@@ -328,7 +364,7 @@ EMEP_UKEIRE_v5.0 <- function(
         species,
         i,
         time_dim,
-        l_uk_inv = l_uk,
+        l_uk_inv = l_uk_split,
         l_ie_inv = l_ie,
         l_s_uk = l_s_uk,
         l_s_ie = l_s_ie,
@@ -365,12 +401,12 @@ EMEP_UKEIRE_v5.0 <- function(
       )]] <- dt_group_summary
     } # sector loop
 
-    ####################################################
+    #### ------------------------------------------ ####
     #### AGGREGATION BY SECTOR OR ISO (IF REQUIRED) ####
 
     # not for the UK & Eire data
 
-    ###################################################
+    #### ----------------------------------------- ####
     #### INPUT DATA TO NETCDF TO SPECIES VARIABLES ####
     print(paste0(
       format(Sys.time(), "%F %T"),
@@ -418,7 +454,8 @@ EMEP_UKEIRE_v5.0 <- function(
       naei_inv,
       time_dim,
       v_EMEP_sec,
-      uk_agg_schema
+      uk_agg_schema,
+      v_snap_split
     )
 
     write_summaries_uk(
@@ -451,13 +488,14 @@ EMEP_UKEIRE_v5.0 <- function(
 } # end of function
 
 
-###############################################################################
+#### -------------------------------------------------------------------------
 #### function to collect sector data for diffuse/points, for country & sector
 UKIE_sector_Emissions <- function(
   dt_alt_emis,
   species,
   y,
   i,
+  i_gnfr,
   project,
   scenario,
   time_dim,
@@ -511,7 +549,7 @@ UKIE_sector_Emissions <- function(
         scenarioName == scenario &
         poll == species &
         diff_or_pt == "diff" &
-        sector == dt_sec[sec == i, GNFRlong] &
+        sector == i_gnfr &
         iso == "GB"
     ]
 
@@ -533,29 +571,11 @@ UKIE_sector_Emissions <- function(
 
       loctext_diff <- "alt_file"
     } else {
-      fol_emis <- "/gws/ssde/j25b/ceh_generic/inventory_processor/data"
-
-      f_diff <- paste0(
-        fol_emis,
-        "/NAEI/inv",
+      f_diff <- uk_diff_file(
         naei_inv,
-        "/maps/",
         map_yr,
-        "/NAEI_",
-        dt_poll[ceh_poll == species, invProc],
-        "_DIFFUSE_inv",
-        naei_inv,
-        "_emis_",
-        map_yr,
-        "/GNFR/NAEI_",
-        dt_poll[ceh_poll == species, invProc],
-        "_DIFFUSE_inv",
-        naei_inv,
-        "_emis_",
-        map_yr,
-        "_GNFR_",
-        dt_sec[sec == i, GNFRlong],
-        "_t_LL.tif"
+        species,
+        i_gnfr
       )
 
       loctext_diff <- "inventory"
@@ -569,7 +589,7 @@ UKIE_sector_Emissions <- function(
         scenarioName == scenario &
         poll == species &
         diff_or_pt == "pt" &
-        sector == dt_sec[sec == i, GNFRlong] &
+        sector == i_gnfr &
         iso == "GB"
     ]
 
@@ -594,24 +614,7 @@ UKIE_sector_Emissions <- function(
 
       loctext_pt <- "alt_file"
     } else {
-      fol_emis <- "/gws/ssde/j25b/ceh_generic/inventory_processor/data"
-
-      f_pt <- c(
-        paste0(
-          fol_emis,
-          "/NAEI/inv",
-          naei_inv,
-          "/points/NAEI_AllPoll_POINTS_inv",
-          naei_inv,
-          "_emis_1990_",
-          naei_inv - 2,
-          "_GNFR_t_LL.csv"
-        ),
-        paste0(
-          fol_emis,
-          "/../../samtom/SPEED/power_station_emissions_ALL_1950-2000_GNFR_t_LL.csv"
-        )
-      )
+      f_pt <- uk_pt_file(naei_inv)
 
       loctext_pt <- "inventory"
     }
@@ -623,7 +626,7 @@ UKIE_sector_Emissions <- function(
         scenarioName == scenario &
         poll == species &
         diff_or_pt == "diff" &
-        sector == dt_sec[sec == i, GNFRlong] &
+        sector == i_gnfr &
         iso == "IE"
     ]
 
@@ -661,7 +664,7 @@ UKIE_sector_Emissions <- function(
           "/GNFR/Zhang_tcl_DIFFUSE_inv2022_emis_",
           file_y,
           "_GNFR_",
-          dt_sec[sec == i, GNFRlong],
+          i_gnfr,
           "_t_LL.tif"
         )
         loctext_diff <- "zhang_glob"
@@ -674,7 +677,7 @@ UKIE_sector_Emissions <- function(
           "_DIFFUSE_inv2021_emis_2019/GNFR/MapEire_",
           dt_poll[ceh_poll == species, invProc],
           "_DIFFUSE_inv2021_emis_2019_GNFR_",
-          dt_sec[sec == i, GNFRlong],
+          i_gnfr,
           "_t_LL.tif"
         )
         loctext_diff <- "inventory"
@@ -690,18 +693,7 @@ UKIE_sector_Emissions <- function(
 
   ### read in the data; if diff/pts are empty / don't exist, set as blank domain
   ### read diffuse data ###
-  if (file.exists(f_diff)) {
-    r_diff <- rast(f_diff)
-    if (species == "hcl" & country == "ie") {
-      r_diff <- disagg(r_diff, 10)
-      r_diff <- r_diff / 100
-      r_diff <- crop(extend(r_diff, r_dom_UKIE), r_dom_UKIE)
-    } else {
-      r_diff <- crop(extend(r_diff, r_dom_UKIE), r_dom_UKIE)
-    }
-  } else {
-    r_diff <- r_dom_UKIE
-  } # end of read diffuse
+  r_diff <- ukie_diff_read(f = f_diff, species, country)
 
   ### read point data ###
   # this is decided by country, UK should always have point files to read
@@ -709,34 +701,7 @@ UKIE_sector_Emissions <- function(
     # get the table of points first and assess if any entries at all
     #     PUBLIC POWER: use NAEI point data back to 1990, then the UKSCAPE/SPEED time series to 1960
     # NOT PUBLIC POWER: years prior to 2000 will use 2000 !! (see theory/graphs on combining points, diffuse, scaling etc)
-
-    # read both files, subset the historical to < 1990 and bind together, then perform subsetting.
-    l_pts <- lapply(f_pt, fread)
-    l_pts[[2]] <- l_pts[[2]][Year < 1990]
-
-    dt_pts <- rbindlist(l_pts, use.names = T)
-
-    dt_pts <- dt_pts[
-      GNFR == dt_sec[sec == i, GNFRlong] &
-        AREA == toupper(country) &
-        Pollutant == dt_poll[ceh_poll == species, invProc]
-    ]
-
-    if (i == "sec01") {
-      dt_pts <- dt_pts[Year == y]
-    } else if (i != "sec01" && y >= 2000) {
-      dt_pts <- dt_pts[Year == y]
-    } else {
-      dt_pts <- dt_pts[Year == 2000]
-    }
-
-    # if there are no points, use a blank raster, otherwise rasterize
-    if (nrow(dt_pts) == 0) {
-      r_pt <- r_dom_UKIE
-    } else {
-      v_pt <- vect(dt_pts, geom = c("Easting", "Northing"), crs = "EPSG:4326")
-      r_pt <- terra::rasterize(v_pt, r_dom_UKIE, field = "emis_t", fun = sum)
-    } # end of read points
+    r_pt <- uk_pt_read(f = f_pt, i_gnfr, country, species, i, y)
   } else if (country == "ie") {
     r_pt <- r_dom_UKIE
   }
@@ -747,8 +712,8 @@ UKIE_sector_Emissions <- function(
   r <- app(s, sum, na.rm = T)
   names(r) <- "total"
 
-  ###############
-  ### SCALING ###
+  ## ------- ##
+  ## SCALING ##
 
   # Scale the mapped data to a chosen year - scale by emissions,
   # not an alpha factor.
@@ -899,7 +864,7 @@ UKIE_sector_Emissions <- function(
           Pollutant == dt_poll[ceh_poll == species, invProc] &
             Year == y &
             ISO2 == "IE" &
-            GNFR == dt_sec[sec == i, GNFRlong],
+            GNFR == i_gnfr,
           tot_emis_t
         ]
       } else {
@@ -921,12 +886,12 @@ UKIE_sector_Emissions <- function(
 
         if (i == "sec08") {
           emep_alpha <- dt_ceds_alpha[
-            Year == y & ISO2 == "XX" & GNFR == dt_sec[sec == i, GNFRlong],
+            Year == y & ISO2 == "XX" & GNFR == i_gnfr,
             alpha
           ]
         } else {
           emep_alpha <- dt_ceds_alpha[
-            Year == y & ISO2 == "IE" & GNFR == dt_sec[sec == i, GNFRlong],
+            Year == y & ISO2 == "IE" & GNFR == i_gnfr,
             alpha
           ]
         }
@@ -935,7 +900,7 @@ UKIE_sector_Emissions <- function(
           Pollutant == dt_poll[ceh_poll == species, SPEED] &
             Year == 1990 &
             ISO2 == "IE" &
-            GNFR == dt_sec[sec == i, GNFRlong],
+            GNFR == i_gnfr,
           tot_emis_t
         ]
         scaling_value <- (emep_alpha * emep90_t)
@@ -987,8 +952,8 @@ UKIE_sector_Emissions <- function(
   # re-scale the mapped data
   rs <- (r / global(r, sum, na.rm = T)$sum) * scaling_value
 
-  ###############
-  ### MASKING ###
+  ## ------- ##
+  ## MASKING ##
 
   # if the species is HCl, the Zhang data will need masking down to just Eire
   if (species == "hcl" & country == "ie") {
@@ -1032,7 +997,7 @@ UKIE_sector_Emissions <- function(
     map_y = map_yr,
     inv_y = naei_inv,
     sec_EMEP = i,
-    sec_GNFR = dt_sec[sec == i, GNFRlong],
+    sec_GNFR = i_gnfr,
     sec_SNAP = dt_sec[sec == i, SNAP],
     sec_long = dt_sec[sec == i, name],
     time_res = time_dim,
@@ -1059,10 +1024,303 @@ UKIE_sector_Emissions <- function(
   return(l)
 } # end of function
 
+#### -------------------------------------------------------------------------
+#### function to split a SNAP sector into multiple sectors (e.g. SN10 to K & L).
+split_sec <- function(
+  l_annual,
+  v_snap_split,
+  i,
+  i_snap,
+  i_gnfr,
+  species,
+  y,
+  dt_alt_emis,
+  project,
+  scenario,
+  time_dim,
+  res_crs,
+  map_yr = map_yr_uk,
+  naei_inv
+) {
+  # This splitting function needs to have some conditionals.
+  # Also, it needs to update the stats table with new amounts.
+  # Plus it has to work on previously empty GNFR/sec codes.
+  # Plus it has to work out of order (e.g. do G_ before I_ is done)
+  if (l_annual$ann_summary$Area != "uk") {
+    stop("Only UK SNAP data can be split. Check.")
+  }
 
-######################################################################################################
+  # only split if the SNAP is nominated.
+  if (i_snap %in% v_snap_split) {
+    # get the NAEI GNFR excel data (formatted)
+    dt_naei_gnfr <- uk_gnfr_excel(species)
+
+    # split sector
+    if (i == "sec11") {
+      # as sec 11 (K_) comes before sec12 (L_), just split.
+      l_split <- copy(l_annual)
+
+      r_frac <- snap_frac_map(
+        dt = dt_naei_gnfr,
+        v_gnfr = c("K_AgriLivestock", "L_AgriOther"),
+        i_gnfr
+      )
+
+      # split all 5 rasters in the l_annual data
+      idx <- vapply(l_annual, inherits, logical(1), what = "SpatRaster")
+      l_split[idx] <- lapply(l_annual[idx], function(x) x * r_frac)
+    } else if (i == "sec12") {
+      # sec12 (L_) is kept blank usually, so splitting will do nothing
+
+      # we have to re-make sec11, and split to L_.
+      l_split <- UKIE_sector_Emissions(
+        dt_alt_emis,
+        species,
+        y,
+        i = "sec11",
+        i_gnfr = "K_AgriLivestock",
+        project,
+        scenario,
+        time_dim,
+        res_crs,
+        map_yr = map_yr_uk,
+        naei_inv,
+        country = "uk"
+      )
+      # overwrite the stats table with the original
+      l_split$ann_summary <- l_annual$ann_summary
+
+      r_frac <- snap_frac_map(
+        dt = dt_naei_gnfr,
+        v_gnfr = c("K_AgriLivestock", "L_AgriOther"),
+        i_gnfr
+      )
+
+      # split all 5 rasters in the l_annual data
+      idx <- vapply(l_split, inherits, logical(1), what = "SpatRaster")
+      l_split[idx] <- lapply(l_split[idx], function(x) x * r_frac)
+    } else if (i == "sec07") {
+      stop("can't split SN08 yet")
+    } else if (i == "sec08") {
+      stop("can't split SN08 yet")
+    } else if (i == "sec09") {
+      stop("can't split SN08 yet")
+    }
+
+    # update the table
+    l_split$ann_summary[, split := TRUE]
+    l_split$ann_summary[,
+      split_snap := ifelse(i %in% c("sec11", "sec12"), 10, 8)
+    ]
+    l_split$ann_summary[,
+      emis_t_split := global(l_split$total, sum, na.rm = TRUE)
+    ]
+    l_split$ann_summary[, emis_t_delta := emis_t_split - emis_t_spatial_scaled]
+  } else {
+    # no split, update the table
+    l_split <- copy(l_annual)
+    l_split$ann_summary[, split := FALSE]
+    l_split$ann_summary[, split_snap := NA]
+    l_split$ann_summary[, emis_t_split := 0]
+    l_split$ann_summary[, emis_t_delta := 0]
+  }
+
+  return(l_split)
+}
+
+#### -------------------------------------------------------------------------
+#### function to read the NAEI GNFR excel dataset
+uk_gnfr_excel <- function(
+  species
+) {
+  ## get the NAEI GNFR data submitted to CEIP
+  v_cols <- c("Lon", "Lat", "GNFR", "emis_kt")
+
+  # z_Memo does NOT include shipping, it's odd stuff on land only.
+  xl_naei_gnfr <- read_xlsx(
+    "data/lookups/annex_v_gridded_emissions_2023_v1.0.xlsx",
+    sheet = "2023",
+    skip = 13
+  )
+  dt <- as.data.table(xl_naei_gnfr)
+
+  setnames(
+    dt,
+    c("GNFR aggregated  sectors", "Longitude", "Latitude", species),
+    c("GNFR", "Lon", "Lat", "emis_kt")
+  )
+
+  dt <- dt[, ..v_cols]
+  return(dt)
+}
+
+#### -------------------------------------------------------------------------
+#### function to rasterise GNFR excel data and split to fractions
+snap_frac_map <- function(
+  dt,
+  v_gnfr,
+  i_gnfr
+) {
+  dt <- dt[GNFR %in% v_gnfr]
+  dt <- dt[, .(emis_t = sum(emis_kt, na.rm = T)), by = .(Lon, Lat, GNFR)]
+
+  dt_w <- dcast(
+    dt,
+    Lon + Lat ~ GNFR,
+    value.var = "emis_t",
+    fun.aggregate = sum
+  )
+
+  # make stack from NAEI GNFR publication
+  s <- rast(dt_w, type = "xyz", crs = "EPSG:4326")
+  s <- s * 1000 # kt to t
+  s <- crop(extend(s, r_dom_UKIE), r_dom_UKIE)
+  s[is.na(s)] <- 0
+
+  # emissions as a fraction of total - convert to 0.01
+  r_sum <- app(s, sum, na.rm = TRUE)
+  s_frac <- s / r_sum
+  s_frac <- disagg(s_frac, 10)
+
+  # here we set NA areas to be 50/50. This ensures data is not lost,
+  # but divided equally. (some edge areas are lost from GNFR to SNAP)
+  s_frac[is.na(s_frac)] <- 0.5
+
+  # keep the right one
+  r <- s_frac[i_gnfr]
+
+  return(r)
+}
+
+#### -------------------------------------------------------------------------
+#### function to construct the uk diffuse file.
+uk_diff_file <- function(
+  naei_inv,
+  map_yr,
+  species,
+  i_gnfr
+) {
+  fol_emis <- "/gws/ssde/j25b/ceh_generic/inventory_processor/data"
+
+  f <- paste0(
+    fol_emis,
+    "/NAEI/inv",
+    naei_inv,
+    "/maps/",
+    map_yr,
+    "/NAEI_",
+    dt_poll[ceh_poll == species, invProc],
+    "_DIFFUSE_inv",
+    naei_inv,
+    "_emis_",
+    map_yr,
+    "/GNFR/NAEI_",
+    dt_poll[ceh_poll == species, invProc],
+    "_DIFFUSE_inv",
+    naei_inv,
+    "_emis_",
+    map_yr,
+    "_GNFR_",
+    i_gnfr,
+    "_t_LL.tif"
+  )
+  return(f)
+}
+
+#### -------------------------------------------------------------------------
+#### function to construct the uk point file.
+uk_pt_file <- function(
+  naei_inv
+) {
+  fol_emis <- "/gws/ssde/j25b/ceh_generic/inventory_processor/data"
+
+  f <- c(
+    paste0(
+      fol_emis,
+      "/NAEI/inv",
+      naei_inv,
+      "/points/NAEI_AllPoll_POINTS_inv",
+      naei_inv,
+      "_emis_1990_",
+      naei_inv - 2,
+      "_GNFR_t_LL.csv"
+    ),
+    paste0(
+      fol_emis,
+      "/../../samtom/SPEED/power_station_emissions_ALL_1950-2000_GNFR_t_LL.csv"
+    )
+  )
+
+  return(f)
+}
+
+#### -------------------------------------------------------------------------
+#### function to read the UK/Eire diffuse file.
+ukie_diff_read <- function(
+  f,
+  species,
+  country
+) {
+  if (file.exists(f)) {
+    r <- rast(f)
+    if (species == "hcl" & country == "ie") {
+      r <- disagg(r, 10)
+      r <- r / 100
+      r <- crop(extend(r, r_dom_UKIE), r_dom_UKIE)
+    } else {
+      r <- crop(extend(r, r_dom_UKIE), r_dom_UKIE)
+    }
+  } else {
+    r <- r_dom_UKIE
+  } # end of read diffuse
+
+  return(r)
+}
+
+#### -------------------------------------------------------------------------
+#### function to read the UK point files.
+uk_pt_read <- function(
+  f,
+  i_gnfr,
+  country,
+  species,
+  i,
+  y
+) {
+  # read both files, subset the historical to < 1990 and bind together, then perform subsetting.
+  l_pts <- lapply(f, fread)
+  l_pts[[2]] <- l_pts[[2]][Year < 1990]
+
+  dt_pts <- rbindlist(l_pts, use.names = T)
+
+  dt_pts <- dt_pts[
+    GNFR == i_gnfr &
+      AREA == toupper(country) &
+      Pollutant == dt_poll[ceh_poll == species, invProc]
+  ]
+
+  if (i == "sec01") {
+    dt_pts <- dt_pts[Year == y]
+  } else if (i != "sec01" && y >= 2000) {
+    dt_pts <- dt_pts[Year == y]
+  } else {
+    dt_pts <- dt_pts[Year == 2000]
+  }
+
+  # if there are no points, use a blank raster, otherwise rasterize
+  if (nrow(dt_pts) == 0) {
+    r <- r_dom_UKIE
+  } else {
+    v_pt <- vect(dt_pts, geom = c("Easting", "Northing"), crs = "EPSG:4326")
+    r <- terra::rasterize(v_pt, r_dom_UKIE, field = "emis_t", fun = sum)
+  } # end of read points
+
+  return(r)
+}
+
+#### -------------------------------------------------------------------------
 #### function to split annual emissions out into months (or keep as annual)
-split_UKIE_annual <- function(
+prof_ukie_annual <- function(
   species,
   time_dim = c("annual", "month", "yday"),
   tp_scheme,
@@ -1370,7 +1628,7 @@ split_UKIE_annual <- function(
   return(l_s) # return the monthly/annual emissions
 } # end function
 
-######################################################################################################
+#### -------------------------------------------------------------------------
 #### function to create stacks of emissions for different mask areas
 stack_data <- function(
   species,
@@ -1516,7 +1774,7 @@ stack_data <- function(
   return(l)
 }
 
-######################################################################################################
+#### -------------------------------------------------------------------------
 #### function to summarise input emissions
 summarise_UKIE_emissions <- function(
   project,
@@ -1528,7 +1786,7 @@ summarise_UKIE_emissions <- function(
   species,
   i,
   time_dim,
-  l_uk_inv = l_uk,
+  l_uk_inv = l_uk_split,
   l_ie_inv = l_ie,
   l_s_uk = l_s_uk,
   l_s_ie = l_s_ie,
@@ -1561,7 +1819,8 @@ summarise_UKIE_emissions <- function(
     sec_GNFR = dt_sec[sec == i, GNFRlong],
     sec_SNAP = dt_sec[sec == i, SNAP],
     sec_long = dt_sec[sec == i, name],
-    time_res = time_dim
+    time_res = time_dim,
+    split = c(rep(l_uk_inv$ann_summary$split, 3), rep(FALSE, 3))
   )
 
   # add in annual totals - in country order as above
@@ -1609,7 +1868,13 @@ summarise_UKIE_emissions <- function(
     sec_GNFR = dt_sec[sec == i, GNFRlong],
     sec_SNAP = dt_sec[sec == i, SNAP],
     sec_long = dt_sec[sec == i, name],
-    time_res = time_dim
+    time_res = time_dim,
+    split = c(
+      l_uk_inv$ann_summary$split,
+      FALSE,
+      l_uk_inv$ann_summary$split,
+      l_uk_inv$ann_summary$split
+    )
   )
 
   # add in annual totals - in country order as above
@@ -1642,7 +1907,7 @@ summarise_UKIE_emissions <- function(
   return(l)
 } # end of function
 
-######################################################################################################
+#### -------------------------------------------------------------------------
 #### function to create directory and archive anything that exists in the target directory.
 archive_data <- function(species, folname) {
   print(paste0(
@@ -1758,7 +2023,7 @@ archive_data <- function(species, folname) {
   # }
 }
 
-######################################################################################################
+#### -------------------------------------------------------------------------
 #### function to create a netCDF and input the data - simple routine chooser
 create_NETCDF_uk <- function(
   data_source,
@@ -1771,7 +2036,8 @@ create_NETCDF_uk <- function(
   tp_scheme,
   v_EMEP_sec,
   time_dim,
-  uk_agg_schema
+  uk_agg_schema,
+  v_snap_split
 ) {
   if (time_dim == "annual") {
     fname <- create_NETCDF_uk_annual(
@@ -1785,7 +2051,8 @@ create_NETCDF_uk <- function(
       tp_scheme,
       v_EMEP_sec,
       time_dim,
-      uk_agg_schema
+      uk_agg_schema,
+      v_snap_split
     )
   } else if (time_dim == "month") {
     fname <- create_NETCDF_uk_month()
@@ -1794,7 +2061,7 @@ create_NETCDF_uk <- function(
   return(fname)
 }
 
-######################################################################################################
+#### -------------------------------------------------------------------------
 #### function to create a netCDF and input the data - this is the ANNUAL/MONTHLY input (EMEPv5.0)
 create_NETCDF_uk_annual <- function(
   data_source,
@@ -1807,7 +2074,8 @@ create_NETCDF_uk_annual <- function(
   tp_scheme,
   v_EMEP_sec,
   time_dim,
-  uk_agg_schema
+  uk_agg_schema,
+  v_snap_split
 ) {
   if (time_dim != "annual") {
     stop("time choice has to be annual to make an annual netcdf.")
@@ -1996,6 +2264,7 @@ create_NETCDF_uk_annual <- function(
   )
 
   # sectors - this might have to change if the amount of sectors input changes
+  ncatt_put(nc_new, 0, "split_snaps", as.character(v_snap_split), prec = "char")
   ncatt_put(nc_new, 0, "SECTORS_NAME", "GNFR", prec = "char")
 
   for (i in v_EMEP_sec) {
@@ -2023,12 +2292,12 @@ create_NETCDF_uk_annual <- function(
 } # end of function
 
 
-######################################################################################################
+#### -------------------------------------------------------------------------
 #### function to create a netCDF and input the data - this is the MONTHLY input (EMEPv4.45)
 create_NETCDF_uk_month <- function() {}
 
 
-######################################################################################################
+#### -------------------------------------------------------------------------
 #### function to create a netCDF and input the data
 input_data_NETCDF_uk <- function(
   project,
@@ -2311,7 +2580,7 @@ input_data_NETCDF_uk <- function(
   return(dt_ncdf_summary)
 } # end of function
 
-######################################################################################################
+#### -------------------------------------------------------------------------
 #### function to write out the summary tables into a new folder
 write_summaries_uk <- function(
   y,
@@ -2373,7 +2642,7 @@ write_summaries_uk <- function(
   )
 }
 
-######################################################################################################
+#### -------------------------------------------------------------------------
 #### function to read and summarise nc file fresh. Post writing.
 summarise_nc_file_uk <- function(
   project,
@@ -2384,7 +2653,8 @@ summarise_nc_file_uk <- function(
   naei_inv,
   time_dim,
   v_EMEP_sec,
-  uk_agg_schema
+  uk_agg_schema,
+  v_snap_split
 ) {
   # time dims
   if (time_dim == "annual") {
@@ -2477,6 +2747,10 @@ summarise_nc_file_uk <- function(
     if (v == species) {
       dt[, sec_name := "TOTAL"]
     }
+
+    dt[, SNAPtemp := dt_sec$SNAP[match(v_secs, dt_sec[, sec])]]
+    dt[, split := SNAPtemp %in% v_snap_split]
+    dt[, SNAPtemp := NULL]
 
     # add some summarised data from netCDF surface
     time_cols <- paste0("t", i_time)

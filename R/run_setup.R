@@ -13,8 +13,8 @@ require(data.table)
 # STANDARD/NFC = paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK", # nolint
 # 					    emep_version,"/inv",naei_inv)
 
-output_project <- "NFCv2"
-v_scenarios <- "BASE" # paste0("SGS",6) # names or 'BASE'
+output_project <- "SNAPSPLIT"
+v_scenarios <- "SN10" # paste0("SGS",6) # names or 'BASE'
 
 # if there are errors re no "alternate_emissions.csv" file, make sure this
 # has been considered in the set up. Make an empty one.
@@ -62,14 +62,21 @@ output_QAQC <<- TRUE
 ## EMISSIONS & INVENTORY YEARS ##
 
 ## vectors of emissions years and pollutants to run ##
-v_years <- c(2015:2018) # what emissions years to process
+v_years <- c(2023) # what emissions years to process
 v_pollutants <- c("nox", "nh3", "sox", "pm25", "pmco", "co", "voc")
 # "nox","nh3","sox","pm25","pmco","co","voc", "hcl",
 # "cd", "cu", "ni", "pb", "zn" - CEH names, not EMEP model
 
 # choose whether to use a static map or dynamic map year (i.e. the latest
 # map scaled or the map pertinent to the emissions year)
-dynamic_map_uk <<- c(TRUE)
+dynamic_map_uk <<- c(FALSE)
+
+# choose what SNAP sectors to split out to GNFR in the UK data.
+# specifically UK, specifically SNAPs.
+# REMEMBER, in processed data:
+#      * SNAP08 is assigned to I_Offroad and H_Aviation & G_Shipping are empty
+#      * SNAP10 is assigned to K_AgriLivestock and L_AgriOther is empty
+v_snap_split <- c(10)
 
 # The following inventory choice is effectively the sub-folder of data choice.
 
@@ -178,6 +185,11 @@ if (
   stop("EDGAR_v81 GLOBAL only runs from 2000 to 2022. Check year chosen!")
 }
 
+# break if SNAP split is anything but NULL, 8 or 10.
+
+if (any(v_snap_split %in% c(1:7, 9, 11))) {
+  stop("Splitting SNAP sectors can only apply to SN08 & SNAP10. Check!")
+}
 
 ##########################
 ## ALTERNATIVE EMISSIONS ##

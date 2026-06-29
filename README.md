@@ -27,12 +27,12 @@ The EMEP model requires gridded emissions data in standardized NetCDF format. Th
 ## Data Sources and Spatial Coverage
 
 ### UK & Ireland (UKEIRE domain)
-- **Pollutants**: NOx, NH3, SO2, PM2.5, PMCO, CO, VOC
+- **Pollutants**: NOx, NH3, SO2, PM2.5, PM10, PMCO, CO, VOC, HCl
 - **Data source**: NAEI (UK) + MapEire (Ireland) + EMEP (supplementary)
 - **Processing**: Handled by [Inventory Processor](https://github.com/oSamTo/inventory_processor) (stored on JASMIN)
-- **Sectors**: SNAP categories (mapped to GNFR for EU reporting)
+- **Sectors**: SNAP & GNFR categories
 - **Resolution**: 1km (original), 0.01° (resampled for EMEP)
-- **Years available**: 2015-2018 (currently configured)
+- **Years available**: 2015-2023
 
 ### EU Domain
 - **Data source**: HTAPv3 (CAMS) emissions as submitted to EMEP/CEIP
@@ -41,10 +41,10 @@ The EMEP model requires gridded emissions data in standardized NetCDF format. Th
 - **Resolution**: 0.1°
 - **Coverage**: 30°W–90°E, 30°N–82°N
 - **Masking**: UK terrestrial cells removed to avoid double-counting
+- **Years available**: 1990-2023
 
 ### Global Domain (under development)
-- **Data source**: HTAPv3.2 emissions (country-level data mapped to GNFR sectors)
-- **Future expansion**: EDGAR inventory integration planned
+- **Data source**: HTAPv3.2 emissions + EDGARv8.1 (country-level data mapped to GNFR sectors)
 
 ---
 
@@ -217,11 +217,10 @@ Rscript run.R 1
 
 Create an array job from your run configuration:
 ```bash
-# Estimate number of array jobs needed
-Rscript R/array_size.R
 
-# Submit array job (replace N with max array size)
-sbatch --array=1-N slurm/emep.array
+# Submit array job
+# The init job sets the array size and calls the array job file. 
+sbatch slurm/init.job
 ```
 
 ### Step 3: Check QA/QC
@@ -360,6 +359,12 @@ Each run generates:
 2. Set `v_scenarios` in `R/run_setup.R`
 3. Ensure folder structure matches expected output paths
 
+### Custom domains
+1. ability to choose any domain on the globe, at any resolution. In development.
+
+### Splitting SNAP sectors
+1. Using UK submission of GNFR data to CAMS to split tricky sectors (SNAPs 8 & 10)
+
 ---
 
 ## Related Resources
@@ -368,13 +373,3 @@ Each run generates:
 - **EMEP Model**: http://emep.int/
 - **GNFR Sectors**: https://www.eea.europa.eu/themes/air/air-quality-standards-and-target-values/gnfr
 - **SNAP Sectors**: UN/ECE Air Pollution Classification
-
----
-
-## Contact & Support
-
-For issues or contributions related to:
-- **This workflow**: Contact Sam Tom (samtom@ceh.ac.uk)
-- **EMEP model**: See http://emep.int/
-- **Inventory data**: See linked Inventory Processor repository
-

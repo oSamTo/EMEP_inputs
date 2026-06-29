@@ -19,6 +19,7 @@ params:
   summary_paths: NA
   raster_paths: NA
   plot_paths: NA
+  v_snap_split: NA
 title: "EMEP input files QAQC"
 author: "Sam Tomlinson"
 date: "`r format(Sys.Date(), '%d %B %Y')`"
@@ -247,6 +248,8 @@ img { max-width: 100%; height: auto; border: 1px solid #d9e2ec; border-radius: 0
 
 **Map Used:** `r params$map_yr_uk`
 
+**SNAPs split (GB):** `r params$v_snap_split`
+
 **Data source:** `r params$data_source`
 
 **Output dir:** `r gsub("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/", "", params$folname)`
@@ -357,6 +360,8 @@ if (nrow(dt_rast) > 0) {
 ```
 
 ## Sectoral Emissions Maps
+
+`r if (is.null(v_snap_split)) "**NB:** GB sectors split by GNFR maps: NONE" else paste0("**NB:** GB sectors split by GNFR maps: ", paste(v_snap_split, collapse = ", "))`
 
 ```{r sector-map, echo = FALSE, fig.align = "center", out.width = "98%", fig.cap = "Sectoral emissions from precomputed QAQC rasters."}
 include_plot(plot_paths$raster_sector)

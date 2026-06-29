@@ -103,6 +103,7 @@ if (run_domain == "UKEIRE") {
     naei_inv = dir_inv,
     map_yr_uk = map_yr_uk,
     dynamic_map = dynamic_map,
+    v_snap_split = v_snap_split,
     map_yr_ie = map_yr_ie,
     folname = folname,
     project = project,
@@ -177,6 +178,7 @@ if (output_QAQC) {
       tp_scheme = tp_scheme,
       dt_sec = dt_sec,
       dt_poll = dt_poll,
+      v_snap_split = v_snap_split,
       render_pdf = TRUE
     )
   }
