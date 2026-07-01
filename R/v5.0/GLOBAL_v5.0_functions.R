@@ -13,6 +13,7 @@ EMEP_GLOBAL_v5.0 <- function(
   time_dim = c("annual", "month", "yday"),
   v_EMEP_sec,
   glob_inv,
+  map_yr_glob,
   folname,
   tp_scheme,
   global_agg_schema
@@ -95,6 +96,7 @@ EMEP_GLOBAL_v5.0 <- function(
     v_pollutants,
     folname,
     glob_inv,
+    map_yr_glob,
     v_EMEP_sec,
     time_dim,
     global_agg_schema,
@@ -361,6 +363,7 @@ EMEP_GLOBAL_v5.0 <- function(
       y,
       species,
       glob_inv,
+      map_yr_glob,
       time_dim,
       v_EMEP_sec,
       dt_iso,
@@ -372,6 +375,7 @@ EMEP_GLOBAL_v5.0 <- function(
       y,
       species,
       glob_inv,
+      map_yr_glob,
       folname,
       dt_emep_emis = dt_emep_emis,
       dt_proc_emis = dt_proc_emis,
@@ -1133,6 +1137,7 @@ create_NETCDF_global <- function(
   v_pollutants,
   folname,
   glob_inv,
+  map_yr_glob,
   v_EMEP_sec,
   time_dim,
   global_agg_schema,
@@ -1145,6 +1150,7 @@ create_NETCDF_global <- function(
       v_pollutants,
       folname,
       glob_inv,
+      map_yr_glob,
       v_EMEP_sec,
       time_dim,
       global_agg_schema,
@@ -1166,6 +1172,7 @@ create_NETCDF_global_annual <- function(
   v_pollutants,
   folname,
   glob_inv,
+  map_yr_glob,
   v_EMEP_sec,
   time_dim,
   global_agg_schema,
@@ -1179,7 +1186,14 @@ create_NETCDF_global_annual <- function(
   dir.create(file.path(folname), showWarnings = FALSE, recursive = T)
 
   # create netcdf name
-  nc_filename <- paste0(folname, "/GLOBAL_", y, "emis_0.1.nc")
+  nc_filename <- paste0(
+    folname,
+    "/GLOBAL_",
+    map_yr_glob,
+    "map_",
+    y,
+    "emis_0.1.nc"
+  )
 
   # if the file already exists, just delete and rewrite
   if (file.exists(nc_filename)) {
@@ -1646,6 +1660,7 @@ summarise_nc_file_global <- function(
   y,
   species,
   glob_inv,
+  map_yr_glob,
   time_dim,
   v_EMEP_sec,
   dt_iso,
@@ -1735,6 +1750,7 @@ summarise_nc_file_global <- function(
       Data_source = "NetCDF_output",
       emis_y = y,
       inv_y = glob_inv,
+      map_y = map_yr_glob,
       agg = global_agg_schema,
       time_res = time_dim,
       sec_num = v_secs
@@ -1787,11 +1803,13 @@ summarise_nc_file_global <- function(
   # same operation as QAQC, reading in from the written ncdf.
 
   # create a holding folder
-  dir.create(
-    file.path(folname, "rast", paste0("e", y)),
-    showWarnings = FALSE,
-    recursive = T
+  folname_rast <- file.path(
+    folname,
+    "rast",
+    paste0("e", y, "_", "m", map_yr_glob)
   )
+
+  dir.create(folname_rast, showWarnings = FALSE, recursive = T)
 
   # total domain surface
   s <- rast(l_r)
@@ -1802,7 +1820,7 @@ summarise_nc_file_global <- function(
     s,
     sum,
     na.rm = TRUE,
-    filename = file.path(folname, "rast", paste0("e", y), fname),
+    filename = file.path(folname_rast, fname),
     overwrite = TRUE
   ))
 
@@ -1816,10 +1834,7 @@ summarise_nc_file_global <- function(
       sum,
       na.rm = TRUE,
       filename = paste0(
-        folname,
-        "/rast/",
-        "e",
-        y,
+        folname_rast,
         "/",
         species,
         "_sector",
@@ -1845,14 +1860,21 @@ write_summaries_global <- function(
   y,
   species,
   glob_inv,
+  map_yr_glob,
   folname,
   dt_emep_emis,
   dt_proc_emis,
   dt_ncinp,
   dt_ncout
 ) {
+  folname_tab <- file.path(
+    folname,
+    "tables",
+    paste0("e", y, "_", "m", map_yr_glob)
+  )
+
   dir.create(
-    file.path(folname, "tables", paste0("e", y)),
+    folname_tab,
     showWarnings = FALSE,
     recursive = T
   )
@@ -1866,19 +1888,19 @@ write_summaries_global <- function(
 
   fwrite(
     dt_emep_emis,
-    paste0(folname, "/tables/e", y, "/", fname_route, "_INVENTORY.csv")
+    paste0(folname_tab, "/", fname_route, "_INVENTORY.csv")
   )
   fwrite(
     dt_proc_emis,
-    paste0(folname, "/tables/e", y, "/", fname_route, "_PROCESSED.csv")
+    paste0(folname_tab, "/", fname_route, "_PROCESSED.csv")
   )
   fwrite(
     dt_ncinp,
-    paste0(folname, "/tables/e", y, "/", fname_route, "_NETCDFINP.csv")
+    paste0(folname_tab, "/", fname_route, "_NETCDFINP.csv")
   )
   fwrite(
     dt_ncout,
-    paste0(folname, "/tables/e", y, "/", fname_route, "_NETCDFOUT.csv")
+    paste0(folname_tab, "/", fname_route, "_NETCDFOUT.csv")
   )
 }
 

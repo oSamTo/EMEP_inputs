@@ -139,6 +139,13 @@ if (run_domain == "UKEIRE") {
   ## GLOBAL ##
   GLOBAL_functions <- paste0("EMEP_GLOBAL_", emep_version)
 
+  ## 'map year'
+  # global data doesn't have a map year, as such, it is just the same as the
+  # emissions year being processed, BUT it creates a standard product for
+  # QAQC routines across all domains to include it PLUS it will be needed
+  # to scale to 2040.
+  map_yr_glob <- y
+
   get(GLOBAL_functions)(
     data_source = data_source,
     y = y,
@@ -146,6 +153,7 @@ if (run_domain == "UKEIRE") {
     time_dim = time_dim,
     v_EMEP_sec = v_EMEP_sec,
     glob_inv = dir_inv,
+    map_yr_glob = map_yr_glob,
     folname = folname,
     tp_scheme = tp_scheme,
     global_agg_schema = agg_schema
@@ -158,6 +166,15 @@ if (run_domain == "UKEIRE") {
 ## QAQC ##
 # this should be lapply over v_pollutants for a separate file.
 if (output_QAQC) {
+  # reset the map year to a generic name.
+  if (run_domain == "UKEIRE") {
+    map_yr <- map_yr_uk
+  } else if (run_domain == "UKEIRE") {
+    map_yr <- map_yr_eu
+  } else if (run_domain == "GLOBAL") {
+    map_yr <- map_yr_glob
+  }
+
   for (species in v_pollutants) {
     create_qaqc_v2_codex(
       array_id = i_a,
@@ -169,7 +186,7 @@ if (output_QAQC) {
       folname = folname,
       inv = dir_inv,
       data_source = data_source,
-      map_yr_uk = map_yr_uk,
+      map_yr = map_yr,
       dynamic_map = dynamic_map,
       time_dim = time_dim,
       emep_version = emep_version,

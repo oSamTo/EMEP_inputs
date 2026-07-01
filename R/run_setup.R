@@ -1,68 +1,52 @@
-#######################################################
-####                                               ####
-####    FILE TO SET RUN CHOICES, E.G THE YEAR,     ####
-####  THE POLLUTANT VECTOR, EMEP MODEL VERSION ETC ####
-####                                               ####
-#######################################################
-require(data.table)
+#### --------------------------------------------- ####
+##--                                               --##
+##--    FILE TO SET RUN CHOICES, E.G THE YEAR,     --##
+##--  THE POLLUTANT VECTOR, EMEP MODEL VERSION ETC --##
+##--                                               --##
+#### --------------------------------------------- ####
+suppressPackageStartupMessages({
+  require(data.table)
+})
 
-######################
-## OUTPUT LOCATIONS ##
+# ---------------- #
+# OUTPUT LOCATIONS #
 
-## choose output directory for the EMEP input files
-# STANDARD/NFC = paste0("/gws/nopw/j04/ceh_generic/samtom/EMEP_inputs/outputs/EMEP4UK", # nolint
-# 					    emep_version,"/inv",naei_inv)
+# choose a project name and any scenarios.
+# This will form the start of the output location, i.e.
+# "ceh_generic/samtom/EMEP_inputs/outputs/", project,"/", scenario
+output_project <- "EDGAR"
+v_scenarios <- "BASE" # paste0("SGS",6) # names or 'BASE'
 
-output_project <- "SNAPSPLIT"
-v_scenarios <- "SN10" # paste0("SGS",6) # names or 'BASE'
-
-# if there are errors re no "alternate_emissions.csv" file, make sure this
-# has been considered in the set up. Make an empty one.
-
-########################
-## EMEP MODEL DOMAINS ##
+# ------------------ #
+# EMEP MODEL DOMAINS #
 # set which domains to run.
-run_domain <<- c("UKEIRE") # "UKEIRE", "EU", "GLOBAL"
-
-if (length(run_domain) > 1) {
-  stop("Choose exactly one domain to construct.")
-}
-
-if (!(run_domain %in% c("UKEIRE", "EU", "GLOBAL"))) {
-  stop("Choose a valid domain to construct.")
-}
+run_domain <<- c("GLOBAL") # "UKEIRE", "EU", "GLOBAL"
 
 # then nominate the data sources.
 # ! THESE NEED TO BE IDENTICAL TO THE FOLDER NAMES IN 'inventory_processor' ! #
 # UKEIRE file = "NAEI" (actually uses MapEire & EMEP as well)
 # EU file     = "EMEP" (to be expanded to EDGAR, CAMS)
-# GLOBAL      = "HTAP" (to be expanded to EDGAR)
-run_source <<- c("NAEI")
+# GLOBAL      = "HTAP" or "EGDAR"
+run_source <<- c("EDGAR")
 
 # For now the run_source is linked to the domain, and only one is chosen,
 # but we could have multiple data sources for the same domain.
 ## possibility to create blended source inputs?
 
-########################
-## EMEP MODEL VERSION ##
-
-## EMEP model version
+# ------------------ #
+# EMEP MODEL VERSION #
 # this makes the input to the model version.
 emep_version <<- "v5.0" # v4.36, v4.45 , v5.0
 
-if (length(emep_version) > 1) {
-  stop("Choose exactly one EMEP model version to run.")
-}
-
-#######################
-## OUTPUT QAQC FILES ##
+# ----------------- #
+# OUTPUT QAQC FILES #
 output_QAQC <<- TRUE
 
-#################################
-## EMISSIONS & INVENTORY YEARS ##
+# ------------------------------------ #
+# EMISSIONS & INVENTORY YEARS/VERSIONS #
 
 ## vectors of emissions years and pollutants to run ##
-v_years <- c(2023) # what emissions years to process
+v_years <- c(2022) # what emissions years to process
 v_pollutants <- c("nox", "nh3", "sox", "pm25", "pmco", "co", "voc")
 # "nox","nh3","sox","pm25","pmco","co","voc", "hcl",
 # "cd", "cu", "ni", "pb", "zn" - CEH names, not EMEP model
@@ -76,7 +60,7 @@ dynamic_map_uk <<- c(FALSE)
 # REMEMBER, in processed data:
 #      * SNAP08 is assigned to I_Offroad and H_Aviation & G_Shipping are empty
 #      * SNAP10 is assigned to K_AgriLivestock and L_AgriOther is empty
-v_snap_split <- c(10)
+v_snap_split <- NULL
 
 # The following inventory choice is effectively the sub-folder of data choice.
 
@@ -96,26 +80,14 @@ emep_inv <- 2025 # emep_inv  = which inventory compilation year to use
 # Zhang et al (2022) years
 zhang_inv <- 2022 # always 2022. Made in 2022. Map comes from emissions year.
 
-if (zhang_inv != 2022) {
-  stop("Zhang inventory has to be 2022. Change!")
-}
-
 # HTAP emissions version
 htap_inv <- "v32" # only option at the moment is 'v32'
-
-if (htap_inv != "v32") {
-  stop("Change HTAP inventory version. Only v32 is available at the moment.")
-}
 
 # EDGAR emissions version
 edgar_inv <- "v81" # only option at the moment is 'v81'
 
-if (edgar_inv != "v81") {
-  stop("Change EDGAR inventory version. Only v81 is available at the moment.")
-}
-
-#########################
-## TEMPORAL PARAMETERS ##
+# ------------------- #
+# TEMPORAL PARAMETERS #
 
 ## time dimension to process the data into ##
 time_dim <- "annual" # annual, month, yday
@@ -140,14 +112,43 @@ if (time_dim == "annual") {
   tp_scheme <- "annual"
 }
 
-##########################
-## COUNTRY AGGREGATIONS ##
+# -------------------- #
+# COUNTRY AGGREGATIONS #
 
 ## aggregation schema
 agg_schema <- "allISO" # allISO = separate ISO inpus. oneGRID = one file.
 
-#################
-## STOP CHECKS ##
+# ----------- #
+# STOP CHECKS #
+
+# stop of run domains are wrong
+if (length(run_domain) > 1) {
+  stop("Choose exactly one domain to construct.")
+}
+
+if (!(run_domain %in% c("UKEIRE", "EU", "GLOBAL"))) {
+  stop("Choose a valid domain to construct.")
+}
+
+# only choose 1 EMEP version at a time.
+if (length(emep_version) > 1) {
+  stop("Choose exactly one EMEP model version to run.")
+}
+
+# stop if Zhang is not 2022
+if (zhang_inv != 2022) {
+  stop("Zhang inventory has to be 2022. Change!")
+}
+
+# stop if HTAP is not v32 (only one processed as of June 2026)
+if (htap_inv != "v32") {
+  stop("Change HTAP inventory version. Only v32 is available at the moment.")
+}
+
+# stop if EDGAR is not v81 (only one processed as of June 2026)
+if (edgar_inv != "v81") {
+  stop("Change EDGAR inventory version. Only v81 is available at the moment.")
+}
 
 # break if EU is monthly AND ISO - the files are too big. THIS WILL CHANGE
 if (run_domain == "EU" && tp_scheme != "annual" && agg_schema == "allISO") {
@@ -191,8 +192,8 @@ if (any(v_snap_split %in% c(1:7, 9, 11))) {
   stop("Splitting SNAP sectors can only apply to SN08 & SNAP10. Check!")
 }
 
-##########################
-## ALTERNATIVE EMISSIONS ##
+# --------------------- #
+# ALTERNATIVE EMISSIONS #
 # a table to nominate file locations for different emissions ;
 # e.g. older years, different projects, and so on.
 

@@ -5,7 +5,7 @@ qaqc_v2_summary_paths <- function(
   species,
   folname,
   inv,
-  map_yr_uk = NA,
+  map_yr = NA,
   data_source = NA
 ) {
   domain <- qaqc_v2_normalise_domain(domain)
@@ -13,7 +13,7 @@ qaqc_v2_summary_paths <- function(
 
   ## UKEIRE filenames include both emissions year and mapping year.
   if (domain == "UKEIRE") {
-    roots <- paste0(poll, "_UKEIRE_", y, "emis_", map_yr_uk, "map_", inv, "inv")
+    roots <- paste0(poll, "_UKEIRE_", y, "emis_", map_yr, "map_", inv, "inv")
     suffixes <- c(
       inventory = "INVENTORY",
       masked = "MASKED",
@@ -64,7 +64,7 @@ qaqc_v2_summary_paths <- function(
     candidates <- file.path(
       folname,
       "tables",
-      paste0("e", y, "_m", map_yr_uk),
+      paste0("e", y, "_m", map_yr),
       paste0(roots, "_", suffix, ".csv")
     )
     existing <- candidates[file.exists(candidates)][1]
@@ -75,8 +75,8 @@ qaqc_v2_summary_paths <- function(
 }
 
 ## Locate the total and per-sector QAQC raster outputs for one pollutant/year.
-qaqc_v2_raster_paths <- function(y, species, folname, map_yr_uk) {
-  rast_dir <- file.path(folname, "rast", paste0("e", y, "_m", map_yr_uk))
+qaqc_v2_raster_paths <- function(y, species, folname, map_yr) {
+  rast_dir <- file.path(folname, "rast", paste0("e", y, "_m", map_yr))
   sector <- list.files(
     rast_dir,
     pattern = paste0("^", species, "_sector[0-9]+_emis_qaqc[.]tif$"),
@@ -94,7 +94,7 @@ qaqc_v2_raster_paths <- function(y, species, folname, map_yr_uk) {
 }
 
 ## Read all available stage summary tables and put their totals into one common format.
-qaqc_v2_stage_totals <- function(paths) {
+qaqc_v2_stage_totals <- function(paths, domain) {
   l_dt <- list()
 
   ## Inventory tables can use several emissions column names depending on domain/source.
@@ -119,7 +119,10 @@ qaqc_v2_stage_totals <- function(paths) {
   dt <- qaqc_v2_read_csv(paths$masked)
   if (nrow(dt) > 0) {
     value_col <- intersect(c("tsum", "emis_t_tot_masked"), names(dt))[1]
-    by_cols <- intersect(c("Area", "ISO", "iso_char", "Pollutant"), names(dt))
+    by_cols <- intersect(
+      c("Area", "mask", "ISO", "iso_char", "Pollutant"),
+      names(dt)
+    )
     if (!is.na(value_col)) {
       l_dt$masked <- dt[,
         .(emis_t = sum(get(value_col), na.rm = TRUE)),
@@ -179,7 +182,7 @@ qaqc_v2_stage_totals <- function(paths) {
   if (length(l_dt) == 0) {
     return(data.table::data.table())
   }
-  out <- data.table::rbindlist(l_dt, fill = TRUE)
+  out <- data.table::rbindlist(l_dt, fill = TRUE, use.names = TRUE)
   ## Different tables call the area field different things; collapse them to one Area column.
   area_cols <- intersect(c("Area", "ISO", "iso_char"), names(out))
   if (length(area_cols) == 0) {
@@ -194,7 +197,14 @@ qaqc_v2_stage_totals <- function(paths) {
     }
     out[, (setdiff(area_cols, "Area_qaqc")) := NULL]
     data.table::setnames(out, "Area_qaqc", "Area")
+
+    out[, Area := toupper(Area)]
+
+    if (domain == "UKEIRE") {
+      out[Area == "GB", Area := "UK"]
+    }
   }
+
   out
 }
 
@@ -254,7 +264,7 @@ qaqc_v2_inventory_processed_sector_loss <- function(paths, dt_sec = NULL) {
     mult <- if (value_col == "ann_emis_kt") 1000 else 1
     dt[,
       .(emis_t = sum(get(value_col) * mult, na.rm = TRUE)),
-      by = Sector
+      by = .(Sector)
     ]
   }
 
@@ -262,37 +272,45 @@ qaqc_v2_inventory_processed_sector_loss <- function(paths, dt_sec = NULL) {
     paths$inventory,
     c("emis_t", "emis_t_spatial_scaled", "emis_t_scalar")
   )
-  dt_processed <- summarise_stage(
-    paths$processed,
-    c("emis_t_tot_grouped", "ann_emis_kt")
+
+  #dt_processed <- summarise_stage(
+  #  paths$processed,
+  #  c("emis_t_tot_grouped", "ann_emis_kt")
+  #)
+
+  dt_ncinput <- summarise_stage(
+    paths$ncinput,
+    c("emis_t_tot_ncinput")
   )
-  if (nrow(dt_inventory) == 0 || nrow(dt_processed) == 0) {
+
+  if (nrow(dt_inventory) == 0 || nrow(dt_ncinput) == 0) {
     return(data.table::data.table())
   }
 
   dt <- merge(
     dt_inventory[, .(Sector, inventory_t = emis_t)],
-    dt_processed[, .(Sector, processed_t = emis_t)],
+    dt_ncinput[, .(Sector, ncinput_t = emis_t)],
     by = "Sector",
     all = TRUE
   )
   dt[is.na(inventory_t), inventory_t := 0]
-  dt[is.na(processed_t), processed_t := 0]
-  dt[, missing_t := inventory_t - processed_t]
-  dt <- dt[missing_t > 1e-6]
+  dt[is.na(ncinput_t), ncinput_t := 0]
+  dt[, missing_t := inventory_t - ncinput_t]
+  dt <- dt[missing_t > 1e-6 | missing_t < -1e-6]
   if (nrow(dt) == 0) {
     return(data.table::data.table())
   }
 
   total_missing_t <- sum(dt$missing_t, na.rm = TRUE)
-  dt <- dt[order(-missing_t)]
+  dt <- dt[order(-abs(missing_t))]
   dt[, `:=`(
     Inventory_kt = round(inventory_t / 1000, 3),
-    Processed_kt = round(processed_t / 1000, 3),
-    Missing_kt = round(missing_t / 1000, 3),
-    Missing_pct = round(100 * missing_t / total_missing_t, 1)
+    ncInput_kt = round(ncinput_t / 1000, 3),
+    Change_kt = round((ncinput_t - inventory_t) / 1000, 3)
   )]
-  dt[, .(Sector, Inventory_kt, Processed_kt, Missing_kt, Missing_pct)]
+  dt[, Change_pct := round(100 * Change_kt / Inventory_kt, 1)]
+
+  dt[, .(Sector, Inventory_kt, ncInput_kt, Change_kt, Change_pct)]
 }
 
 ## Summarise total and sector rasters with simple totals and cell statistics.

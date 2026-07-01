@@ -142,8 +142,8 @@ qaqc_v2_total_map_plot <- function(path, domain, species, y, data_source = NA) {
     ggplot2::guides(fill = ggplot2::guide_legend(nrow = 2)) +
     ggplot2::theme(
       axis.text = ggplot2::element_text(size = 12),
-      legend.text = ggplot2::element_text(size = 18),
-      legend.title = ggplot2::element_text(size = 24),
+      legend.text = ggplot2::element_text(size = 14),
+      legend.title = ggplot2::element_text(size = 20),
       legend.position = "bottom",
       plot.margin = ggplot2::margin(t = 2, r = 2, b = 2, l = 2, unit = "mm")
     )
@@ -241,12 +241,12 @@ qaqc_v2_write_plots <- function(
   folname,
   summary_paths,
   raster_paths,
-  map_yr_uk,
+  map_yr,
   dt_sec = NULL,
   data_source = NA,
   inv = NA
 ) {
-  plot_dir <- file.path(folname, "plots", paste0("e", y, "_m", map_yr_uk))
+  plot_dir <- file.path(folname, "plots", paste0("e", y, "_m", map_yr))
   dir.create(plot_dir, recursive = TRUE, showWarnings = FALSE)
 
   ## Initialise every expected output path as missing; plots fill these in when created.
@@ -260,16 +260,54 @@ qaqc_v2_write_plots <- function(
   )
 
   ## Compare each processing stage against inventory totals by area.
-  dt_stage <- qaqc_v2_stage_totals(summary_paths)
+  dt_stage <- qaqc_v2_stage_totals(summary_paths, domain)
   if (nrow(dt_stage) > 0) {
-    dt <- dt_stage[,
-      .(emis_kt = sum(emis_t, na.rm = TRUE) / 1000),
-      by = .(Area, stage)
-    ]
-    dt <- dt[!is.na(Area) & Area != "SUM_ALL"]
-    dt[, inventory_kt := emis_kt[stage == "inventory"][1], by = Area]
+    if (domain == "UKEIRE") {
+      dt_temp <- CJ(
+        Area = c("UK", "IE", "SEA", "OW"),
+        mask_plot = c("none", "terrestrial", "sea", "outwith"),
+        stage = unique(dt_stage$stage)
+      )
+
+      dt_stage[, mask_plot := fifelse(is.na(mask), "none", mask)]
+
+      dt_stage <- merge(
+        dt_temp,
+        dt_stage,
+        by = c("Area", "mask_plot", "stage"),
+        all.x = TRUE
+      )
+
+      dt <- dt_stage[,
+        .(emis_kt = sum(emis_t, na.rm = TRUE) / 1000),
+        by = .(Area, mask_plot, stage)
+      ]
+      dt <- dt[!is.na(Area) & Area != "SUM_ALL"]
+      dt[, inventory_kt := emis_kt[stage == "inventory"][1], by = Area]
+
+      dt[
+        Area %in% c("SEA", "OW"),
+        inventory_kt := dt[stage == "inventory", sum(emis_kt, na.rm = T)]
+      ]
+
+      dt[,
+        mask_plot := factor(
+          mask_plot,
+          levels = c("none", "terrestrial", "sea", "outwith")
+        )
+      ]
+    } else {
+      dt <- dt_stage[,
+        .(emis_kt = sum(emis_t, na.rm = TRUE) / 1000),
+        by = .(Area, stage)
+      ]
+      dt <- dt[!is.na(Area) & Area != "SUM_ALL"]
+      dt[, inventory_kt := emis_kt[stage == "inventory"][1], by = Area]
+    }
+
     dt <- dt[!is.na(inventory_kt) & inventory_kt > 0]
     dt[, ratio_to_inventory := emis_kt / inventory_kt]
+
     dt[,
       stage := factor(
         stage,
@@ -291,18 +329,22 @@ qaqc_v2_write_plots <- function(
       order(-inventory_kt),
       Area
     ]
+
     dt[, Area := factor(Area, levels = area_order)]
     dt[, rank := as.integer(Area)]
 
     if (domain == "UKEIRE") {
       cut_length <- 1
       cut_labels <- 1:1
+      x_axis_size <- 20
     } else if (domain == "EU") {
       cut_length <- 3
       cut_labels <- 1:2
+      x_axis_size <- 15
     } else if (domain == "GLOBAL") {
       cut_length <- 5
       cut_labels <- 1:4
+      x_axis_size <- 12
     }
 
     if (domain == "UKEIRE") {
@@ -322,14 +364,112 @@ qaqc_v2_write_plots <- function(
       ]
     }
 
-    p <- ggplot2::ggplot(
-      dt,
-      ggplot2::aes(Area, ratio_to_inventory, fill = stage)
-    ) +
-      ggplot2::geom_col(
-        position = ggplot2::position_dodge(width = 0.8),
-        width = 0.72
+    ## PLOT
+
+    if (domain == "UKEIRE") {
+      stage_pos <- data.table(
+        stage = levels(dt$stage),
+        stage_x = seq_along(levels(dt$stage))
+      )
+      stage_pos[, stage := factor(stage)]
+
+      area_pos <- data.table(
+        Area = levels(dt$Area),
+        area_i = seq_along(levels(dt$Area))
+      )
+      area_pos[, Area := factor(Area)]
+
+      # Width of total dodge group around each stage
+      dodge_width <- 0.75
+      n_area <- length(levels(dt$Area))
+
+      area_pos[,
+        area_offset := (area_i - mean(seq_len(n_area))) * dodge_width / n_area
+      ]
+
+      dt2 <- merge(dt, stage_pos, by = "stage", all.x = TRUE)
+      dt2 <- merge(dt2, area_pos, by = "Area", all.x = TRUE)
+      dt2[,
+        mask_plot := factor(
+          as.character(mask_plot),
+          levels = c("none", "terrestrial", "sea", "outwith")
+        )
+      ]
+      dt2[, x_plot := stage_x + area_offset]
+
+      area_labs <- unique(dt2[, .(stage, Area, x_plot)])
+      area_labs <- area_labs[!is.na(x_plot)]
+
+      p <- ggplot(
+        dt2,
+        aes(
+          x = x_plot,
+          y = ratio_to_inventory,
+          fill = mask_plot,
+          alpha = Area,
+          group = interaction(stage, Area, mask_plot)
+        )
       ) +
+        geom_col(
+          position = position_stack(reverse = TRUE),
+          width = dodge_width / n_area * 0.9,
+          colour = NA
+        ) +
+        geom_text(
+          data = area_labs,
+          aes(x = x_plot, y = -0.03, label = Area),
+          inherit.aes = FALSE,
+          angle = 90,
+          size = 3,
+          hjust = 1
+        ) +
+        scale_x_continuous(
+          breaks = stage_pos$stage_x,
+          labels = stage_pos$stage,
+          expand = expansion(mult = c(0.03, 0.03))
+        ) +
+        scale_fill_manual(
+          values = c(
+            none = "#D9B623",
+            terrestrial = "#4daf4a",
+            sea = "#377eb8",
+            outwith = "#F2755C"
+          ),
+          breaks = c("none", "terrestrial", "sea", "outwith"),
+          drop = FALSE
+        ) +
+        scale_alpha_manual(
+          values = c(
+            UK = 1,
+            IE = 1,
+            SEA = 0.7,
+            OW = 0.7
+          ),
+          guide = "none"
+        ) +
+        labs(
+          x = NULL,
+          y = "Ratio to inventory",
+          fill = "Mask"
+        )
+    } else {
+      p <- ggplot2::ggplot(
+        dt,
+        ggplot2::aes(
+          x = Area,
+          y = ratio_to_inventory,
+          fill = stage,
+          group = stage
+        )
+      ) +
+        ggplot2::geom_col(
+          position = ggplot2::position_dodge(width = 0.8, preserve = "single"),
+          width = 0.72
+        ) +
+        ggplot2::labs(x = NULL, y = "ratio to inventory", fill = "Stage")
+    }
+
+    p <- p +
       ggplot2::geom_hline(
         yintercept = 1,
         colour = "grey35",
@@ -337,16 +477,17 @@ qaqc_v2_write_plots <- function(
         linewidth = 0.25
       ) +
       ggplot2::facet_wrap(~group, ncol = 1, scales = "free_x") +
-      ggplot2::labs(x = NULL, y = "ratio to inventory", fill = "Stage") +
       ggplot2::theme_bw() +
       ggplot2::theme(
         legend.position = "bottom",
+        legend.text = ggplot2::element_text(size = 14),
         axis.text.x = ggplot2::element_text(
           angle = 90,
           hjust = 1,
           vjust = 0.5,
-          size = 5
+          size = x_axis_size
         ),
+        axis.text.y = ggplot2::element_text(size = 14),
         strip.text = ggplot2::element_text(size = 9)
       )
     out$stage <- file.path(

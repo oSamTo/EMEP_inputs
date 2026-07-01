@@ -24,7 +24,8 @@ packs <- c(
   "tidyterra",
   "knitr",
   "kableExtra",
-  "janitor"
+  "janitor",
+  "ggpattern"
 )
 
 suppressPackageStartupMessages({
