@@ -53,15 +53,25 @@ EMEP_GLOBAL_v5.0 <- function(
   # Much of the matching of ISOs and ISO areas, to the data, has been done
   # elsewhere (contact samtom@ceh.ac.uk). It's not exact, but best effort, and
   # emissions have been represented as best as possible.
+  # An extra column of ISO2 codes have been included, for model choice.
 
   ## ISO information - summaries, look-ups, EMEP territory names etc.
   # ISO table - add on experimental SEA zone
-  dt_iso <- fread(paste0("data/lookups/dt_iso_", data_source, ".csv"))
-  dt_iso <- rbindlist(list(
-    dt_iso,
-    data.table(ISO_A3_EH = "SEA", ISO_N3_EH = 0)
-  ))
-  names(dt_iso) <- c("ISO_char", "ISO_num")
+  dt_iso <- fread(
+    paste0("data/lookups/dt_iso.csv"),
+    na.strings = ""
+  )
+
+  iso_keep <- c(
+    "English short name",
+    paste0(global_iso, "_", run_source),
+    "ISO_N3_EH"
+  )
+  dt_iso <- dt_iso[, ..iso_keep]
+
+  names(dt_iso) <- c("Name", "ISO_char", "ISO_num")
+  dt_iso <- dt_iso[!is.na(ISO_char)]
+  dt_iso <- dt_iso[!is.na(ISO_num)]
 
   ## HTAP specific zonal rasters
   # - These are 0.01 degree rasters, to capture data from HTAP more accurately.
@@ -512,17 +522,16 @@ summarise_emission_file <- function(
     # attach iso names
     dt_emis <- dt_iso[dt_emis, on = "ISO_num"]
 
-    # Global data uses ISO on the ISO3 system
-    setnames(dt_emis, c("ISO_char"), c("ISO3"))
+    # Global data uses ISO on the ISO_A2 or ISO_A3 system
     setnames(dt_emis, i_GNFR, c("emis_t"))
 
     # format and subset
     dt_emis[, c("Year", "Pollutant", "GNFR") := list(y, species, i)]
 
-    dt_emis <- dt_emis[!is.na(ISO3)]
+    dt_emis <- dt_emis[!is.na(ISO_char)]
 
     dt_emis <- dt_emis[, c(
-      "ISO3",
+      "ISO_char",
       "Year",
       "GNFR",
       "Pollutant",
@@ -531,7 +540,7 @@ summarise_emission_file <- function(
   } else {
     # empty table if file doesn't exist
     dt_emis <- data.table(
-      ISO3 = character(),
+      ISO_char = character(),
       Year = numeric(),
       GNFR = character(),
       Pollutant = character(),
@@ -566,11 +575,11 @@ summarise_emission_file <- function(
     )
   ]
 
-  setnames(dt_tot, "ISO3", "ISO")
+  setnames(dt_tot, "ISO_char", "ISO")
 
   # Check if the ISO codes in the emissions data are present in the v_iso
   # If not, something needs looking at - is the latest model version being used?
-  v_iso_emis <- unique(dt_emis[, ISO3])
+  v_iso_emis <- unique(dt_emis[, ISO_char])
   if (any(!(v_iso_emis %in% dt_iso[, ISO_char]))) {
     stop(
       "There are extra ISO codes in the emissions - check the model version!"
@@ -1352,6 +1361,13 @@ create_NETCDF_global_annual <- function(
     0,
     "ncdf4_version",
     packageDescription("ncdf4")$Version,
+    prec = "char"
+  )
+  ncatt_put(
+    nc_new,
+    0,
+    "iso_alpha",
+    global_iso,
     prec = "char"
   )
 

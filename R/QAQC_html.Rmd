@@ -20,6 +20,7 @@ params:
   raster_paths: NA
   plot_paths: NA
   v_snap_split: NA
+  global_iso: NA
 title: "EMEP input files QAQC"
 author: "Sam Tomlinson"
 date: "`r format(Sys.Date(), '%d %B %Y')`"
@@ -276,6 +277,42 @@ kbl <- function(
   invisible(NULL)
 }
 
+dtbl <- function(
+  dt,
+  caption = NULL,
+  scroll_y = "550px"
+) {
+  if (!requireNamespace("DT", quietly = TRUE)) {
+    stop("Package 'DT' is required for interactive tables.")
+  }
+
+  if (!is.null(caption)) {
+    cat(
+      paste0(
+        "<div class=\"table-caption\">",
+        q_html_escape(caption),
+        "</div>\n"
+      )
+    )
+  }
+
+  DT::datatable(
+    dt,
+    rownames = FALSE,
+    filter = "top",
+    class = "compact stripe hover",
+    options = list(
+      paging = FALSE,
+      scrollX = TRUE,
+      scrollY = scroll_y,
+      scrollCollapse = TRUE,
+      autoWidth = TRUE,
+      order = list(list(0, "asc")),
+      dom = "frt"
+    )
+  )
+}
+
 root <- "/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs"
 source(file.path(root, "R/qaqc_codex_v2/utils.R"))
 source(file.path(root, "R/qaqc_codex_v2/data.R"))
@@ -347,21 +384,9 @@ img {
 
 **Domain:** `r params$domain`
 
-**Species:** `r params$species`
-
-**Emissions year:** `r params$y`
-
-**Inventory / source version:** `r params$inv`
-
-**Map Used:** `r params$map_yr`
-
 **SNAPs split (GB):** `r params$v_snap_split`
 
-**Data source:** `r params$data_source`
-
 **Output dir:** `r gsub("/gws/ssde/j25b/ceh_generic/samtom/EMEP_inputs/", "", params$folname)`
-
-**EMEP version:** `r params$emep_version`
 
 ```{r metadata-table, echo = FALSE, results = "asis"}
 # preserve original metadata rendering but using HTML kbl
@@ -381,7 +406,8 @@ if(params$domain == "UKEIRE"){
     Inv = params$inv,
     orig_sec = c("SNAP", eire_sec, "N/A"),
     orig_res = c("1km", eire_res, "N/A"),
-    Temporal = params$time_dim
+    Temporal = params$time_dim,
+    EMEP_version = params$emep_version
   )
   kbl(dt_meta, caption = "Run metadata")
 
@@ -394,7 +420,9 @@ if(params$domain == "UKEIRE"){
     Source = params$data_source,
     Inv = params$inv,
     Temporal = params$time_dim,
-    Aggregation = params$agg_schema
+    Aggregation = params$agg_schema,
+    ISO_coding = params$global_iso,
+    EMEP_version = params$emep_version
   )
   kbl(dt_meta, caption = "Run metadata")
 }
@@ -480,9 +508,9 @@ include_plot(plot_paths$raster_sector)
 
 ## Sectoral Emissions: Top ISO Codes
 
-Figure 4 and Table 5 are restricted to the ten ISO codes with the biggest totals across all sectors.
+Figure 4 and Table 5 are restricted to the ten ISO codes with the biggest totals (Gg) across all sectors.
 
-```{r sector-plot, echo = FALSE, fig.align = "center", out.width = "70%", fig.cap = "Sectoral emissions for the ten largest ISO totals."}
+```{r sector-plot, echo = FALSE, fig.align = "center", out.width = "70%", fig.cap = "Sectoral emissions (Gg) for the ten largest ISO totals."}
 include_plot(plot_paths$sector_bar)
 ```
 
@@ -492,7 +520,7 @@ if (nrow(dt_sector) > 0) {
   if(params$domain == "UKEIRE"){
     dt_sector[, ncTotal := rowSums(.SD, na.rm=T), .SDcols = c("GB", "IE", "SEA")]
   }
-  kbl(dt_sector, caption = paste0(params$species, " emissions by sector for top ten ISO totals (kt). ISO columns are ordered largest to smallest."))
+  kbl(dt_sector, caption = paste0(params$species, " emissions by sector for top ten ISO totals (Gg). ISO columns are ordered largest to smallest (ISO coding = ",params$global_iso,")."))
 } else {
   kbl(data.table(Note = "No sectoral NetCDF output summary found."))
 }
@@ -520,11 +548,19 @@ if (params$domain == "GLOBAL") {
 
 ```{r ts-table, echo = FALSE, results = "asis"}
 if (params$domain == "GLOBAL") {
-  ts <- qaqc_v2_global_timeseries(params$data_source, params$inv, params$species, params$y)
+  ts <- qaqc_v2_global_timeseries(params$data_source, params$inv, params$species, params$y, years_back = 10)
   if (nrow(ts$data) > 0) {
-    dt <- copy(ts$data)
-    dt[, emis_kt := round(emis_kt, 3)]
-    kbl(dt, caption = paste0("Global ", params$species, " inventory totals from ", basename(ts$file), " (kt)"))
+    dt_tot <- copy(ts$data)
+    dt_tot[, emis_Tg := round(emis_Tg, 3)]
+    dt_sec <- copy(ts$sector)
+    dt_sec[, emis_Tg := round(emis_Tg, 3)]
+    dt_sec <- dcast(dt_sec, Year ~ GNFR, value.var = "emis_Tg", fill = 0)
+    if ("V1" %in% names(dt_sec)) {
+      data.table::setnames(dt_sec, "V1", "Other (discard)")
+    }
+    dt <- merge(dt_tot, dt_sec, by = "Year", all.x = TRUE)
+
+    kbl(dt, caption = paste0("Global ", params$species, " inventory totals from ", basename(ts$file), " (Tg)"))
   } else {
     kbl(data.table(Note = "No global time-series data found."))
   }
@@ -558,5 +594,49 @@ if (!is.null(params$dt_sec) && nrow(params$dt_sec) > 0) {
   kbl(dt, caption = "Sectoral lookup table")
 } else {
   kbl(data.table(Note = "No sector lookup table supplied."))
+}
+```
+
+```{r iso-processing-title, echo = FALSE, results = "asis"}
+if (params$domain == "GLOBAL") {
+  cat("## Appendix 1: Global ISO Processing QAQC\n\n")
+} else {
+
+}
+```
+
+```{r global-iso-processing, echo = FALSE}
+if (params$domain == "GLOBAL") {
+  
+  dt_stage <- qaqc_v2_stage_totals(summary_paths, params$domain)
+  if (nrow(dt_stage) > 0) {
+    dt <- dt_stage[, .(Total_Gg = round(sum(emis_t, na.rm = TRUE) / 1000, 2)), by = .(Area, stage)]
+    dtw <- dcast(dt, Area ~ stage, value.var = "Total_Gg", fill = 0)
+    setcolorder(dtw, c("Area", "inventory", "processed", "netcdf_input", "netcdf_output"))
+
+    dtw[, data_change := round(netcdf_input - inventory, 2)]
+    dtw[, change_frac := round(data_change/inventory, 2)]
+    dtw <- dtw[order(data_change)]
+    
+    dtbl(
+      dtw,
+      caption = "ISO-level conservation check",
+      scroll_y = "550px"
+    )
+  } else {
+    kbl(data.table(Note = "No ISO processing-stage summaries found."))
+  }
+
+} else {
+  
+}
+```
+
+```{r product-process-data-change, echo = FALSE, results = "asis"}
+if (params$domain == "GLOBAL") {
+  # this is where we can add some code to show what data is lost when processing the global inventory, e.g. AWB
+  cat("## Appendix 2: Inventory to model data change\n\n")
+} else {
+  
 }
 ```

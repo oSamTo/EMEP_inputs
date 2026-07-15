@@ -19,6 +19,7 @@ create_qaqc_v2_codex <- function(
   dt_sec = get0("dt_sec", inherits = TRUE),
   dt_poll = get0("dt_poll", inherits = TRUE),
   v_snap_split = NA,
+  global_iso,
   render_pdf = TRUE
 ) {
   # RESET map_yr if dynamic_map is TRUE
@@ -95,7 +96,8 @@ create_qaqc_v2_codex <- function(
     summary_paths = summary_paths,
     raster_paths = raster_paths,
     plot_paths = plot_paths,
-    v_snap_split = v_snap_split
+    v_snap_split = v_snap_split,
+    global_iso = global_iso
   )
 
   ## Name the output PDF consistently with the existing inventory/domain/year convention.

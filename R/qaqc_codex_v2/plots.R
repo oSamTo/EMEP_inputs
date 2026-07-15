@@ -511,7 +511,7 @@ qaqc_v2_write_plots <- function(
     dt_long[, Area := factor(Area, levels = iso_order)]
     p <- ggplot2::ggplot(dt_long, ggplot2::aes(Area, emis_kt, fill = Sector)) +
       ggplot2::geom_col(position = "stack") +
-      ggplot2::labs(x = NULL, y = "kt a-1", fill = "Sector") +
+      ggplot2::labs(x = NULL, y = "Gg a-1", fill = "Sector") +
       ggplot2::theme_bw() +
       ggplot2::theme(
         legend.position = "bottom",
@@ -561,7 +561,7 @@ qaqc_v2_write_plots <- function(
   if (qaqc_v2_normalise_domain(domain) == "GLOBAL") {
     ts <- qaqc_v2_global_timeseries(data_source, inv, species, y)
     if (nrow(ts$data) > 0) {
-      p <- ggplot2::ggplot(ts$data, ggplot2::aes(Year, emis_kt)) +
+      p <- ggplot2::ggplot(ts$data, ggplot2::aes(Year, emis_Tg)) +
         ggplot2::geom_line() +
         ggplot2::geom_point(size = 1.8) +
         ggplot2::geom_vline(
@@ -571,7 +571,7 @@ qaqc_v2_write_plots <- function(
         ) +
         ggplot2::labs(
           x = NULL,
-          y = "kt a-1",
+          y = "Gg a-1",
           title = paste(species, "global inventory total")
         ) +
         ggplot2::theme_bw()
@@ -579,12 +579,12 @@ qaqc_v2_write_plots <- function(
         plot_dir,
         paste0(species, "_global_total_timeseries.png")
       )
-      ggplot2::ggsave(out$timeseries_total, p, width = 8, height = 4.8)
+      ggplot2::ggsave(out$timeseries_total, p, width = 8, height = 4.4)
     }
     if (!is.null(ts$sector) && nrow(ts$sector) > 0) {
       p <- ggplot2::ggplot(
         ts$sector,
-        ggplot2::aes(Year, emis_kt, colour = GNFR)
+        ggplot2::aes(Year, emis_Tg, colour = GNFR)
       ) +
         ggplot2::geom_line() +
         ggplot2::geom_vline(
@@ -594,7 +594,7 @@ qaqc_v2_write_plots <- function(
         ) +
         ggplot2::labs(
           x = NULL,
-          y = "kt a-1",
+          y = "Gg a-1",
           colour = "GNFR",
           title = paste(species, "global sector totals")
         ) +

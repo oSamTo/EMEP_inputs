@@ -399,7 +399,7 @@ qaqc_v2_top_iso_sector_table <- function(paths, top_n = 10) {
   dt_long <- dt[
     Area %in% top_iso,
     .(
-      emis_kt = round(sum(emis_t_tot_ncoutput, na.rm = TRUE) / 1000, 3)
+      emis_kt = round(sum(emis_t_tot_ncoutput, na.rm = TRUE) / 1000, 1)
     ),
     by = .(Sector, Area)
   ]
@@ -533,6 +533,9 @@ qaqc_v2_global_timeseries <- function(
           c("Year", "GNFR")
         )
       }
+
+      setnames(dt_total, "emis_kt", "emis_Tg")
+      setnames(dt_sector, "emis_kt", "emis_Tg")
 
       list(data = dt_total, sector = dt_sector, file = fname)
     },

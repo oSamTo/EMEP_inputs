@@ -196,6 +196,7 @@ if (output_QAQC) {
       dt_sec = dt_sec,
       dt_poll = dt_poll,
       v_snap_split = v_snap_split,
+      global_iso = global_iso,
       render_pdf = TRUE
     )
   }
